@@ -1,0 +1,55 @@
+MODEL:
+  TYPE: generalized_rcnn
+  CONV_BODY: FPN.add_fpn_ResNet101_conv5_body
+  NUM_CLASSES: 2
+  KEYPOINTS_ON: True
+NUM_GPUS: 8
+SOLVER:
+  WEIGHT_DECAY: 0.0001
+  LR_POLICY: steps_with_decay
+  BASE_LR: 0.02
+  GAMMA: 0.1
+  MAX_ITER: 90000
+  STEPS: [0, 60000, 80000]
+FPN:
+  FPN_ON: True
+  MULTILEVEL_ROIS: True
+  MULTILEVEL_RPN: True
+RESNETS:
+  STRIDE_1X1: False  # default True for MSRA; False for C2 or Torch models
+  TRANS_FUNC: bottleneck_transformation
+  NUM_GROUPS: 32
+  WIDTH_PER_GROUP: 8
+FAST_RCNN:
+  ROI_BOX_HEAD: head_builder.add_roi_2mlp_head
+  ROI_XFORM_METHOD: RoIAlign
+  ROI_XFORM_RESOLUTION: 7
+  ROI_XFORM_SAMPLING_RATIO: 2
+KRCNN:
+  ROI_KEYPOINTS_HEAD: keypoint_rcnn_heads.add_roi_pose_head_v1convX
+  NUM_STACKED_CONVS: 8
+  NUM_KEYPOINTS: 17
+  USE_DECONV_OUTPUT: True
+  CONV_INIT: MSRAFill
+  CONV_HEAD_DIM: 512
+  UP_SCALE: 2
+  HEATMAP_SIZE: 56  # ROI_XFORM_RESOLUTION (14) * UP_SCALE (2) * USE_DECONV_OUTPUT (2)
+  ROI_XFORM_METHOD: RoIAlign
+  ROI_XFORM_RESOLUTION: 14
+  ROI_XFORM_SAMPLING_RATIO: 2
+  KEYPOINT_CONFIDENCE: bbox
+TRAIN:
+  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/20171220/X-101-32x8d.pkl
+  DATASETS: ('keypoints_coco_2014_train', 'keypoints_coco_2014_valminusminival')
+  PROPOSAL_FILES: ('https://s3-us-west-2.amazonaws.com/detectron/36760438/12_2017_baselines/rpn_person_only_X-101-32x8d-FPN_1x.yaml.06_04_23.M2oJlDPW/output/test/keypoints_coco_2014_train/generalized_rcnn/rpn_proposals.pkl', 'https://s3-us-west-2.amazonaws.com/detectron/36760438/12_2017_baselines/rpn_person_only_X-101-32x8d-FPN_1x.yaml.06_04_23.M2oJlDPW/output/test/keypoints_coco_2014_valminusminival/generalized_rcnn/rpn_proposals.pkl')
+  SCALES: (640, 672, 704, 736, 768, 800)
+  MAX_SIZE: 1333
+  BATCH_SIZE_PER_IM: 512
+TEST:
+  DATASETS: ('keypoints_coco_2014_minival',)
+  PROPOSAL_FILES: ('https://s3-us-west-2.amazonaws.com/detectron/36760438/12_2017_baselines/rpn_person_only_X-101-32x8d-FPN_1x.yaml.06_04_23.M2oJlDPW/output/test/keypoints_coco_2014_minival/generalized_rcnn/rpn_proposals.pkl',)
+  PROPOSAL_LIMIT: 1000
+  SCALES: (800,)
+  MAX_SIZE: 1333
+  NMS: 0.5
+OUTPUT_DIR: .

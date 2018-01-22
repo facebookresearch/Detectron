@@ -1,0 +1,53 @@
+MODEL:
+  TYPE: generalized_rcnn
+  CONV_BODY: FPN.add_fpn_ResNet101_conv5_body
+  NUM_CLASSES: 81
+  FASTER_RCNN: True
+  MASK_ON: True
+NUM_GPUS: 8
+SOLVER:
+  WEIGHT_DECAY: 0.0001
+  LR_POLICY: steps_with_decay
+  # 1x schedule (note TRAIN.IMS_PER_BATCH: 1)
+  BASE_LR: 0.01
+  GAMMA: 0.1
+  MAX_ITER: 180000
+  STEPS: [0, 120000, 160000]
+FPN:
+  FPN_ON: True
+  MULTILEVEL_ROIS: True
+  MULTILEVEL_RPN: True
+RESNETS:
+  STRIDE_1X1: False  # default True for MSRA; False for C2 or Torch models
+  TRANS_FUNC: bottleneck_transformation
+  NUM_GROUPS: 32
+  WIDTH_PER_GROUP: 8
+FAST_RCNN:
+  ROI_BOX_HEAD: fast_rcnn_heads.add_roi_2mlp_head
+  ROI_XFORM_METHOD: RoIAlign
+  ROI_XFORM_RESOLUTION: 7
+  ROI_XFORM_SAMPLING_RATIO: 2
+MRCNN:
+  ROI_MASK_HEAD: mask_rcnn_heads.mask_rcnn_fcn_head_v1up4convs
+  RESOLUTION: 28  # (output mask resolution) default 14
+  ROI_XFORM_METHOD: RoIAlign
+  ROI_XFORM_RESOLUTION: 14  # default 7
+  ROI_XFORM_SAMPLING_RATIO: 2  # default 0
+  DILATION: 1  # default 2
+  CONV_INIT: MSRAFill  # default GaussianFill
+TRAIN:
+  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/20171220/X-101-32x8d.pkl
+  DATASETS: ('coco_2014_train', 'coco_2014_valminusminival')
+  SCALES: (800,)
+  MAX_SIZE: 1333
+  IMS_PER_BATCH: 1
+  BATCH_SIZE_PER_IM: 512
+  RPN_PRE_NMS_TOP_N: 2000  # Per FPN level
+TEST:
+  DATASETS: ('coco_2014_minival',)
+  SCALES: (800,)
+  MAX_SIZE: 1333
+  NMS: 0.5
+  RPN_PRE_NMS_TOP_N: 1000  # Per FPN level
+  RPN_POST_NMS_TOP_N: 1000
+OUTPUT_DIR: .

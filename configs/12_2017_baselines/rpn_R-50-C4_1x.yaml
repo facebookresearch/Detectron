@@ -1,0 +1,26 @@
+MODEL:
+  TYPE: rpn
+  CONV_BODY: ResNet.add_ResNet50_conv4_body
+  NUM_CLASSES: 81
+  RPN_ONLY: True
+NUM_GPUS: 8
+SOLVER:
+  WEIGHT_DECAY: 0.0001
+  LR_POLICY: steps_with_decay
+  BASE_LR: 0.02
+  GAMMA: 0.1
+  MAX_ITER: 90000
+  STEPS: [0, 60000, 80000]
+RPN:
+  SIZES: (32, 64, 128, 256, 512)
+TRAIN:
+  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/MSRA/R-50.pkl
+  DATASETS: ('coco_2014_train', 'coco_2014_valminusminival')
+  SCALES: (800,)
+  MAX_SIZE: 1333
+TEST:
+  DATASETS: ('coco_2014_minival','coco_2014_train','coco_2014_valminusminival')
+  SCALES: (800,)
+  MAX_SIZE: 1333
+USE_NCCL: False
+OUTPUT_DIR: .

@@ -1,0 +1,34 @@
+MODEL:
+  TYPE: generalized_rcnn
+  CONV_BODY: ResNet.add_ResNet50_conv4_body
+  NUM_CLASSES: 81
+NUM_GPUS: 8
+SOLVER:
+  WEIGHT_DECAY: 0.0001
+  LR_POLICY: steps_with_decay
+  BASE_LR: 0.01
+  GAMMA: 0.1
+  # 2x schedule (note TRAIN.IMS_PER_BATCH: 1)
+  MAX_ITER: 360000
+  STEPS: [0, 240000, 320000]
+RPN:
+  SIZES: (32, 64, 128, 256, 512)
+FAST_RCNN:
+  ROI_BOX_HEAD: ResNet.add_ResNet_roi_conv5_head
+  ROI_XFORM_METHOD: RoIAlign
+TRAIN:
+  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/MSRA/R-50.pkl
+  DATASETS: ('coco_2014_train', 'coco_2014_valminusminival')
+  PROPOSAL_FILES: ('https://s3-us-west-2.amazonaws.com/detectron/35998355/12_2017_baselines/rpn_R-50-C4_1x.yaml.08_00_43.njH5oD9L/output/test/coco_2014_train/rpn/rpn_proposals.pkl', 'https://s3-us-west-2.amazonaws.com/detectron/35998355/12_2017_baselines/rpn_R-50-C4_1x.yaml.08_00_43.njH5oD9L/output/test/coco_2014_valminusminival/rpn/rpn_proposals.pkl')
+  SCALES: (800,)
+  MAX_SIZE: 1333
+  IMS_PER_BATCH: 1
+  BATCH_SIZE_PER_IM: 512
+TEST:
+  DATASETS: ('coco_2014_minival',)
+  PROPOSAL_FILES: ('https://s3-us-west-2.amazonaws.com/detectron/35998355/12_2017_baselines/rpn_R-50-C4_1x.yaml.08_00_43.njH5oD9L/output/test/coco_2014_minival/rpn/rpn_proposals.pkl',)
+  PROPOSAL_LIMIT: 1000
+  SCALES: (800,)
+  MAX_SIZE: 1333
+  NMS: 0.5
+OUTPUT_DIR: .

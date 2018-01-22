@@ -1,0 +1,32 @@
+MODEL:
+  TYPE: generalized_rcnn
+  CONV_BODY: FPN.add_fpn_ResNet50_conv5_body
+  NUM_CLASSES: 2
+  RPN_ONLY: True
+NUM_GPUS: 8
+SOLVER:
+  WEIGHT_DECAY: 0.0001
+  LR_POLICY: steps_with_decay
+  BASE_LR: 0.02
+  GAMMA: 0.1
+  MAX_ITER: 90000
+  STEPS: [0, 60000, 80000]
+FPN:
+  FPN_ON: True
+  MULTILEVEL_RPN: True
+  RPN_MAX_LEVEL: 6
+  RPN_MIN_LEVEL: 2
+  RPN_ANCHOR_START_SIZE: 32
+  RPN_ASPECT_RATIOS: (0.5, 1, 2)
+TRAIN:
+  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/MSRA/R-50.pkl
+  DATASETS: ('keypoints_coco_2014_train', 'keypoints_coco_2014_valminusminival')
+  SCALES: (800,)
+  MAX_SIZE: 1333
+TEST:
+  DATASETS: ('keypoints_coco_2014_minival', 'keypoints_coco_2014_train', 'keypoints_coco_2014_valminusminival', 'keypoints_coco_2015_test')
+  SCALES: (800,)
+  MAX_SIZE: 1333
+  RPN_PRE_NMS_TOP_N: 1000  # Per FPN level
+  RPN_POST_NMS_TOP_N: 2000
+OUTPUT_DIR: .
