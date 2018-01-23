@@ -704,7 +704,7 @@ def im_detect_keypoints_aspect_ratio(
 ):
     """Detects keypoints at the given width-relative aspect ratio."""
 
-    # Perform keypoint detectionon the transformed image
+    # Perform keypoint detection on the transformed image
     im_ar = image_utils.aspect_ratio_rel(im, aspect_ratio)
     boxes_ar = box_utils.aspect_ratio(boxes, aspect_ratio)
 
