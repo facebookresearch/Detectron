@@ -130,7 +130,7 @@ def add_retinanet_blobs(blobs, im_scales, roidb, image_width, image_height):
                         loc_stride *= (cfg.MODEL.NUM_CLASSES - 1)
                     anchor_ind = foa.octave * num_aspect_ratios + foa.aspect
                     # v[:, 1] is the class label [range 0-80] if we do
-                    # class-specfic bbox otherwise it is 0. In case of class
+                    # class-specific bbox otherwise it is 0. In case of class
                     # specific, based on the label, the location of current
                     # anchor is class_label * 4 and then we take into account
                     # the anchor_ind if the anchors
@@ -153,7 +153,7 @@ def add_retinanet_blobs(blobs, im_scales, roidb, image_width, image_height):
             # and length of this list is N x A where
             # N = num_images, A = num_anchors for example, N = 2, A = 9
             # Each element of the list has the shape 1 x 1 x H x W where H, W are
-            # spatial dimension of curret fpn lvl. Let a{i} denote the element
+            # spatial dimension of current fpn lvl. Let a{i} denote the element
             # corresponding to anchor i [9 anchors total] in the list.
             # The elements in the list are in order [[a0, ..., a9], [a0, ..., a9]]
             # however the network will make predictions like 2 x (9 * 80) x H x W
