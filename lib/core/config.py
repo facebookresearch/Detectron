@@ -394,7 +394,7 @@ __C.TEST.KPS_AUG.SCALE_H_FLIP = False
 __C.TEST.KPS_AUG.SCALE_SIZE_DEP = False
 __C.TEST.KPS_AUG.AREA_TH = 180**2
 
-# Eeach aspect ratio is realtive to image width
+# Each aspect ratio is relative to image width
 __C.TEST.KPS_AUG.ASPECT_RATIOS = ()
 
 # Horizontal flip at each aspect ratio
@@ -663,7 +663,7 @@ __C.FAST_RCNN.ROI_XFORM_RESOLUTION = 14
 # ---------------------------------------------------------------------------- #
 __C.RPN = AttrDict()
 
-# [Infered value; do not set directly in a config]
+# [Inferred value; do not set directly in a config]
 # Indicates that the model contains an RPN subnetwork
 __C.RPN.RPN_ON = False
 
@@ -836,7 +836,7 @@ __C.KRCNN.ROI_XFORM_SAMPLING_RATIO = 0
 # the minibatch is discarded)
 __C.KRCNN.MIN_KEYPOINT_COUNT_FOR_VALID_MINIBATCH = 20
 
-# When infering the keypoint locations from the heatmap, don't scale the heatmap
+# When inferring the keypoint locations from the heatmap, don't scale the heatmap
 # below this minimum size
 __C.KRCNN.INFERENCE_MIN_SIZE = 0
 
@@ -972,7 +972,7 @@ __C.CLUSTER.ON_CLUSTER = False
 # If an option is removed from the code and you don't want to break existing
 # yaml configs, you can add the full config key as a string to the set below.
 # ---------------------------------------------------------------------------- #
-_DEPCRECATED_KEYS = set(
+_DEPRECATED_KEYS = set(
     (
         'FINAL_MSG',
         'MODEL.DILATION',
@@ -1118,7 +1118,7 @@ def _merge_a_into_b(a, b, stack=None):
 
 
 def _key_is_deprecated(full_key):
-    if full_key in _DEPCRECATED_KEYS:
+    if full_key in _DEPRECATED_KEYS:
         logger.warn(
             'Deprecated config key (ignoring): {}'.format(full_key)
         )
