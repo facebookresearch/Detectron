@@ -4,8 +4,8 @@
 # This cmake file is called from Dependencies.cmake. You do not need to
 # manually invoke it.
 
-# Known NVIDIA GPU achitectures Caffe2 can be compiled for.
-# Default is set to cuda 9. If we detect the cuda architectores to be less than
+# Known NVIDIA GPU architectures Caffe2 can be compiled for.
+# Default is set to cuda 9. If we detect the cuda architectures to be less than
 # 9, we will lower it to the corresponding known archs.
 set(Caffe2_known_gpu_archs "30 35 50 52 60 61 70") # for CUDA 9.x
 set(Caffe2_known_gpu_archs8 "20 21(20) 30 35 50 52 60 61") # for CUDA 8.x
@@ -197,7 +197,7 @@ else()
     message(FATAL_ERROR "Cannot find libnvrtc.so. Please file an issue on https://github.com/caffe2/caffe2 with your build output.")
 endif()
 
-# disable some nvcc diagnostic that apears in boost, glog, glags, opencv, etc.
+# disable some nvcc diagnostic that appears in boost, glog, glags, opencv, etc.
 foreach(diag cc_clobber_ignored integer_sign_change useless_using_declaration set_but_not_used)
   list(APPEND CUDA_NVCC_FLAGS -Xcudafe --diag_suppress=${diag})
 endforeach()
