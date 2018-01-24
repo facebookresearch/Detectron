@@ -71,11 +71,32 @@ We expect PASCAL VOC annotations converted to COCO json format, which are availa
 
 ## Creating Symlinks for Cityscapes:
 
-Symlink the Cityscapes dataset:
+We assume that your symlinked `lib/datasets/data/cityscapes` directory has the following structure:
+
+```
+cityscapes
+|_ images
+|  |_ <im-1-name>.jpg
+|  |_ ...
+|  |_ <im-N-name>.jpg
+|_ annotations
+|  |_ instanceonly_gtFile_train.json
+|  |_ ...
+|_ raw
+   |_ gtFine
+   |_ ...
+   |_ README.md
+```
+
+Create symlinks for `cityscapes`:
 
 ```
 mkdir -p $DETECTRON/lib/datasets/data/cityscapes
 ln -s /path/to/cityscapes/images $DETECTRON/lib/datasets/data/cityscapes/images
 ln -s /path/to/cityscapes/json/annotations $DETECTRON/lib/datasets/data/cityscapes/annotations
-ln -s /path/to/cityscapes/root/dir $DETECTRON/lib/datasets/data/cityscapes/raw
+ln -s /path/to/cityscapes/root $DETECTRON/lib/datasets/data/cityscapes/raw
 ```
+
+### Cityscapes Annotations in COCO Format
+
+We expect Cityscapes annotations converted to COCO json format, which we will make available for download soon.
