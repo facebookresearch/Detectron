@@ -215,13 +215,13 @@ class JsonDataset(object):
             boxes[ix, :] = obj['clean_bbox']
             gt_classes[ix] = cls
             seg_areas[ix] = obj['area']
-            is_crowd[ix] = obj['iscrowd']
+            is_crowd[ix] = obj.get('iscrowd', 0)
             box_to_gt_ind_map[ix] = ix
             if self.keypoints is not None:
                 gt_keypoints[ix, :, :] = self._get_gt_keypoints(obj)
                 if np.sum(gt_keypoints[ix, 2, :]) > 0:
                     im_has_visible_keypoints = True
-            if obj['iscrowd']:
+            if is_crowd[ix]:
                 # Set overlap to -1 for all classes for crowd objects
                 # so they will be excluded during training
                 gt_overlaps[ix, :] = -1.0
