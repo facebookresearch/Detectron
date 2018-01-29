@@ -36,7 +36,7 @@ import utils.boxes as box_utils
 logger = logging.getLogger(__name__)
 
 
-def create_cell_anchors():
+def _create_cell_anchors():
     """
     Generate all types of anchors for all fpn levels/scales/aspect ratios.
     This function is called only once at the beginning of inference.
@@ -65,11 +65,13 @@ def create_cell_anchors():
     return anchors
 
 
-def im_detections(model, im, anchors, timers=None):
+def im_detect_bbox(model, im, timers=None):
     """Generate RetinaNet detections on a single image."""
     if timers is None:
         timers = defaultdict(Timer)
-
+    # Although anchors are input independent and could be precomputed,
+    # recomputing them per image only brings a small overhead
+    anchors = _create_cell_anchors()
     timers['im_detect_bbox'].tic()
     k_max, k_min = cfg.FPN.RPN_MAX_LEVEL, cfg.FPN.RPN_MIN_LEVEL
     A = cfg.RETINANET.SCALES_PER_OCTAVE * len(cfg.RETINANET.ASPECT_RATIOS)
@@ -187,4 +189,4 @@ def im_detections(model, im, anchors, timers=None):
         cls_boxes[c] = detections[inds, :5]
     timers['misc_bbox'].toc()
 
-    return cls_boxes, None, None
+    return cls_boxes

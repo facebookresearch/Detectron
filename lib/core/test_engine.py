@@ -38,8 +38,6 @@ from datasets.json_dataset import JsonDataset
 from modeling import model_builder
 from utils.io import save_object
 from utils.timer import Timer
-
-import core.test_retinanet as test_retinanet
 import utils.c2 as c2_utils
 import utils.env as envu
 import utils.net as net_utils
@@ -121,11 +119,6 @@ def test_net(ind_range=None):
         'Use rpn_generate to generate proposals from RPN-only models'
     assert cfg.TEST.DATASET != '', \
         'TEST.DATASET must be set to the dataset name to test'
-    # Create anchors for RetinaNet
-    if cfg.RETINANET.RETINANET_ON:
-        anchors = test_retinanet.create_cell_anchors()
-    else:
-        anchors = None
     output_dir = get_output_dir(training=False)
     roidb, dataset, start_ind, end_ind, total_num_images = get_roidb_and_dataset(
         ind_range
@@ -152,13 +145,9 @@ def test_net(ind_range=None):
 
         im = cv2.imread(entry['image'])
         with c2_utils.NamedCudaScope(0):
-            if cfg.RETINANET.RETINANET_ON:
-                cls_boxes_i, cls_segms_i, cls_keyps_i = \
-                    test_retinanet.im_detections(model, im, anchors, timers)
-            else:
-                cls_boxes_i, cls_segms_i, cls_keyps_i = im_detect_all(
-                    model, im, box_proposals, timers
-                )
+            cls_boxes_i, cls_segms_i, cls_keyps_i = im_detect_all(
+                model, im, box_proposals, timers
+            )
 
         extend_results(i, all_boxes, cls_boxes_i)
         if cls_segms_i is not None:
