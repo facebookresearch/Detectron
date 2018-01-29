@@ -339,6 +339,8 @@ def build_generic_retinanet_model(
         """Builds the model on a single GPU. Can be called in a loop over GPUs
         with name and device scoping to create a data parallel model."""
         blobs, dim, spatial_scales = add_conv_body_func(model)
+        if not model.train:
+            model.conv_body_net = model.net.Clone('conv_body_net')
         retinanet_heads.add_fpn_retinanet_outputs(
             model, blobs, dim, spatial_scales
         )

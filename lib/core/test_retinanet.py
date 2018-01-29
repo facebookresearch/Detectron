@@ -21,26 +21,17 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import numpy as np
-import cv2
-import os
-import yaml
 import logging
 from collections import defaultdict
 
 from caffe2.python import core, workspace
 
-from core.config import cfg, get_output_dir
+from core.config import cfg
 from core.rpn_generator import _get_image_blob
-from datasets.json_dataset import JsonDataset
-from modeling import model_builder
 from modeling.generate_anchors import generate_anchors
-from utils.io import save_object
 from utils.timer import Timer
 
-import core.test_engine as test_engine
 import utils.boxes as box_utils
-import utils.c2 as c2_utils
-import utils.net as nu
 
 logger = logging.getLogger(__name__)
 
@@ -74,8 +65,12 @@ def create_cell_anchors():
     return anchors
 
 
-def im_detections(model, im, anchors):
+def im_detections(model, im, anchors, timers=None):
     """Generate RetinaNet detections on a single image."""
+    if timers is None:
+        timers = defaultdict(Timer)
+
+    timers['im_detect_bbox'].tic()
     k_max, k_min = cfg.FPN.RPN_MAX_LEVEL, cfg.FPN.RPN_MIN_LEVEL
     A = cfg.RETINANET.SCALES_PER_OCTAVE * len(cfg.RETINANET.ASPECT_RATIOS)
     inputs = {}
@@ -160,8 +155,10 @@ def im_detections(model, im, anchors):
             inds = np.where(classes == cls - 1)[0]
             if len(inds) > 0:
                 boxes_all[cls].extend(box_scores[inds, :])
+    timers['im_detect_bbox'].toc()
 
     # Combine predictions across all levels and retain the top scoring by class
+    timers['misc_bbox'].tic()
     detections = []
     for cls, boxes in boxes_all.items():
         cls_dets = np.vstack(boxes).astype(dtype=np.float32)
@@ -188,70 +185,6 @@ def im_detections(model, im, anchors):
     for c in range(1, num_classes):
         inds = np.where(detections[:, 5] == c)[0]
         cls_boxes[c] = detections[inds, :5]
+    timers['misc_bbox'].toc()
 
-    return cls_boxes
-
-
-def im_list_detections(model, roidb):
-    """Generate RetinaNet detections on all images in an imdb."""
-    _t = Timer()
-    num_images = len(roidb)
-    num_classes = cfg.MODEL.NUM_CLASSES
-    all_boxes, all_segms, all_keyps = test_engine.empty_results(
-        num_classes, num_images
-    )
-    # create anchors for each level
-    anchors = create_cell_anchors()
-    for i, entry in enumerate(roidb):
-        im = cv2.imread(entry['image'])
-        with c2_utils.NamedCudaScope(0):
-            _t.tic()
-            cls_boxes_i = im_detections(model, im, anchors)
-            _t.toc()
-        test_engine.extend_results(i, all_boxes, cls_boxes_i)
-        logger.info(
-            'im_detections: {:d}/{:d} {:.3f}s'.format(
-                i + 1, num_images, _t.average_time))
-    return all_boxes, all_segms, all_keyps
-
-
-def test_retinanet(ind_range=None):
-    """
-    Test RetinaNet model either on the entire dataset or the subset of dataset
-    specified by the index range
-    """
-    assert cfg.RETINANET.RETINANET_ON, \
-        'RETINANET_ON must be set for testing RetinaNet model'
-    output_dir = get_output_dir(training=False)
-    dataset = JsonDataset(cfg.TEST.DATASET)
-    roidb = dataset.get_roidb()
-    if ind_range is not None:
-        start, end = ind_range
-        roidb = roidb[start:end]
-    # Create and load the model
-    model = model_builder.create(cfg.MODEL.TYPE, train=False)
-    if cfg.TEST.WEIGHTS:
-        nu.initialize_from_weights_file(
-            model, cfg.TEST.WEIGHTS, broadcast=False
-        )
-    model_builder.add_inference_inputs(model)
-    workspace.CreateNet(model.net)
-    # Compute the detections
-    all_boxes, all_segms, all_keyps = im_list_detections(model, roidb)
-    # Save the detections
-    cfg_yaml = yaml.dump(cfg)
-    if ind_range is not None:
-        det_name = 'detection_range_%s_%s.pkl' % tuple(ind_range)
-    else:
-        det_name = 'detections.pkl'
-    det_file = os.path.join(output_dir, det_name)
-    save_object(
-        dict(
-            all_boxes=all_boxes,
-            all_segms=all_segms,
-            all_keyps=all_keyps,
-            cfg=cfg_yaml
-        ), det_file
-    )
-    logger.info('Wrote detections to: {}'.format(os.path.abspath(det_file)))
-    return all_boxes, all_segms, all_keyps
+    return cls_boxes, None, None

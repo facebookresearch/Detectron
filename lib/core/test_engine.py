@@ -38,6 +38,8 @@ from datasets.json_dataset import JsonDataset
 from modeling import model_builder
 from utils.io import save_object
 from utils.timer import Timer
+
+import core.test_retinanet as test_retinanet
 import utils.c2 as c2_utils
 import utils.env as envu
 import utils.net as net_utils
@@ -119,9 +121,11 @@ def test_net(ind_range=None):
         'Use rpn_generate to generate proposals from RPN-only models'
     assert cfg.TEST.DATASET != '', \
         'TEST.DATASET must be set to the dataset name to test'
+    # Create anchors for RetinaNet
     if cfg.RETINANET.RETINANET_ON:
-        import core.test_retinanet as test_retinanet
-        return test_retinanet.test_retinanet(ind_range)
+        anchors = test_retinanet.create_cell_anchors()
+    else:
+        anchors = None
     output_dir = get_output_dir(training=False)
     roidb, dataset, start_ind, end_ind, total_num_images = get_roidb_and_dataset(
         ind_range
@@ -132,11 +136,7 @@ def test_net(ind_range=None):
     all_boxes, all_segms, all_keyps = empty_results(num_classes, num_images)
     timers = defaultdict(Timer)
     for i, entry in enumerate(roidb):
-        if cfg.MODEL.FASTER_RCNN:
-            # Faster R-CNN type models generate proposals on-the-fly with an
-            # in-network RPN
-            box_proposals = None
-        else:
+        if cfg.TEST.PRECOMPUTED_PROPOSALS:
             # The roidb may contain ground-truth rois (for example, if the roidb
             # comes from the training or val split). We only want to evaluate
             # detection on the *non*-ground-truth rois. We select only the rois
@@ -145,12 +145,20 @@ def test_net(ind_range=None):
             box_proposals = entry['boxes'][entry['gt_classes'] == 0]
             if len(box_proposals) == 0:
                 continue
+        else:
+            # Faster R-CNN type models generate proposals on-the-fly with an
+            # in-network RPN; 1-stage models don't require proposals.
+            box_proposals = None
 
         im = cv2.imread(entry['image'])
         with c2_utils.NamedCudaScope(0):
-            cls_boxes_i, cls_segms_i, cls_keyps_i = im_detect_all(
-                model, im, box_proposals, timers
-            )
+            if cfg.RETINANET.RETINANET_ON:
+                cls_boxes_i, cls_segms_i, cls_keyps_i = \
+                    test_retinanet.im_detections(model, im, anchors, timers)
+            else:
+                cls_boxes_i, cls_segms_i, cls_keyps_i = im_detect_all(
+                    model, im, box_proposals, timers
+                )
 
         extend_results(i, all_boxes, cls_boxes_i)
         if cls_segms_i is not None:
@@ -238,13 +246,13 @@ def get_roidb_and_dataset(ind_range):
     restrict it to a range of indices if ind_range is a pair of integers.
     """
     dataset = JsonDataset(cfg.TEST.DATASET)
-    if cfg.MODEL.FASTER_RCNN:
-        roidb = dataset.get_roidb()
-    else:
+    if cfg.TEST.PRECOMPUTED_PROPOSALS:
         roidb = dataset.get_roidb(
             proposal_file=cfg.TEST.PROPOSAL_FILE,
             proposal_limit=cfg.TEST.PROPOSAL_LIMIT
         )
+    else:
+        roidb = dataset.get_roidb()
 
     if ind_range is not None:
         total_num_images = len(roidb)
