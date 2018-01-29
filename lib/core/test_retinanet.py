@@ -229,12 +229,6 @@ def test_retinanet(ind_range=None):
     if ind_range is not None:
         start, end = ind_range
         roidb = roidb[start:end]
-        logger.info('Testing on roidb range: {}-{}'.format(start, end))
-    else:
-        # if testing over the whole dataset, use the NUM_TEST_IMAGES setting
-        # the NUM_TEST_IMAGES could be over a small set of images for quick
-        # debugging purposes
-        roidb = roidb[0:cfg.TEST.NUM_TEST_IMAGES]
     # Create and load the model
     model = model_builder.create(cfg.MODEL.TYPE, train=False)
     if cfg.TEST.WEIGHTS:
@@ -259,7 +253,7 @@ def test_retinanet(ind_range=None):
     return all_boxes
 
 
-def multi_gpu_test_retinanet_on_dataset(num_images, output_dir, dataset):
+def multi_gpu_test_retinanet_on_dataset(num_images, output_dir):
     """
     If doing multi-gpu testing, we need to divide the data on various gpus and
     make the subprocess call for each child process that'll run test_retinanet()
@@ -303,16 +297,9 @@ def test_retinanet_on_dataset(multi_gpu=False):
     dataset = JsonDataset(cfg.TEST.DATASET)
     test_timer = Timer()
     test_timer.tic()
-
-    # for test-dev or full test dataset, we generate detections for all images
-    if 'test-dev' in cfg.TEST.DATASET or 'test' in cfg.TEST.DATASET:
-        cfg.TEST.NUM_TEST_IMAGES = len(dataset.get_roidb())
-
     if multi_gpu:
-        num_images = cfg.TEST.NUM_TEST_IMAGES
-        all_boxes = multi_gpu_test_retinanet_on_dataset(
-            num_images, output_dir, dataset
-        )
+        num_images = len(dataset.get_roidb())
+        all_boxes = multi_gpu_test_retinanet_on_dataset(num_images, output_dir)
     else:
         all_boxes = test_retinanet()
     test_timer.toc()

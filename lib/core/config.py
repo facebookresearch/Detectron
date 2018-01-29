@@ -270,11 +270,6 @@ __C.TEST.COMPETITION_MODE = True
 # COCO API to get COCO style AP on PASCAL VOC)
 __C.TEST.FORCE_JSON_DATASET_EVAL = False
 
-# Number of images to test on - presently used in RetinaNet Inference only
-# If the dataset name include 'test-dev' or 'test', this is ignored (i.e.,
-# it's intended to apply to a validation set)
-__C.TEST.NUM_TEST_IMAGES = 5000
-
 # [Inferred value; do not set directly in a config]
 # Indicates if precomputed proposals are used at test time
 # Not set for 1-stage models and 2-stage models with RPN subnetwork enabled
@@ -981,6 +976,7 @@ _DEPCRECATED_KEYS = set(
         'TRAIN.BBOX_NORMALIZE_TARGETS_PRECOMPUTED',
         'TRAIN.DROPOUT',
         'USE_GPU_NMS',
+        'TEST.NUM_TEST_IMAGES',
     )
 )
 
