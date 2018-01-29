@@ -128,9 +128,10 @@ class DetectionModelHelper(cnn.CNNModelHelper):
             (extracted from rpn_cls_probs; see above).
         """
         name = 'GenerateProposalsOp:' + ','.join([str(b) for b in blobs_in])
+        # spatial_scale passed to the Python op is only used in convert_pkl_to_pb
         self.net.Python(
             GenerateProposalsOp(anchors, spatial_scale, self.train).forward
-        )(blobs_in, blobs_out, name=name)
+        )(blobs_in, blobs_out, name=name, spatial_scale=spatial_scale)
         return blobs_out
 
     def GenerateProposalLabels(self, blobs_in):
