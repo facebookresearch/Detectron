@@ -38,8 +38,6 @@ from core.config import merge_cfg_from_list
 from core.rpn_generator import generate_rpn_on_dataset
 from core.rpn_generator import generate_rpn_on_range
 from core.test_engine import test_net, test_net_on_dataset
-from core.test_retinanet import test_retinanet
-from core.test_retinanet import test_retinanet_on_dataset
 from datasets import task_evaluation
 import utils.c2
 import utils.logging
@@ -100,12 +98,8 @@ def main(ind_range=None, multi_gpu_testing=False):
     if cfg.MODEL.RPN_ONLY:
         child_func = generate_rpn_on_range
         parent_func = generate_rpn_on_dataset
-    elif cfg.RETINANET.RETINANET_ON:
-        child_func = test_retinanet
-        parent_func = test_retinanet_on_dataset
     else:
         # Generic case that handles all network types other than RPN-only nets
-        # and RetinaNet
         child_func = test_net
         parent_func = test_net_on_dataset
 

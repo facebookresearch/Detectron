@@ -119,7 +119,9 @@ def test_net(ind_range=None):
         'Use rpn_generate to generate proposals from RPN-only models'
     assert cfg.TEST.DATASET != '', \
         'TEST.DATASET must be set to the dataset name to test'
-
+    if cfg.RETINANET.RETINANET_ON:
+        import core.test_retinanet as test_retinanet
+        return test_retinanet.test_retinanet(ind_range)
     output_dir = get_output_dir(training=False)
     roidb, dataset, start_ind, end_ind, total_num_images = get_roidb_and_dataset(
         ind_range

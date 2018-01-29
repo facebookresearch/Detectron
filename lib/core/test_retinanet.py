@@ -31,7 +31,6 @@ from caffe2.python import core, workspace
 
 from core.config import cfg, get_output_dir
 from core.rpn_generator import _get_image_blob
-from datasets import task_evaluation
 from datasets.json_dataset import JsonDataset
 from modeling import model_builder
 from modeling.generate_anchors import generate_anchors
@@ -41,9 +40,7 @@ from utils.timer import Timer
 import core.test_engine as test_engine
 import utils.boxes as box_utils
 import utils.c2 as c2_utils
-import utils.env as envu
 import utils.net as nu
-import utils.subprocess as subprocess_utils
 
 logger = logging.getLogger(__name__)
 
@@ -200,7 +197,9 @@ def im_list_detections(model, roidb):
     _t = Timer()
     num_images = len(roidb)
     num_classes = cfg.MODEL.NUM_CLASSES
-    all_boxes, _, _ = test_engine.empty_results(num_classes, num_images)
+    all_boxes, all_segms, all_keyps = test_engine.empty_results(
+        num_classes, num_images
+    )
     # create anchors for each level
     anchors = create_cell_anchors()
     for i, entry in enumerate(roidb):
@@ -213,7 +212,7 @@ def im_list_detections(model, roidb):
         logger.info(
             'im_detections: {:d}/{:d} {:.3f}s'.format(
                 i + 1, num_images, _t.average_time))
-    return all_boxes
+    return all_boxes, all_segms, all_keyps
 
 
 def test_retinanet(ind_range=None):
@@ -238,7 +237,7 @@ def test_retinanet(ind_range=None):
     model_builder.add_inference_inputs(model)
     workspace.CreateNet(model.net)
     # Compute the detections
-    all_boxes = im_list_detections(model, roidb)
+    all_boxes, all_segms, all_keyps = im_list_detections(model, roidb)
     # Save the detections
     cfg_yaml = yaml.dump(cfg)
     if ind_range is not None:
@@ -247,64 +246,12 @@ def test_retinanet(ind_range=None):
         det_name = 'detections.pkl'
     det_file = os.path.join(output_dir, det_name)
     save_object(
-        dict(all_boxes=all_boxes, cfg=cfg_yaml),
-        det_file)
-    logger.info('Wrote detections to: {}'.format(os.path.abspath(det_file)))
-    return all_boxes
-
-
-def multi_gpu_test_retinanet_on_dataset(num_images, output_dir):
-    """
-    If doing multi-gpu testing, we need to divide the data on various gpus and
-    make the subprocess call for each child process that'll run test_retinanet()
-    on its subset data. After all the subprocesses finish, we combine the results
-    and return
-    """
-    # Retrieve the test_net binary path
-    binary_dir = envu.get_runtime_dir()
-    binary_ext = envu.get_py_bin_ext()
-    binary = os.path.join(binary_dir, 'test_net' + binary_ext)
-    assert os.path.exists(binary), 'Binary \'{}\' not found'.format(binary)
-
-    # Run inference in parallel in subprocesses
-    outputs = subprocess_utils.process_in_parallel(
-        'detection', num_images, binary, output_dir)
-
-    # Combine the results from each subprocess
-    all_boxes = [[] for _ in range(cfg.MODEL.NUM_CLASSES)]
-    for det_data in outputs:
-        all_boxes_batch = det_data['all_boxes']
-        for cls_idx in range(1, cfg.MODEL.NUM_CLASSES):
-            all_boxes[cls_idx] += all_boxes_batch[cls_idx]
-
-    # Save the computed detections
-    det_file = os.path.join(output_dir, 'detections.pkl')
-    cfg_yaml = yaml.dump(cfg)
-    save_object(
-        dict(all_boxes=all_boxes, cfg=cfg_yaml),
-        det_file
+        dict(
+            all_boxes=all_boxes,
+            all_segms=all_segms,
+            all_keyps=all_keyps,
+            cfg=cfg_yaml
+        ), det_file
     )
     logger.info('Wrote detections to: {}'.format(os.path.abspath(det_file)))
-
-    return all_boxes
-
-
-def test_retinanet_on_dataset(multi_gpu=False):
-    """
-    Main entry point for testing on a given dataset: whether multi_gpu or not
-    """
-    output_dir = get_output_dir(training=False)
-    dataset = JsonDataset(cfg.TEST.DATASET)
-    test_timer = Timer()
-    test_timer.tic()
-    if multi_gpu:
-        num_images = len(dataset.get_roidb())
-        all_boxes = multi_gpu_test_retinanet_on_dataset(num_images, output_dir)
-    else:
-        all_boxes = test_retinanet()
-    test_timer.toc()
-    logger.info('Total inference time: {:.3f}s'.format(test_timer.average_time))
-    results = task_evaluation.evaluate_all(
-        dataset, all_boxes, None, None, output_dir
-    )
-    return results
+    return all_boxes, all_segms, all_keyps
