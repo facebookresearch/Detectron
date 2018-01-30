@@ -471,6 +471,13 @@ class DetectionModelHelper(cnn.CNNModelHelper):
                         scale=correction)
                     workspace.RunOperatorOnce(op)
 
+    def GetLossScale(self):
+        """Allow a way to configure the loss scale dynamically.
+
+        This may be used in a distributed data parallel setting.
+        """
+        return 1.0 / cfg.NUM_GPUS
+
     def AddLosses(self, losses):
         if not isinstance(losses, list):
             losses = [losses]

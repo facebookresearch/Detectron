@@ -96,7 +96,7 @@ def add_mask_rcnn_losses(model, blob_mask):
     loss_mask = model.net.SigmoidCrossEntropyLoss(
         [blob_mask, 'masks_int32'],
         'loss_mask',
-        scale=1. / cfg.NUM_GPUS * cfg.MRCNN.WEIGHT_LOSS_MASK
+        scale=model.GetLossScale() * cfg.MRCNN.WEIGHT_LOSS_MASK
     )
     loss_gradients = blob_utils.get_loss_gradients(model, [loss_mask])
     model.AddLosses('loss_mask')
