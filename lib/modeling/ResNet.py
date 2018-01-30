@@ -92,7 +92,7 @@ def add_ResNet_convX_body(model, block_counts, freeze_at=2):
     X = 4 or 5)."""
     assert freeze_at in [0, 2, 3, 4, 5]
     p = model.Conv('data', 'conv1', 3, 64, 7, pad=3, stride=2, no_bias=1)
-    p = model.AffineChannel(p, 'res_conv1_bn', inplace=True)
+    p = model.AffineChannel(p, 'res_conv1_bn', dim=64, inplace=True)
     p = model.Relu(p, p)
     p = model.MaxPool(p, 'pool1', kernel=3, pad=1, stride=2)
     dim_in = 64
@@ -204,7 +204,7 @@ def add_shortcut(model, prefix, blob_in, dim_in, dim_out, stride):
         stride=stride,
         no_bias=1
     )
-    return model.AffineChannel(c, prefix + '_branch1_bn')
+    return model.AffineChannel(c, prefix + '_branch1_bn', dim=dim_out)
 
 
 # ------------------------------------------------------------------------------
