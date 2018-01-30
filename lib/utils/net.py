@@ -214,8 +214,8 @@ def print_net(model, namescope='gpu_0'):
 
         if namescope is None or output_name.startswith(namescope):
             # Only print the forward pass network
-            if output_name.find('grad') >= 0:
-                break
+            if output_name.find('grad') >= 0 or output_name.find('__m') >= 0:
+                continue
 
             output_shape = workspace.FetchBlob(output_name).shape
             first_blob = True
