@@ -169,7 +169,7 @@ def add_ResNet_roi_conv5_head_for_keypoints(
     )
     # Using the prefix '_[pose]_' to 'res5' enables initializing the head's
     # parameters using pretrained 'res5' parameters if given (see
-    # utils.net.initialize_gpu_0_from_weights_file)
+    # utils.net.initialize_from_weights_file)
     s, dim_in = ResNet.add_stage(
         model,
         '_[pose]_res5',

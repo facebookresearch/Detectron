@@ -42,16 +42,19 @@ def initialize_from_weights_file(model, weights_file, broadcast=True):
     multiple GPUs are used, the loaded weights are synchronized on all GPUs,
     unless 'broadcast' is False.
     """
-    initialize_gpu_0_from_weights_file(model, weights_file)
+    initialize_gpu_from_weights_file(model, weights_file, gpu_id=0)
     if broadcast:
         broadcast_parameters(model)
 
 
-def initialize_gpu_0_from_weights_file(model, weights_file):
-    """Initialize a network with ops on GPU 0. Note that we always use GPU 0 and
-    rely on proper usage of CUDA_VISIBLE_DEVICES.
+def initialize_gpu_from_weights_file(model, weights_file, gpu_id=0):
+    """Initialize a network with ops on a specific GPU.
+
+    If you use CUDA_VISIBLE_DEVICES to target specific GPUs, Caffe2 will
+    automatically map logical GPU ids (starting from 0) to the physical GPUs
+    specified in CUDA_VISIBLE_DEVICES.
     """
-    logger.info('Loading from: {}'.format(weights_file))
+    logger.info('Loading weights from: {}'.format(weights_file))
     ws_blobs = workspace.Blobs()
     with open(weights_file, 'r') as f:
         src_blobs = pickle.load(f)
@@ -62,11 +65,11 @@ def initialize_gpu_0_from_weights_file(model, weights_file):
         # Backwards compat--dictionary used to be only blobs, now they are
         # stored under the 'blobs' key
         src_blobs = src_blobs['blobs']
-    # Initialize weights on GPU 0 only
+    # Initialize weights on GPU gpu_id only
     unscoped_param_names = OrderedDict()  # Print these out in model order
     for blob in model.params:
         unscoped_param_names[c2_utils.UnscopeName(str(blob))] = True
-    with c2_utils.NamedCudaScope(0):
+    with c2_utils.NamedCudaScope(gpu_id):
         for unscoped_param_name in unscoped_param_names.keys():
             if (unscoped_param_name.find(']_') >= 0 and
                     unscoped_param_name not in src_blobs):
@@ -85,10 +88,12 @@ def initialize_gpu_0_from_weights_file(model, weights_file):
             dst_name = core.ScopedName(unscoped_param_name)
             has_momentum = src_name + '_momentum' in src_blobs
             has_momentum_str = ' [+ momentum]' if has_momentum else ''
-            logger.info('{:s}{:} loaded from weights file into {:s}: {}'.
-                        format(
-                            src_name, has_momentum_str,
-                            dst_name, src_blobs[src_name].shape))
+            logger.debug(
+                '{:s}{:} loaded from weights file into {:s}: {}'.format(
+                    src_name, has_momentum_str, dst_name, src_blobs[src_name]
+                    .shape
+                )
+            )
             if dst_name in ws_blobs:
                 # If the blob is already in the workspace, make sure that it
                 # matches the shape of the loaded blob
@@ -121,7 +126,7 @@ def initialize_gpu_0_from_weights_file(model, weights_file):
             with c2_utils.CpuScope():
                 workspace.FeedBlob(
                     '__preserve__/{:s}'.format(src_name), src_blobs[src_name])
-                logger.info(
+                logger.debug(
                     '{:s} preserved in workspace (unused)'.format(src_name))
 
 

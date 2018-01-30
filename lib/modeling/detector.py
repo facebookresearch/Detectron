@@ -32,7 +32,6 @@ from ops.collect_and_distribute_fpn_rpn_proposals \
     import CollectAndDistributeFpnRpnProposalsOp
 from ops.generate_proposal_labels import GenerateProposalLabelsOp
 from ops.generate_proposals import GenerateProposalsOp
-from utils import lr_policy
 import roi_data.fast_rcnn
 import utils.c2 as c2_utils
 
@@ -417,14 +416,13 @@ class DetectionModelHelper(cnn.CNNModelHelper):
         self.use_cudnn = self.prev_use_cudnn
         self.prev_use_cudnn = prev_use_cudnn
 
-    def UpdateWorkspaceLr(self, cur_iter):
+    def UpdateWorkspaceLr(self, cur_iter, new_lr):
         """Updates the model's current learning rate and the workspace (learning
         rate and update history/momentum blobs).
         """
         # The workspace is the one source of truth for the lr
         # The lr is always the same on all GPUs
         cur_lr = workspace.FetchBlob('gpu_0/lr')[0]
-        new_lr = lr_policy.get_lr_at_iter(cur_iter)
         # There are no type conversions between the lr in Python and the lr in
         # the GPU (both are float32), so exact comparision is ok
         if cur_lr != new_lr:
