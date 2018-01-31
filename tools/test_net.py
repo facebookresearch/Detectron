@@ -33,11 +33,10 @@ from caffe2.python import workspace
 
 from core.config import assert_and_infer_cfg
 from core.config import cfg
+from core.config import get_output_dir
 from core.config import merge_cfg_from_file
 from core.config import merge_cfg_from_list
-from core.rpn_generator import generate_rpn_on_dataset
-from core.rpn_generator import generate_rpn_on_range
-from core.test_engine import test_net, test_net_on_dataset
+from core.test_engine import run_inference
 from datasets import task_evaluation
 import utils.c2
 import utils.logging
@@ -94,46 +93,17 @@ def parse_args():
 
 
 def main(ind_range=None, multi_gpu_testing=False):
-    # Determine which parent or child function should handle inference
-    if cfg.MODEL.RPN_ONLY:
-        child_func = generate_rpn_on_range
-        parent_func = generate_rpn_on_dataset
-    else:
-        # Generic case that handles all network types other than RPN-only nets
-        child_func = test_net
-        parent_func = test_net_on_dataset
-
-    is_parent = ind_range is None
-
-    if is_parent:
-        # Parent case:
-        # In this case we're either running inference on the entire dataset in a
-        # single process or (if multi_gpu_testing is True) using this process to
-        # launch subprocesses that each run inference on a range of the dataset
-        if len(cfg.TEST.DATASETS) == 0:
-            cfg.TEST.DATASETS = (cfg.TEST.DATASET, )
-            cfg.TEST.PROPOSAL_FILES = (cfg.TEST.PROPOSAL_FILE, )
-
-        all_results = {}
-        for i in range(len(cfg.TEST.DATASETS)):
-            cfg.TEST.DATASET = cfg.TEST.DATASETS[i]
-            if cfg.TEST.PRECOMPUTED_PROPOSALS:
-                cfg.TEST.PROPOSAL_FILE = cfg.TEST.PROPOSAL_FILES[i]
-            results = parent_func(multi_gpu=multi_gpu_testing)
-            all_results.update(results)
-
+    output_dir = get_output_dir(training=False)
+    all_results = run_inference(
+        output_dir, ind_range=ind_range, multi_gpu_testing=multi_gpu_testing
+    )
+    if not ind_range:
         task_evaluation.check_expected_results(
             all_results,
             atol=cfg.EXPECTED_RESULTS_ATOL,
             rtol=cfg.EXPECTED_RESULTS_RTOL
         )
         task_evaluation.log_copy_paste_friendly_results(all_results)
-    else:
-        # Subprocess child case:
-        # In this case test_net was called via subprocess.Popen to execute on a
-        # range of inputs on a single dataset (i.e., use cfg.TEST.DATASET and
-        # don't loop over cfg.TEST.DATASETS)
-        child_func(ind_range=ind_range)
 
 
 if __name__ == '__main__':
