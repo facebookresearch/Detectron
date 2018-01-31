@@ -231,3 +231,11 @@ make sure that your python versions are not getting mixed. For instance, this is
 
 In case you experience issues with CMake being unable to find the Caffe2 package when building custom operators,
 make sure you have run `make install` as part of your Caffe2 installation process.
+
+### Conflicting Imports
+
+Python modules with common names could result in import conflicts.
+For instance, a `datasets` module is also found in [tensorflow](https://github.com/tensorflow/tensorflow)
+and could cause an error (e.g. `ImportError: cannot import name task_evaluation`)
+as discussed [here](https://github.com/facebookresearch/Detectron/issues/20).
+If you encounter an import error, please make sure that you are not trying to import the module from another project.
