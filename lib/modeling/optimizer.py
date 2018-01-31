@@ -34,7 +34,9 @@ def build_data_parallel_model(model, single_gpu_build_func):
     """Build a data parallel model given a function that builds the model on a
     single GPU.
     """
-    if model.train:
+    if model.only_build_forward_pass:
+        single_gpu_build_func(model)
+    elif model.train:
         all_loss_gradients = _build_forward_graph(model, single_gpu_build_func)
         # Add backward pass on all GPUs
         model.AddGradientOperators(all_loss_gradients)
@@ -43,11 +45,12 @@ def build_data_parallel_model(model, single_gpu_build_func):
         for gpu_id in range(cfg.NUM_GPUS):
             # After allreduce, all GPUs perform SGD updates on their identical
             # params and gradients in parallel
-            _add_parameter_update_ops(model, gpu_id)
+            with c2_utils.NamedCudaScope(gpu_id):
+                add_single_gpu_param_update_ops(model, gpu_id)
     else:
         # Test-time network operates on single GPU
         # Test-time parallelism is implemented through multiprocessing
-        with c2_utils.NamedCudaScope(0):
+        with c2_utils.NamedCudaScope(model.target_gpu_id):
             single_gpu_build_func(model)
 
 
@@ -84,40 +87,37 @@ def _add_allreduce_graph(model):
                     muji.Allreduce(model.net, gradients, reduced_affix='')
 
 
-def _add_parameter_update_ops(model, gpu_id):
-    """Construct the optimizer update op graph."""
-    with c2_utils.NamedCudaScope(gpu_id):
-        # Learning rate of 0 is a dummy value to be set properly at the
-        # start of training
-        lr = model.param_init_net.ConstantFill(
-            [], 'lr', shape=[1], value=0.0
+def add_single_gpu_param_update_ops(model, gpu_id):
+    # Learning rate of 0 is a dummy value to be set properly at the
+    # start of training
+    lr = model.param_init_net.ConstantFill(
+        [], 'lr', shape=[1], value=0.0
+    )
+    one = model.param_init_net.ConstantFill(
+        [], 'one', shape=[1], value=1.0
+    )
+    wd = model.param_init_net.ConstantFill(
+        [], 'wd', shape=[1], value=cfg.SOLVER.WEIGHT_DECAY
+    )
+    for param in model.TrainableParams(gpu_id=gpu_id):
+        logger.debug('param ' + str(param) + ' will be updated')
+        param_grad = model.param_to_grad[param]
+        # Initialize momentum vector
+        param_momentum = model.param_init_net.ConstantFill(
+            [param], param + '_momentum', value=0.0
         )
-        one = model.param_init_net.ConstantFill(
-            [], 'one', shape=[1], value=1.0
+        if param in model.biases:
+            # Special treatment for biases (mainly to match historical impl.
+            # details):
+            # (1) Do not apply weight decay
+            # (2) Use a 2x higher learning rate
+            model.Scale(param_grad, param_grad, scale=2.0)
+        elif cfg.SOLVER.WEIGHT_DECAY > 0:
+            # Apply weight decay to non-bias weights
+            model.WeightedSum([param_grad, one, param, wd], param_grad)
+        # Update param_grad and param_momentum in place
+        model.net.MomentumSGDUpdate(
+            [param_grad, param_momentum, lr, param],
+            [param_grad, param_momentum, param],
+            momentum=cfg.SOLVER.MOMENTUM
         )
-        wd = model.param_init_net.ConstantFill(
-            [], 'wd', shape=[1], value=cfg.SOLVER.WEIGHT_DECAY
-        )
-
-        for param in model.TrainableParams(gpu_id=gpu_id):
-            logger.info('param ' + str(param) + ' will be updated')
-            param_grad = model.param_to_grad[param]
-            # Initialize momentum vector
-            param_momentum = model.param_init_net.ConstantFill(
-                [param], param + '_momentum', value=0.0
-            )
-            if param in model.biases:
-                # Special treatment for biases (mainly to match historical impl.
-                # details):
-                # (1) Do not apply weight decay
-                # (2) Use a 2x higher learning rate
-                model.Scale(param_grad, param_grad, scale=2.0)
-            elif cfg.SOLVER.WEIGHT_DECAY > 0:
-                # Apply weight decay to non-bias weights
-                model.WeightedSum([param_grad, one, param, wd], param_grad)
-            # Update param_grad and param_momentum in place
-            model.net.MomentumSGDUpdate(
-                [param_grad, param_momentum, lr, param],
-                [param_grad, param_momentum, param],
-                momentum=cfg.SOLVER.MOMENTUM
-            )

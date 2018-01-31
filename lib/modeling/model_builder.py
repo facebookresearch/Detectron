@@ -104,9 +104,14 @@ def retinanet(model):
 # Helper functions for building various re-usable network bits
 # ---------------------------------------------------------------------------- #
 
-def create(model_type_func, train=False):
+def create(model_type_func, train=False, gpu_id=0):
     """Generic model creation function that dispatches to specific model
     building functions.
+
+    By default, this function will generate a data parallel model configured to
+    run on cfg.NUM_GPUS devices. However, you can restrict it to build a model
+    targeted to a specific GPU by specifying gpu_id. This is used by
+    optimizer.build_data_parallel_model() during test time.
     """
     model = DetectionModelHelper(
         name=model_type_func,
@@ -114,6 +119,8 @@ def create(model_type_func, train=False):
         num_classes=cfg.MODEL.NUM_CLASSES,
         init_params=train
     )
+    model.only_build_forward_pass = False
+    model.target_gpu_id = gpu_id
     return get_func(model_type_func)(model)
 
 
