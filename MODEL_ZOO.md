@@ -43,6 +43,10 @@ The backbone models pretrained on ImageNet are available in the format used by D
 - [X-101-32x8d.pkl](https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/20171220/X-101-32x8d.pkl): ResNeXt-101-32x8d model trained with Caffe2 at FB
 - [X-152-32x8d-IN5k.pkl](https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/25093814/X-152-32x8d-IN5k.pkl): ResNeXt-152-32x8d model **trained on ImageNet-5k** with Caffe2 at FB (see our [ResNeXt paper](https://arxiv.org/abs/1611.05431) for details on ImageNet-5k)
 
+#### Log Files
+
+[Training and inference logs](https://s3-us-west-2.amazonaws.com/detectron/logs/model_zoo_12_2017_baseline_logs.tgz) are available for most models in the model zoo.
+
 ## Proposal, Box, and Mask Detection Baselines
 
 ### RPN Proposal Baselines
