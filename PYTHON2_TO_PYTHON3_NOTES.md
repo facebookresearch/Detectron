@@ -8,12 +8,18 @@
 
 * fix ``urllib`` compatibility (``response.info().getheader`` breaks)
 
+* the pickles from the Model Zoo (as of January 2018) seem to be encoded with latin1,
+  so use ``pickle.load(f, encoding='latin1')``; see also https://github.com/tflearn/tflearn/issues/57
+  However, Python 2 doesn't have an ``encoding`` argument to pickle, so a check is needed
+  (try/except or sys version) for compatibility.
+
 * Be careful when processing values of type ``bytes``, they may be intended to be ascii strings
   (as they were in python 2)... e.g. ``if isinstance(somestr,bytes): somestr.decode('ascii')``,
   which is what ``bytes2string`` does in ``lib/utils/py3compat.py``.
 
-* the pickles from the Model Zoo (as of January 2018) seem to be encoded with latin1,
-  so use ``pickle.load(f, encoding='latin1')``
+* Also some types appear in Python 2 as ``unicode``... need to decode them using ``latin1``.
+  2to3 will change ``unicode`` to ``str``, which will leave an error if using ``unicode_str.decode()``,
+  so that has to be checked too.
 
 # Git notes
 
