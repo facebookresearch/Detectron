@@ -95,7 +95,7 @@ def process_in_parallel(tag, total_range_size, binary, output_dir):
         range_file = os.path.join(
             output_dir, '%s_range_%s_%s.pkl' % (tag, start, end)
         )
-        range_data = pickle.load(open(range_file))
+        range_data = pickle.load(open(range_file, 'rb'))
         outputs.append(range_data)
     return outputs
 

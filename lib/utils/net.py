@@ -56,7 +56,7 @@ def initialize_gpu_from_weights_file(model, weights_file, gpu_id=0):
     """
     logger.info('Loading weights from: {}'.format(weights_file))
     ws_blobs = workspace.Blobs()
-    with open(weights_file, 'r') as f:
+    with open(weights_file, 'rb') as f:
         src_blobs = pickle.load(f)
     if 'cfg' in src_blobs:
         saved_cfg = yaml.load(src_blobs['cfg'])

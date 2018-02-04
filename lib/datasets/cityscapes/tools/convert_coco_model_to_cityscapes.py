@@ -106,7 +106,7 @@ if __name__ == '__main__':
         'Weights file does not exist'
     weights = load_and_convert_coco_model(args)
 
-    with open(args.out_file_name, 'w') as f:
+    with open(args.out_file_name, 'wb') as f:
         pickle.dump(weights, f, protocol=pickle.HIGHEST_PROTOCOL)
     print('Wrote blobs to {}:'.format(args.out_file_name))
     print(sorted(weights['blobs'].keys()))

@@ -84,7 +84,7 @@ def vis(dataset, detections_pkl, thresh, output_dir, limit=0):
     ds = JsonDataset(dataset)
     roidb = ds.get_roidb()
 
-    with open(detections_pkl, 'r') as f:
+    with open(detections_pkl, 'rb') as f:
         dets = pickle.load(f)
 
     all_boxes = dets['all_boxes']
