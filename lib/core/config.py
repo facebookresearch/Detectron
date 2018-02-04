@@ -1160,7 +1160,7 @@ def _decode_cfg_value(v):
     # All remaining processing is only applied to strings
     if isinstance(v, bytes): # assume bytes are encoded ascii strings (thats how they are in python 2)
         v = v.decode('ascii')
-    if not isinstance(v, str):
+    if not isinstance(v, str) and not isinstance(v, unicode):
         return v
     # Try to interpret `v` as a:
     #   string, number, tuple, list, dict, boolean, or None
@@ -1191,6 +1191,9 @@ def _check_and_coerce_cfg_value_type(value_a, value_b, key, full_key):
     """
     if isinstance(value_a, bytes) and isinstance(value_b, bytes):
         return value_a.decode('ascii') # assume bytes are encoded ascii strings (thats how they are in python 2)
+    if isinstance(value_a, unicode):
+        assert isinstance(value_b, str) or isinstance(value_b, unicode), str(type(value_b))
+        return value_a.decode('latin1')  # https://github.com/tflearn/tflearn/issues/57
 
     # The types must match (with some exceptions)
     type_b = type(value_b)
