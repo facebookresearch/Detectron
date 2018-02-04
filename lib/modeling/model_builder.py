@@ -55,6 +55,7 @@ import modeling.rfcn_heads as rfcn_heads
 import modeling.rpn_heads as rpn_heads
 import roi_data.minibatch
 import utils.c2 as c2_utils
+from utils.py3compat import bytes2string
 
 logger = logging.getLogger(__name__)
 
@@ -129,6 +130,7 @@ def get_func(func_name):
     function in this module or the path to a function relative to the base
     'modeling' module.
     """
+    func_name = bytes2string(func_name)
     if func_name == '':
         return None
     new_func_name = modeling.name_compat.get_new_name(func_name)

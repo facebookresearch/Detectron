@@ -43,7 +43,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from ast import literal_eval
-from past.builtins import basestring
+#from past.builtins import basestring
 from utils.collections import AttrDict
 import copy
 import logging
@@ -1112,6 +1112,16 @@ def _merge_a_into_b(a, b, stack=None):
         else:
             b[k] = v
 
+    # walk into b, look for bytes, decode as ascii strings
+    # assume bytes are encoded ascii strings (thats how they are in python 2)
+    for k, v_ in list(b.items()):
+        if isinstance(v_, bytes):
+            b[k] = v_.decode('ascii')
+        elif isinstance(v_, dict):
+            for vkey,vval in v_.items():
+                if isinstance(vval, bytes):
+                    v_[vkey] = vval.decode('ascii')
+
 
 def _key_is_deprecated(full_key):
     if full_key in _DEPCRECATED_KEYS:
@@ -1148,7 +1158,9 @@ def _decode_cfg_value(v):
     if isinstance(v, dict):
         return AttrDict(v)
     # All remaining processing is only applied to strings
-    if not isinstance(v, basestring):
+    if isinstance(v, bytes): # assume bytes are encoded ascii strings (thats how they are in python 2)
+        v = v.decode('ascii')
+    if not isinstance(v, str):
         return v
     # Try to interpret `v` as a:
     #   string, number, tuple, list, dict, boolean, or None
@@ -1177,6 +1189,9 @@ def _check_and_coerce_cfg_value_type(value_a, value_b, key, full_key):
     right type. The type is correct if it matches exactly or is one of a few
     cases in which the type can be easily coerced.
     """
+    if isinstance(value_a, bytes) and isinstance(value_b, bytes):
+        return value_a.decode('ascii') # assume bytes are encoded ascii strings (thats how they are in python 2)
+
     # The types must match (with some exceptions)
     type_b = type(value_b)
     type_a = type(value_a)
@@ -1186,8 +1201,9 @@ def _check_and_coerce_cfg_value_type(value_a, value_b, key, full_key):
     # Exceptions: numpy arrays, strings, tuple<->list
     if isinstance(value_b, np.ndarray):
         value_a = np.array(value_a, dtype=value_b.dtype)
-    elif isinstance(value_b, basestring):
-        value_a = str(value_a)
+    elif isinstance(value_b, bytes) and isinstance(value_a, str):
+        pass   # encode to match other dict? or just leave alone?
+        #value_a = value_a.encode('ascii')
     elif isinstance(value_a, tuple) and isinstance(value_b, list):
         value_a = list(value_a)
     elif isinstance(value_a, list) and isinstance(value_b, tuple):
