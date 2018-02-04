@@ -48,6 +48,7 @@ from utils.collections import AttrDict
 import copy
 import logging
 import numpy as np
+import sys
 import os
 import os.path as osp
 import yaml
@@ -1191,7 +1192,7 @@ def _check_and_coerce_cfg_value_type(value_a, value_b, key, full_key):
     """
     if isinstance(value_a, bytes) and isinstance(value_b, bytes):
         return value_a.decode('ascii') # assume bytes are encoded ascii strings (thats how they are in python 2)
-    if isinstance(value_a, unicode):
+    if sys.version_info.major == 2 and isinstance(value_a, unicode):
         assert isinstance(value_b, str) or isinstance(value_b, unicode), str(type(value_b))
         return value_a.decode('latin1')  # https://github.com/tflearn/tflearn/issues/57
 
