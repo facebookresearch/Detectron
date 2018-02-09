@@ -106,6 +106,9 @@ def main(args):
     else:
         im_list = [args.im_or_folder]
 
+    #Sort frames by number
+    im_list = list(im_list)
+    im_list.sort()
     json_output = []
 
     for i, im_name in enumerate(im_list):
@@ -132,7 +135,10 @@ def main(args):
         boxes, segms, keypoints, classes = vis_utils.convert_from_cls_format(
             cls_boxes, cls_segms, cls_keyps)
         
-        json_output.append(boxes.tolist())
+        json_output.append({
+            'frame': i,
+            'boxes': boxes.tolist()
+        })
 
         vis_utils.vis_one_image(
             im[:, :, ::-1],  # BGR -> RGB for visualization
