@@ -32,8 +32,10 @@ import logging
 import os
 import sys
 import time
+import json
 
 from caffe2.python import workspace
+from pdb import set_trace
 
 from core.config import assert_and_infer_cfg
 from core.config import cfg
@@ -104,6 +106,11 @@ def main(args):
     else:
         im_list = [args.im_or_folder]
 
+    #Sort frames by number
+    im_list = list(im_list)
+    im_list.sort()
+    json_output = []
+
     for i, im_name in enumerate(im_list):
         out_name = os.path.join(
             args.output_dir, '{}'.format(os.path.basename(im_name) + '.pdf')
@@ -125,6 +132,14 @@ def main(args):
                 'rest (caches and auto-tuning need to warm up)'
             )
 
+        boxes, segms, keypoints, classes = vis_utils.convert_from_cls_format(
+            cls_boxes, cls_segms, cls_keyps)
+        
+        json_output.append({
+            'frame': i,
+            'boxes': boxes.tolist()
+        })
+
         vis_utils.vis_one_image(
             im[:, :, ::-1],  # BGR -> RGB for visualization
             im_name,
@@ -137,7 +152,10 @@ def main(args):
             show_class=True,
             thresh=0.7,
             kp_thresh=2
-        )
+        )        
+
+    with open(args.output_dir + '/boxes.json', 'w') as outfile:
+        json.dump(json_output, outfile, indent=4)
 
 
 if __name__ == '__main__':

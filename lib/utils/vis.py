@@ -23,6 +23,9 @@ from __future__ import unicode_literals
 import cv2
 import numpy as np
 import os
+import json
+from pdb import set_trace
+import logging
 
 import pycocotools.mask as mask_util
 
@@ -253,6 +256,7 @@ def vis_one_image(
         kp_thresh=2, dpi=200, box_alpha=0.0, dataset=None, show_class=False,
         ext='pdf'):
     """Visual debugging of detections."""
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -286,6 +290,14 @@ def vis_one_image(
     sorted_inds = np.argsort(-areas)
 
     mask_color_id = 0
+
+    debugPath = os.path.join(output_dir, '{}'.format('vis-boxes.json'))
+    logging.info("Writing vis.py")
+    logging.info(debugPath)
+    
+    with open(debugPath, 'w') as outfile:
+        json.dump(boxes.tolist(), outfile, indent=4)
+
     for i in sorted_inds:
         bbox = boxes[i, :4]
         score = boxes[i, -1]
