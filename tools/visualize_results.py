@@ -84,46 +84,38 @@ def vis(dataset, detections_pkl, thresh, output_dir, limit=0):
     ds = JsonDataset(dataset)
     roidb = ds.get_roidb()
 
-    with open(detections_pkl, 'r') as f:
+    with open(detections_pkl) as f:
         dets = pickle.load(f)
 
-    all_boxes = dets['all_boxes']
-    if 'all_segms' in dets:
-        all_segms = dets['all_segms']
-    else:
-        all_segms = None
-
-    if 'all_keyps' in dets:
-        all_keyps = dets['all_keyps']
-    else:
-        all_keyps = None
-
+    all_boxes = dets['all_boxes']    
+    all_segms = dets.get('all_segms', None)        
+    all_keyps = dets.get('all_keyps', None)
+        
     def id_or_index(ix, val):
-        if len(val) == 0:
+        if not val:
             return val
-        else:
-            return val[ix]
+        return val[ix]
 
     for ix, entry in enumerate(roidb):
         if limit > 0 and ix >= limit:
             break
-        if ix % 10 == 0:
+        if not ix % 10:
             print('{:d}/{:d}'.format(ix + 1, len(roidb)))
         im = cv2.imread(entry['image'])
         im_name = os.path.splitext(os.path.basename(entry['image']))[0]
         cls_boxes_i = [
-            id_or_index(ix, all_boxes[j]) for j in range(len(all_boxes))
+            id_or_index(ix, j) for j in all_boxes)
         ]
         if all_segms is not None:
             cls_segms_i = [
-                id_or_index(ix, all_segms[j]) for j in range(len(all_segms))
+                id_or_index(ix, j) for j in all_segms)
             ]
         else:
             cls_segms_i = None
 
         if all_keyps is not None:
             cls_keyps_i = [
-                id_or_index(ix, all_keyps[j]) for j in range(len(all_keyps))
+                id_or_index(ix, j) for j in all_keyps)
             ]
         else:
             cls_keyps_i = None
