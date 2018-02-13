@@ -197,6 +197,55 @@ def vis_keypoints(img, kps, kp_thresh=2, alpha=0.7):
     # Blend the keypoints.
     return cv2.addWeighted(img, 1.0 - alpha, kp_mask, alpha, 0)
 
+def vis_one_image_opencv(
+        im, boxes, segms=None, keypoints=None, thresh=0.9, kp_thresh=2,
+        show_box=False, dataset=None, show_class=False):
+    """Constructs a numpy array with the detections visualized."""
+
+    if isinstance(boxes, list):
+        boxes, segms, keypoints, classes = convert_from_cls_format(
+            boxes, segms, keypoints)
+
+    if boxes is None or boxes.shape[0] == 0 or max(boxes[:, 4]) < thresh:
+        return im
+
+    if segms is not None:
+        masks = mask_util.decode(segms)
+        color_list = colormap()
+        mask_color_id = 0
+
+    # Display in largest to smallest order to reduce occlusion
+    areas = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
+    sorted_inds = np.argsort(-areas)
+
+    for i in sorted_inds:
+        bbox = boxes[i, :4]
+        score = boxes[i, -1]
+        if score < thresh:
+            continue
+
+        # show box (off by default)
+        if show_box:
+            im = vis_bbox(
+                im, (bbox[0], bbox[1], bbox[2] - bbox[0], bbox[3] - bbox[1]))
+
+        # show class (off by default)
+        if show_class:
+            class_str = get_class_string(classes[i], score, dataset)
+            im = vis_class(im, (bbox[0], bbox[1] - 2), class_str)
+
+        # show mask
+        if segms is not None and len(segms) > i:
+            color_mask = color_list[mask_color_id % len(color_list), 0:3]
+            mask_color_id += 1
+            im = vis_mask(im, masks[..., i], color_mask)
+
+        # show keypoints
+        if keypoints is not None and len(keypoints) > i:
+            im = vis_keypoints(im, keypoints[i], kp_thresh)
+
+    return im
+
 
 def vis_one_image_opencv(
         im, boxes, segms=None, keypoints=None, thresh=0.9, kp_thresh=2,
@@ -246,6 +295,65 @@ def vis_one_image_opencv(
             im = vis_keypoints(im, keypoints[i], kp_thresh)
 
     return im
+
+
+
+def segmented_images(
+        im, im_name, output_dir, boxes, segms=None, keypoints=None, thresh=0.9,
+        kp_thresh=2, dpi=200, box_alpha=0.0, dataset=None, show_class=False,
+        ext='pdf'):
+    """Extract segmented images."""
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    if isinstance(boxes, list):
+        boxes, segms, keypoints, classes = convert_from_cls_format(
+            boxes, segms, keypoints)
+
+    if boxes is None or boxes.shape[0] == 0 or max(boxes[:, 4]) < thresh:
+        return
+
+    if segms is not None:
+        masks = mask_util.decode(segms)
+
+    color_list = colormap(rgb=True) / 255
+
+    # Display in largest to smallest order to reduce occlusion
+    areas = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
+    sorted_inds = np.argsort(-areas)
+
+    mask_color_id = 0
+    segmented_images = []
+    segmented_classes = []
+    segmented_scores = []
+    for i in sorted_inds:
+        bbox = boxes[i, :4]
+        score = boxes[i, -1]
+        if score < thresh:
+            continue
+
+        # show mask
+        if segms is not None and len(segms) > i:
+            img = np.zeros(im.shape)
+            color_mask = color_list[mask_color_id % len(color_list), 0:3]
+            mask_color_id += 1
+
+            w_ratio = .4
+            e = masks[:, :, i]
+
+            for channel in range(3):
+                img[:,:, channel] = im[:,:, channel] * e[:,:]
+            _, contour, hier = cv2.findContours(
+                e.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
+            for c in contour:
+                x, y, w, h = cv2.boundingRect(c)
+                img_countour = np.zeros([h, w, 3])
+                for channel in range(3):
+                    img_countour[:, :, channel] = img[y:h + y, x:w + x, channel]
+                segmented_images.insert(len(segmented_images), img_countour)
+                segmented_classes.insert(len(segmented_classes), dataset.classes[classes[i]])
+                segmented_scores.insert(len(segmented_scores), score)
+    return segmented_images, segmented_classes, segmented_scores
 
 
 def vis_one_image(
@@ -322,6 +430,7 @@ def vis_one_image(
             for c in range(3):
                 img[:, :, c] = color_mask[c]
             e = masks[:, :, i]
+
 
             _, contour, hier = cv2.findContours(
                 e.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
