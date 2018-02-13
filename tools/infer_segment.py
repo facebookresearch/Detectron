@@ -16,7 +16,7 @@
 ##############################################################################
 
 """Perform inference on a single image or all images with a certain extension
-(e.g., .jpg) in a folder.
+(e.g., .jpg) in a folder, extracting all the objects of a given class.
 """
 
 from __future__ import absolute_import
