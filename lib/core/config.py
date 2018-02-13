@@ -483,7 +483,8 @@ __C.MODEL.RPN_ONLY = False
 # Use 'prof_dag' to get profiling statistics
 __C.MODEL.EXECUTION_TYPE = b'dag'
 
-
+__C.MODEL.PROTOTXT = b''
+__C.MODEL.INIT_PROTOTXT = b''
 # ---------------------------------------------------------------------------- #
 # RetinaNet options
 # ---------------------------------------------------------------------------- #
@@ -950,7 +951,7 @@ __C.EXPECTED_RESULTS_EMAIL = b''
 
 # Models and proposals referred to by URL are downloaded to a local cache
 # specified by DOWNLOAD_CACHE
-__C.DOWNLOAD_CACHE = b'/tmp/detectron-download-cache'
+__C.DOWNLOAD_CACHE = b'/home/roy/data/detectron/detectron-download-cache'
 
 
 # ---------------------------------------------------------------------------- #

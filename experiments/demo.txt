@@ -1,0 +1,9 @@
+python2 tools/infer_simple.py     --cfg configs/12_2017_baselines/e2e_mask_rcnn_R-101-FPN_2x.yaml     --output-dir /tmp/detectron-visualizations     --image-ext jpg     --wts https://s3-us-west-2.amazonaws.com/detectron/35861858/12_2017_baselines/e2e_mask_rcnn_R-101-FPN_2x.yaml.02_32_51.SgT4y1cO/output/train/coco_2014_train:coco_2014_valminusminival/generalized_rcnn/model_final.pkl     demo
+
+python2 tools/infer_simple.py \
+    --cfg configs/12_2017_baselines/e2e_faster_rcnn_R-50-FPN_2x.yaml \
+    --output-dir /tmp/detectron-visualizations \
+    --image-ext jpg \
+    --wts https://s3-us-west-2.amazonaws.com/detectron/35857389/12_2017_baselines/e2e_faster_rcnn_R-50-FPN_2x.yaml.01_37_22.KSeq0b5q/output/train/coco_2014_train%3Acoco_2014_valminusminival/generalized_rcnn/model_final.pkl    demo
+
+python2 tools/train_net.py --cfg experiments/e2e_faster_rcnn_resnet-50-FPN_pascal2007.yaml  OUTPUT_DIR experiments/output

@@ -55,6 +55,9 @@ import modeling.rfcn_heads as rfcn_heads
 import modeling.rpn_heads as rpn_heads
 import roi_data.minibatch
 import utils.c2 as c2_utils
+import json
+from caffe2.proto.caffe2_pb2 import NetDef
+from google.protobuf import json_format
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +102,51 @@ def retinanet(model):
     # TODO(rbg): fold into build_generic_detection_model
     return build_generic_retinanet_model(model, get_func(cfg.MODEL.CONV_BODY))
 
+# remove 'gpu_0/roi_blobs_queue'
+def workaround_net(jstr):
+    if not jstr:
+        return
+
+    ext_list = jstr['externalInput']
+    for it in ext_list:
+        if it.startswith('gpu_0/roi_blobs_queue'):
+            ext_list.remove(it)
+
+    op_list = jstr['op']
+    for it_op in op_list:
+        if it_op['input'][0].startswith('gpu_0/roi_blobs_queue'):
+            op_list.remove(it_op)
+
+    return jstr
+
+def load_model(proto_file, init_proto_file, train=False, gpu_id=0):
+    model = DetectionModelHelper(
+        #name=cfg.MODEL.TYPE,
+        train=train,
+        num_classes=cfg.MODEL.NUM_CLASSES,
+        init_params=train
+    )
+    model.only_build_forward_pass = False
+    model.target_gpu_id = gpu_id
+
+    jstr = None
+    with open(proto_file, 'r') as fid:
+        jstr = json.load(fid)
+
+    jstr = workaround_net(jstr)
+    jstr = json.dumps(jstr)
+    net = NetDef()
+    json_format.Parse(jstr, net)
+    model.net = core.Net(net)
+
+    with open(init_proto_file, 'r') as fid:
+        jstr = json.dumps(json.load(fid))
+
+    init_net = NetDef()
+    json_format.Parse(jstr, init_net)
+    model.param_init_net = core.Net(init_net)
+
+    return model
 
 # ---------------------------------------------------------------------------- #
 # Helper functions for building various re-usable network bits
