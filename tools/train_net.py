@@ -48,8 +48,6 @@ from utils.training_stats import TrainingStats
 import utils.c2
 import utils.env as envu
 import utils.net as nu
-import json
-from google.protobuf import json_format
 
 utils.c2.import_contrib_ops()
 utils.c2.import_detectron_ops()
@@ -205,11 +203,7 @@ def create_model():
             )
 
     logger.info('Building model: {}'.format(cfg.MODEL.TYPE))
-    if cfg.MODEL.PROTOTXT and cfg.MODEL.INIT_PROTOTXT:
-        model = model_builder.load_model(cfg.MODEL.PROTOTXT, cfg.MODEL.INIT_PROTOTXT,
-            train=True)
-    else:
-        model = model_builder.create(cfg.MODEL.TYPE, train=True)
+    model = model_builder.create(cfg.MODEL.TYPE, train=True)
     if cfg.MEMONGER:
         optimize_memory(model)
     # Performs random weight initialization as defined by the model
@@ -271,15 +265,6 @@ def dump_proto_files(model, output_dir):
         fid.write(str(model.net.Proto()))
     with open(os.path.join(output_dir, 'param_init_net.pbtxt'), 'w') as fid:
         fid.write(str(model.param_init_net.Proto()))
-
-    #Convert net to json format and can save it in file, later we can edit it mannually
-    with open(os.path.join(output_dir, 'net.json'), 'w') as fid:
-        net_json = json_format.MessageToJson(model.net.Proto())
-        fid.write(json.dumps(json.loads(net_json), indent=4))
-
-    with open(os.path.join(output_dir, 'param_init_net.json'), 'wb') as fid:
-        init_net_json = json_format.MessageToJson(model.param_init_net.Proto())
-        fid.write(json.dumps(json.loads(init_net_json), indent=4))
 
 
 def test_model(model_file, multi_gpu_testing, opts=None):
