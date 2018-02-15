@@ -1,18 +1,16 @@
 MODEL:
   TYPE: generalized_rcnn
   CONV_BODY: FPN.add_fpn_ResNet50_conv5_body
-  NUM_CLASSES: 81
+  NUM_CLASSES: 21
   FASTER_RCNN: True
-  #PROTOTXT: /home/roy/working/Detectron/experiments/output/train/voc_2007_train/generalized_rcnn/net.json
-  #INIT_PROTOTXT: /home/roy/working/Detectron/experiments/output/train/voc_2007_train/generalized_rcnn/param_init_net.json
 NUM_GPUS: 1
 SOLVER:
   WEIGHT_DECAY: 0.0001
   LR_POLICY: steps_with_decay
   BASE_LR: 0.0025
   GAMMA: 0.1
-  MAX_ITER: 5000
-  STEPS: [0, 1000, 3000]
+  MAX_ITER: 50000
+  STEPS: [0, 30000, 40000]
   # Equivalent schedules with...
   # 1 GPU:
   #   BASE_LR: 0.0025
@@ -40,9 +38,8 @@ FAST_RCNN:
   ROI_XFORM_RESOLUTION: 7
   ROI_XFORM_SAMPLING_RATIO: 2
 TRAIN:
-  SNAPSHOT_ITERS: 1000
-  WEIGHTS: /home/roy/data/detectron/detectron-download-cache/ImageNetPretrained/MSRA/R-50.pkl
-  #WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/35857389/12_2017_baselines/e2e_faster_rcnn_R-50-FPN_2x.yaml.01_37_22.KSeq0b5q/output/train/coco_2014_train%3Acoco_2014_valminusminival/generalized_rcnn/model_final.pkl
+  SNAPSHOT_ITERS: 5000
+  WEIGHTS: /tmp/detectron/detectron-download-cache/35857389/12_2017_baselines/e2e_faster_rcnn_R-50-FPN_2x.yaml.01_37_22.KSeq0b5q/output/train/coco_2014_train%3Acoco_2014_valminusminival/generalized_rcnn/model_final.pkl
   DATASETS: ('voc_2007_train',)
   SCALES: (500,)
   MAX_SIZE: 833

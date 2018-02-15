@@ -46,7 +46,7 @@ def add_fast_rcnn_outputs(model, blob_in, dim):
     """Add RoI classification and bounding box regression output ops."""
     model.FC(
         blob_in,
-        'cls_score',
+        'cls_score_voc',
         dim,
         model.num_classes,
         weight_init=gauss_fill(0.01),
@@ -55,10 +55,10 @@ def add_fast_rcnn_outputs(model, blob_in, dim):
     if not model.train:  # == if test
         # Only add softmax when testing; during training the softmax is combined
         # with the label cross entropy loss for numerical stability
-        model.Softmax('cls_score', 'cls_prob', engine='CUDNN')
+        model.Softmax('cls_score_voc', 'cls_prob', engine='CUDNN')
     model.FC(
         blob_in,
-        'bbox_pred',
+        'bbox_pred_voc',
         dim,
         model.num_classes * 4,
         weight_init=gauss_fill(0.001),
@@ -69,12 +69,12 @@ def add_fast_rcnn_outputs(model, blob_in, dim):
 def add_fast_rcnn_losses(model):
     """Add losses for RoI classification and bounding box regression."""
     cls_prob, loss_cls = model.net.SoftmaxWithLoss(
-        ['cls_score', 'labels_int32'], ['cls_prob', 'loss_cls'],
+        ['cls_score_voc', 'labels_int32'], ['cls_prob', 'loss_cls'],
         scale=model.GetLossScale()
     )
     loss_bbox = model.net.SmoothL1Loss(
         [
-            'bbox_pred', 'bbox_targets', 'bbox_inside_weights',
+            'bbox_pred_voc', 'bbox_targets', 'bbox_inside_weights',
             'bbox_outside_weights'
         ],
         'loss_bbox',
