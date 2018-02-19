@@ -231,3 +231,5 @@ make sure that your python versions are not getting mixed. For instance, this is
 
 In case you experience issues with CMake being unable to find the Caffe2 package when building custom operators,
 make sure you have run `make install` as part of your Caffe2 installation process.
+
+export PYTHONPATH="${PYTHONPATH}:/home/elnazavr/caffe2/build/"
