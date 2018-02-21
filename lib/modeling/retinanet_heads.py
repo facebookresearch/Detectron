@@ -286,7 +286,8 @@ def add_fpn_retinanet_losses(model):
                 ['fl_{}'.format(suffix)],
                 gamma=cfg.RETINANET.LOSS_GAMMA,
                 alpha=cfg.RETINANET.LOSS_ALPHA,
-                scale=model.GetLossScale()
+                scale=model.GetLossScale(),
+                num_classes=model.num_classes - 1
             )
             gradients.append(cls_focal_loss)
             losses.append('fl_{}'.format(suffix))
@@ -300,6 +301,7 @@ def add_fpn_retinanet_losses(model):
                 gamma=cfg.RETINANET.LOSS_GAMMA,
                 alpha=cfg.RETINANET.LOSS_ALPHA,
                 scale=model.GetLossScale(),
+                num_classes=model.num_classes
             )
             gradients.append(cls_focal_loss)
             losses.append('fl_{}'.format(suffix))
