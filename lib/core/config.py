@@ -1034,8 +1034,7 @@ def cache_cfg_urls():
 
 def get_output_dir(training=True):
     """Get the output directory determined by the current global config."""
-    dataset = __C.TRAIN.DATASETS if training else __C.TEST.DATASETS
-    dataset = ':'.join(dataset)
+    dataset = ':'.join(__C.TRAIN.DATASETS) if training else __C.TEST.DATASET
     tag = 'train' if training else 'test'
     # <output-dir>/<train|test>/<dataset>/<model-type>/
     outdir = osp.join(__C.OUTPUT_DIR, tag, dataset, __C.MODEL.TYPE)

@@ -39,6 +39,7 @@ from caffe2.python import core
 from caffe2.python import workspace
 
 from core.config import cfg
+from core.config import get_output_dir
 from datasets import task_evaluation
 from datasets.json_dataset import JsonDataset
 from modeling import model_builder
@@ -53,8 +54,9 @@ import utils.subprocess as subprocess_utils
 logger = logging.getLogger(__name__)
 
 
-def generate_rpn_on_dataset(output_dir, multi_gpu=False, gpu_id=0):
+def generate_rpn_on_dataset(multi_gpu=False, gpu_id=0):
     """Run inference on a dataset."""
+    output_dir = get_output_dir(training=False)
     dataset = JsonDataset(cfg.TEST.DATASET)
     test_timer = Timer()
     test_timer.tic()
@@ -65,9 +67,7 @@ def generate_rpn_on_dataset(output_dir, multi_gpu=False, gpu_id=0):
         )
     else:
         # Processes entire dataset range by default
-        _boxes, _scores, _ids, rpn_file = generate_rpn_on_range(
-            output_dir, gpu_id=gpu_id
-        )
+        _boxes, _scores, _ids, rpn_file = generate_rpn_on_range(gpu_id=gpu_id)
     test_timer.toc()
     logger.info('Total inference time: {:.3f}s'.format(test_timer.average_time))
     return evaluate_proposal_file(dataset, rpn_file, output_dir)
@@ -101,7 +101,7 @@ def multi_gpu_generate_rpn_on_dataset(num_images, output_dir):
     return boxes, scores, ids, rpn_file
 
 
-def generate_rpn_on_range(output_dir, ind_range=None, gpu_id=0):
+def generate_rpn_on_range(ind_range=None, gpu_id=0):
     """Run inference on all images in a dataset or over an index range of images
     in a dataset using a single GPU.
     """
@@ -112,6 +112,7 @@ def generate_rpn_on_range(output_dir, ind_range=None, gpu_id=0):
     assert cfg.MODEL.RPN_ONLY or cfg.MODEL.FASTER_RCNN
 
     roidb, start_ind, end_ind, total_num_images = get_roidb(ind_range)
+    output_dir = get_output_dir(training=False)
     logger.info(
         'Output will be saved to: {:s}'.format(os.path.abspath(output_dir))
     )
