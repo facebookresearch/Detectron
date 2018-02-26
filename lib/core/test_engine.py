@@ -81,7 +81,10 @@ def run_inference(ind_range=None, multi_gpu_testing=False, gpu_id=0):
             cfg.TEST.DATASET = cfg.TEST.DATASETS[i]
             if cfg.TEST.PRECOMPUTED_PROPOSALS:
                 cfg.TEST.PROPOSAL_FILE = cfg.TEST.PROPOSAL_FILES[i]
-            results = parent_func(multi_gpu=multi_gpu_testing)
+            # Note that output dir computation cannot be moved before the
+            # if statement since it depends on the value of cfg.TEST.DATASET
+            output_dir = get_output_dir(training=False)
+            results = parent_func(output_dir, multi_gpu=multi_gpu_testing)
             all_results.update(results)
 
         return all_results
@@ -90,12 +93,12 @@ def run_inference(ind_range=None, multi_gpu_testing=False, gpu_id=0):
         # In this case test_net was called via subprocess.Popen to execute on a
         # range of inputs on a single dataset (i.e., use cfg.TEST.DATASET and
         # don't loop over cfg.TEST.DATASETS)
-        return child_func(ind_range=ind_range, gpu_id=gpu_id)
+        output_dir = get_output_dir(training=False)
+        return child_func(output_dir, ind_range=ind_range, gpu_id=gpu_id)
 
 
-def test_net_on_dataset(multi_gpu=False, gpu_id=0):
+def test_net_on_dataset(output_dir, multi_gpu=False, gpu_id=0):
     """Run inference on a dataset."""
-    output_dir = get_output_dir(training=False)
     dataset = JsonDataset(cfg.TEST.DATASET)
     test_timer = Timer()
     test_timer.tic()
@@ -105,7 +108,7 @@ def test_net_on_dataset(multi_gpu=False, gpu_id=0):
             num_images, output_dir
         )
     else:
-        all_boxes, all_segms, all_keyps = test_net(gpu_id=gpu_id)
+        all_boxes, all_segms, all_keyps = test_net(output_dir, gpu_id=gpu_id)
     test_timer.toc()
     logger.info('Total inference time: {:.3f}s'.format(test_timer.average_time))
     results = task_evaluation.evaluate_all(
@@ -155,7 +158,7 @@ def multi_gpu_test_net_on_dataset(num_images, output_dir):
     return all_boxes, all_segms, all_keyps
 
 
-def test_net(ind_range=None, gpu_id=0):
+def test_net(output_dir, ind_range=None, gpu_id=0):
     """Run inference on all images in a dataset or over an index range of images
     in a dataset using a single GPU.
     """
@@ -166,7 +169,6 @@ def test_net(ind_range=None, gpu_id=0):
     assert cfg.TEST.DATASET != '', \
         'TEST.DATASET must be set to the dataset name to test'
 
-    output_dir = get_output_dir(training=False)
     roidb, dataset, start_ind, end_ind, total_num_images = get_roidb_and_dataset(
         ind_range
     )
