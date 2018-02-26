@@ -175,7 +175,7 @@ def create_model():
     logger = logging.getLogger(__name__)
     start_iter = 0
     checkpoints = {}
-    output_dir = get_output_dir(training=True)
+    output_dir = get_output_dir(cfg.TRAIN.DATASETS, training=True)
     if cfg.TRAIN.AUTO_RESUME:
         # Check for the final model (indicates training already finished)
         final_path = os.path.join(output_dir, 'model_final.pkl')

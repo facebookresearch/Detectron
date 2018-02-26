@@ -81,9 +81,7 @@ def run_inference(ind_range=None, multi_gpu_testing=False, gpu_id=0):
             cfg.TEST.DATASET = cfg.TEST.DATASETS[i]
             if cfg.TEST.PRECOMPUTED_PROPOSALS:
                 cfg.TEST.PROPOSAL_FILE = cfg.TEST.PROPOSAL_FILES[i]
-            # Note that output dir computation cannot be moved before the
-            # if statement since it depends on the value of cfg.TEST.DATASET
-            output_dir = get_output_dir(training=False)
+            output_dir = get_output_dir(cfg.TEST.DATASET, training=False)
             results = parent_func(output_dir, multi_gpu=multi_gpu_testing)
             all_results.update(results)
 
@@ -93,7 +91,7 @@ def run_inference(ind_range=None, multi_gpu_testing=False, gpu_id=0):
         # In this case test_net was called via subprocess.Popen to execute on a
         # range of inputs on a single dataset (i.e., use cfg.TEST.DATASET and
         # don't loop over cfg.TEST.DATASETS)
-        output_dir = get_output_dir(training=False)
+        output_dir = get_output_dir(cfg.TEST.DATASET, training=False)
         return child_func(output_dir, ind_range=ind_range, gpu_id=gpu_id)
 
 
