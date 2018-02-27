@@ -53,6 +53,7 @@ import modeling.optimizer as optim
 import modeling.retinanet_heads as retinanet_heads
 import modeling.rfcn_heads as rfcn_heads
 import modeling.rpn_heads as rpn_heads
+import modeling.classification_heads as cls_heads
 import roi_data.minibatch
 import utils.c2 as c2_utils
 
@@ -89,6 +90,8 @@ def generalized_rcnn(model):
         freeze_conv_body=cfg.TRAIN.FREEZE_CONV_BODY
     )
 
+def classification(model):
+    return build_generic_classification_model(model, get_func(cfg.MODEL.CONV_BODY))
 
 def rfcn(model):
     # TODO(rbg): fold into build_generic_detection_model
@@ -158,6 +161,7 @@ def build_generic_detection_model(
     add_roi_box_head_func=None,
     add_roi_mask_head_func=None,
     add_roi_keypoint_head_func=None,
+    add_mlp_head_func=None,
     freeze_conv_body=False
 ):
     def _single_gpu_build_func(model):
@@ -181,6 +185,7 @@ def build_generic_detection_model(
             'box': None,
             'mask': None,
             'keypoints': None,
+            'classification': None
         }
 
         if cfg.RPN.RPN_ON:
@@ -216,6 +221,9 @@ def build_generic_detection_model(
                 model, add_roi_keypoint_head_func, blob_conv, dim_conv,
                 spatial_scale_conv
             )
+        if cfg.MODEL.CLASSIFICATION:
+            #add classification head
+            head_loss_gradients["classification"] =
 
         if model.train:
             loss_gradients = {}
@@ -245,6 +253,20 @@ def _narrow_to_fpn_roi_levels(blobs, spatial_scales):
     num_roi_levels = cfg.FPN.ROI_MAX_LEVEL - cfg.FPN.ROI_MIN_LEVEL + 1
     return blobs[-num_roi_levels:], spatial_scales[-num_roi_levels:]
 
+def _add_classification_head(
+    model, add_roi_box_head_func, blob_in, dim_in):
+
+    """Add a Classification head to the model."""
+
+    blob_frcn, dim_frcn = add_mlp_head_func(
+        model, blob_in, dim_in, spatial_scale_in
+    )
+    fast_rcnn_heads.add_fast_rcnn_outputs(model, blob_frcn, dim_frcn)
+    if model.train:
+        loss_gradients = fast_rcnn_heads.add_fast_rcnn_losses(model)
+    else:
+        loss_gradients = None
+    return loss_gradients
 
 def _add_fast_rcnn_head(
     model, add_roi_box_head_func, blob_in, dim_in, spatial_scale_in
@@ -327,8 +349,12 @@ def build_generic_rfcn_model(model, add_conv_body_func, dim_reduce=None):
         """Builds the model on a single GPU. Can be called in a loop over GPUs
         with name and device scoping to create a data parallel model."""
         blob, dim, spatial_scale = add_conv_body_func(model)
+        if freeze_conv_body:
+            for b in c2_utils.BlobReferenceList(blob_conv):
+                model.StopGradient(b, b)
         if not model.train:
             model.conv_body_net = model.net.Clone('conv_body_net')
+
         rfcn_heads.add_rfcn_outputs(model, blob, dim, dim_reduce, spatial_scale)
         if model.train:
             loss_gradients = fast_rcnn_heads.add_fast_rcnn_losses(model)
@@ -337,6 +363,30 @@ def build_generic_rfcn_model(model, add_conv_body_func, dim_reduce=None):
     optim.build_data_parallel_model(model, _single_gpu_build_func)
     return model
 
+def build_generic_classification_model(
+    model, add_conv_body_func, freeze_conv_body=False
+):
+    def _single_gpu_build_func(model):
+        """Builds the model on a single GPU. Can be called in a loop over GPUs
+        with name and device scoping to create a data parallel model."""
+        blobs, dim, spatial_scales = add_conv_body_func(model)
+        if freeze_conv_body:
+            for b in c2_utils.BlobReferenceList(blob_conv):
+                model.StopGradient(b, b)
+        if not model.train:
+            model.conv_body_net = model.net.Clone('conv_body_net')
+
+        cls_heads.add_mlp_outputs(
+            model, blobs, dim
+        )
+        if model.train:
+            loss_gradients = cls_heads.add_mlp_losses(
+                model
+            )
+        return loss_gradients if model.train else None
+
+    optim.build_data_parallel_model(model, _single_gpu_build_func)
+    return model
 
 def build_generic_retinanet_model(
     model, add_conv_body_func, freeze_conv_body=False
@@ -346,8 +396,12 @@ def build_generic_retinanet_model(
         """Builds the model on a single GPU. Can be called in a loop over GPUs
         with name and device scoping to create a data parallel model."""
         blobs, dim, spatial_scales = add_conv_body_func(model)
+        if freeze_conv_body:
+            for b in c2_utils.BlobReferenceList(blob_conv):
+                model.StopGradient(b, b)
         if not model.train:
             model.conv_body_net = model.net.Clone('conv_body_net')
+
         retinanet_heads.add_fpn_retinanet_outputs(
             model, blobs, dim, spatial_scales
         )

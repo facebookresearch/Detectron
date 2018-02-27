@@ -22,6 +22,7 @@ from __future__ import unicode_literals
 
 from past.builtins import basestring
 import logging
+import pprint
 import numpy as np
 
 from core.config import cfg
@@ -62,11 +63,12 @@ def combined_roidb_for_training(dataset_names, proposal_files):
     roidb = roidbs[0]
     for r in roidbs[1:]:
         roidb.extend(r)
-    roidb = filter_for_training(roidb)
+    if not cfg.MODEL.CLASSIFICATION:
+        roidb = filter_for_training(roidb)
 
-    logger.info('Computing bounding-box regression targets...')
-    add_bbox_regression_targets(roidb)
-    logger.info('done')
+        logger.info('Computing bounding-box regression targets...')
+        add_bbox_regression_targets(roidb)
+        logger.info('done')
 
     _compute_and_log_stats(roidb)
 
@@ -83,26 +85,28 @@ def extend_with_flipped_entries(roidb, dataset):
     flipped_roidb = []
     for entry in roidb:
         width = entry['width']
-        boxes = entry['boxes'].copy()
-        oldx1 = boxes[:, 0].copy()
-        oldx2 = boxes[:, 2].copy()
-        boxes[:, 0] = width - oldx2 - 1
-        boxes[:, 2] = width - oldx1 - 1
-        assert (boxes[:, 2] >= boxes[:, 0]).all()
         flipped_entry = {}
+        if not cfg.MODEL.CLASSIFICATION:
+            boxes = entry['boxes'].copy()
+            oldx1 = boxes[:, 0].copy()
+            oldx2 = boxes[:, 2].copy()
+            boxes[:, 0] = width - oldx2 - 1
+            boxes[:, 2] = width - oldx1 - 1
+            assert (boxes[:, 2] >= boxes[:, 0]).all()
+            flipped_entry['boxes'] = boxes
+            flipped_entry['segms'] = segm_utils.flip_segms(
+                entry['segms'], entry['height'], entry['width']
+            )
+            if dataset.keypoints is not None:
+                flipped_entry['gt_keypoints'] = keypoint_utils.flip_keypoints(
+                    dataset.keypoints, dataset.keypoint_flip_map,
+                    entry['gt_keypoints'], entry['width']
+                )
+
         dont_copy = ('boxes', 'segms', 'gt_keypoints', 'flipped')
         for k, v in entry.items():
             if k not in dont_copy:
                 flipped_entry[k] = v
-        flipped_entry['boxes'] = boxes
-        flipped_entry['segms'] = segm_utils.flip_segms(
-            entry['segms'], entry['height'], entry['width']
-        )
-        if dataset.keypoints is not None:
-            flipped_entry['gt_keypoints'] = keypoint_utils.flip_keypoints(
-                dataset.keypoints, dataset.keypoint_flip_map,
-                entry['gt_keypoints'], entry['width']
-            )
         flipped_entry['flipped'] = True
         flipped_roidb.append(flipped_entry)
     roidb.extend(flipped_roidb)

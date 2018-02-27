@@ -1,0 +1,24 @@
+MODEL:
+  TYPE: classification
+  CONV_BODY: ResNet.add_ResNet50_conv5_body
+  NUM_CLASSES: 100
+  CLASSIFICATION: True
+NUM_GPUS: 1
+SOLVER:
+  WEIGHT_DECAY: 0.0001
+  LR_POLICY: steps_with_decay
+  BASE_LR: 0.002
+  GAMMA: 0.1
+  MAX_ITER: 90000
+  STEPS: [0, 60000, 80000]
+TRAIN:
+  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/MSRA/R-50.pkl
+  DATASETS: ('coco_2014_train',)
+  SCALES: (32,)
+  IMS_PER_BATCH: 1
+  MAX_SIZE: 32
+TEST:
+  DATASETS: ('coco_2014_val',)
+  SCALES: (32,)
+  MAX_SIZE: 32
+OUTPUT_DIR: .

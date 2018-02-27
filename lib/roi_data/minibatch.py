@@ -36,6 +36,7 @@ from core.config import cfg
 import roi_data.fast_rcnn
 import roi_data.retinanet
 import roi_data.rpn
+import roi_data.classification
 import utils.blob as blob_utils
 
 logger = logging.getLogger(__name__)
@@ -51,6 +52,11 @@ def get_minibatch_blob_names(is_training=True):
         blob_names += roi_data.rpn.get_rpn_blob_names(is_training=is_training)
     elif cfg.RETINANET.RETINANET_ON:
         blob_names += roi_data.retinanet.get_retinanet_blob_names(
+            is_training=is_training
+        )
+    elif cfg.MODEL.CLASSIFICATION:
+        # for classification models
+        blob_names += roi_data.classification.get_classification_blob_names(
             is_training=is_training
         )
     else:
@@ -79,6 +85,11 @@ def get_minibatch(roidb):
         # accordingly so that we don't need to use SampleAsOp
         valid = roi_data.retinanet.add_retinanet_blobs(
             blobs, im_scales, roidb, im_width, im_height
+        )
+    elif cfg.MODEL.CLASSIFICATION:
+        # for classification models
+        valid = roi_data.classification.add_classification_blobs(
+            blobs, im_scales, roidb
         )
     else:
         # Fast R-CNN like models trained on precomputed proposals
