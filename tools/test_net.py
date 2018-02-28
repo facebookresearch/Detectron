@@ -94,10 +94,12 @@ def parse_args():
 
 def main(ind_range=None, multi_gpu_testing=False):
     output_dir = get_output_dir(training=False)
+    if ind_range is not None :
+        cfg.TEST.DATASET = cfg.TEST.DATASETS[0]
     all_results = run_inference(
         output_dir, ind_range=ind_range, multi_gpu_testing=multi_gpu_testing
     )
-    if not ind_range:
+    if not ind_range and not cfg.MODEL.CLASSIFICATION:
         task_evaluation.check_expected_results(
             all_results,
             atol=cfg.EXPECTED_RESULTS_ATOL,
