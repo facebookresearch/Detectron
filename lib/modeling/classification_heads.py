@@ -1,19 +1,10 @@
-# Copyright (c) 2017-present, Sterblue, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-##############################################################################
 
-"""
+"""network head for classification.
+
+The design is as follows:
+
+... -> Feature Map -> MLP HEAD -> Classification loss
+
 """
 
 from __future__ import absolute_import
@@ -63,7 +54,7 @@ def add_mlp_losses(model):
 def add_Xmlp_head(model, blob_in, dim_in):
 
     hidden_dims = cfg.CLASSIFICATION.MLP_HEADS_DIM
-    
+
     for i,hidden_dim in enumerate(hidden_dims):
         model.FC(blob_in, 'fc'+str(6+i), dim_in , hidden_dim)
         model.Relu('fc'+str(6+i), 'fc'+str(6+i))
