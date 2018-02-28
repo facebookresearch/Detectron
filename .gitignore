@@ -22,7 +22,3 @@ lib/datasets/data/*
 
 # Generated C files
 lib/utils/cython_*.c
-
-RUNS/
-
-\.ropeproject/
