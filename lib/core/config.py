@@ -628,6 +628,18 @@ __C.SOLVER.SCALE_MOMENTUM_THRESHOLD = 1.1
 # threshold (prevents linear warm up from spamming the training log)
 __C.SOLVER.LOG_LR_CHANGE_THRESHOLD = 1.1
 
+# ---------------------------------------------------------------------------- #
+# CLASSIFICATION options
+# ---------------------------------------------------------------------------- #
+__C.CLASSIFICATION = AttrDict()
+
+
+# The type of head to use for classification
+# The string must match a function this is imported in modeling.model_builder
+__C.CLASSIFICATION.MLP_HEAD = b''
+
+# Num of hidden layers and their size to use for classification head
+__C.CLASSIFICATION.MLP_HEADS_DIM = [1024,1024]
 
 # ---------------------------------------------------------------------------- #
 # Fast R-CNN options
