@@ -32,11 +32,10 @@ import utils.blob as blob_utils
 def add_mlp_outputs(model, blob_in, dim):
     """Add  classification  ops."""
 
-    bb,dimO = add_2mlp_head(model, blob_in, dim)
     model.FC(
-        bb,
+        blob_in,
         'logits',
-        dimO,
+        dim,
         model.num_classes,
         weight_init=gauss_fill(0.01),
         bias_init=const_fill(0.0)
@@ -47,7 +46,7 @@ def add_mlp_outputs(model, blob_in, dim):
         model.Softmax('cls_prob', engine='CUDNN')
 
 def add_mlp_losses(model):
-    
+
     """Add losses for classification """
 
     cls_prob, loss_cls = model.net.SoftmaxWithLoss(
@@ -61,21 +60,13 @@ def add_mlp_losses(model):
     return loss_gradients
 
 
+def add_Xmlp_head(model, blob_in, dim_in):
 
-def add_1mlp_head(model, blob_in, dim_in):
-
-    hidden_dim = cfg.FAST_RCNN.MLP_HEAD_DIM
-    model.FC(blob_in, 'fc6', dim_in , hidden_dim)
-    model.Relu('fc6', 'fc6')
-
-    return 'fc6', hidden_dim
-
-def add_2mlp_head(model, blob_in, dim_in):
-
-    hidden_dim = cfg.FAST_RCNN.MLP_HEAD_DIM
-    model.FC(blob_in, 'fc6', dim_in , hidden_dim)
-    model.Relu('fc6', 'fc6')
-    model.FC('fc6', 'fc7', hidden_dim , hidden_dim)
-    model.Relu('fc7', 'fc7')
-
-    return 'fc7', hidden_dim
+    hidden_dims = cfg.CLASSIFICATION.MLP_HEADS_DIM
+    
+    for i,hidden_dim in enumerate(hidden_dims):
+        model.FC(blob_in, 'fc'+str(6+i), dim_in , hidden_dim)
+        model.Relu('fc'+str(6+i), 'fc'+str(6+i))
+        blob_in = 'fc'+str(6+i)
+        dim_in = hidden_dim
+    return blob_in, dim_in
