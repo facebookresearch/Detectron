@@ -34,7 +34,7 @@ def add_mlp_outputs(model, blob_in, dim):
     if not model.train:  # == if test
         # Only add softmax when testing; during training the softmax is combined
         # with the label cross entropy loss for numerical stability
-        model.Softmax('cls_prob', engine='CUDNN')
+        model.Softmax('logits', 'cls_prob', engine='CUDNN')
 
 def add_mlp_losses(model):
 
