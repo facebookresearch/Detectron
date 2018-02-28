@@ -38,7 +38,6 @@ from __future__ import unicode_literals
 from collections import OrderedDict
 import logging
 import os
-import pprint
 
 from core.config import cfg
 from utils.logging import send_email
@@ -68,7 +67,6 @@ def evaluate_all(
         all_results[dataset.name].update(results[dataset.name])
         logger.info('Evaluating keypoints is done!')
     return all_results
-
 
 def evaluate_boxes(dataset, all_boxes, output_dir, use_matlab=False):
     """Evaluate bounding box detection."""
