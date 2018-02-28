@@ -47,8 +47,8 @@ def add_classification_blobs(blobs, im_scales, roidb):
     """Add blobs needed for training classification models."""
     # Sample training RoIs from each image and append them to the blob lists
     for im_i, entry in enumerate(roidb):
-        blobs['rois'] = im_i * blob_utils.ones((entry['gt_classes'].shape[0], 1))
-        blobs['labels_int32'] = entry['gt_classes']
+        blobs['rois'].append(im_i * blob_utils.ones((entry['gt_classes'].shape[0], 1)))
+        blobs['labels_int32'].append(entry['gt_classes'].astype(np.int32))
 
     # Concat the training blob lists into tensors
     for k, v in blobs.items():

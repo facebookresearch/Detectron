@@ -110,7 +110,6 @@ def add_fast_rcnn_blobs(blobs, im_scales, roidb):
     # Sample training RoIs from each image and append them to the blob lists
     for im_i, entry in enumerate(roidb):
         frcn_blobs = _sample_rois(entry, im_scales[im_i], im_i)
-        print(frcn_blobs)
         for k, v in frcn_blobs.items():
             blobs[k].append(v)
     # Concat the training blob lists into tensors
