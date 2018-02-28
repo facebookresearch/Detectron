@@ -57,6 +57,9 @@ def im_detect_all(model, im, box_proposals, timers=None):
     if cfg.RETINANET.RETINANET_ON:
         cls_boxes = test_retinanet.im_detect_bbox(model, im, timers)
         return cls_boxes, None, None
+    if cfg.MODEL.CLASSIFICATION:
+        cls_scores = im_classify(model, im, timers)
+        return cls_scores, None, None
 
     timers['im_detect_bbox'].tic()
     if cfg.TEST.BBOX_AUG.ENABLED:
@@ -113,6 +116,17 @@ def im_conv_body_only(model, im):
     workspace.RunNet(model.conv_body_net.Proto().name)
     return im_scale_factors
 
+def im_classify(model, im, timers):
+
+    inputs, im_scales = _get_blobs(im, None)
+
+    for k, v in inputs.items():
+        workspace.FeedBlob(core.ScopedName(k), v)
+    timers['classify_im'].tic()
+    workspace.RunNet(model.net.Proto().name)
+    scores = workspace.FetchBlob(core.ScopedName('cls_prob')).squeeze()
+    timers['classify_im'].toc()
+    return scores
 
 def im_detect_bbox(model, im, boxes=None):
     """Bounding box object detection for an image with given box proposals.
