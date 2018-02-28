@@ -50,12 +50,15 @@ logger = logging.getLogger(__name__)
 
 def get_eval_functions():
     # Determine which parent or child function should handle inference
-    if cfg.MODEL.RPN_ONLY:
+    if cfg.MODEL.CLASSIFICATION:
+        child_func = test_cls_net
+        parent_func = test_cls_net_on_dataset
+    elif cfg.MODEL.RPN_ONLY:
         child_func = generate_rpn_on_range
         parent_func = generate_rpn_on_dataset
     else:
         # Generic case that handles all network types other than RPN-only nets
-        # and RetinaNet
+        # and RetinaNet and classification nets
         child_func = test_net
         parent_func = test_net_on_dataset
 
@@ -75,9 +78,11 @@ def run_inference(output_dir, ind_range=None, multi_gpu_testing=False, gpu_id=0)
             cfg.TEST.DATASETS = (cfg.TEST.DATASET, )
             cfg.TEST.PROPOSAL_FILES = (cfg.TEST.PROPOSAL_FILE, )
 
+
         all_results = {}
         for i in range(len(cfg.TEST.DATASETS)):
             cfg.TEST.DATASET = cfg.TEST.DATASETS[i]
+
             if cfg.TEST.PRECOMPUTED_PROPOSALS:
                 cfg.TEST.PROPOSAL_FILE = cfg.TEST.PROPOSAL_FILES[i]
             results = parent_func(output_dir, multi_gpu=multi_gpu_testing)
@@ -111,6 +116,47 @@ def test_net_on_dataset(output_dir, multi_gpu=False, gpu_id=0):
     )
     return results
 
+def test_cls_net_on_dataset(output_dir, multi_gpu=False, gpu_id=0):
+    """Run inference on a dataset."""
+    dataset = JsonDataset(cfg.TEST.DATASET)
+    test_timer = Timer()
+    test_timer.tic()
+    if multi_gpu:
+        num_images = len(dataset.get_roidb())
+        acc = multi_gpu_test_cls_net_on_dataset(
+            num_images, output_dir
+        )
+    else:
+        acc = test_cls_net(output_dir, gpu_id=gpu_id)
+    test_timer.toc()
+    logger.info('Total inference time: {:.3f}s'.format(test_timer.average_time))
+    logger.info('Classification Accuracy on TEST data is: {:.2f}%'.format(acc*100))
+
+    return {"Accuracy":acc}
+
+
+def multi_gpu_test_cls_net_on_dataset(num_images, output_dir):
+    """Multi-gpu inference on a dataset."""
+    binary_dir = envu.get_runtime_dir()
+    binary_ext = envu.get_py_bin_ext()
+    binary = os.path.join(binary_dir, 'test_net' + binary_ext)
+    assert os.path.exists(binary), 'Binary \'{}\' not found'.format(binary)
+
+    # Run inference in parallel in subprocesses
+    # Outputs will be a list of outputs from each subprocess, where the output
+    # of each subprocess is the dictionary saved by test_net().
+    outputs = subprocess_utils.process_in_parallel(
+        'detection', num_images, binary, output_dir
+    )
+
+    # Collate the results from each subprocess
+    all_cls = [[] for _ in range(cfg.MODEL.NUM_CLASSES)]
+    for cls_data in outputs:
+        all_cls_batch = cls_data['all_scores']
+        for cls_idx in range(1, cfg.MODEL.NUM_CLASSES):
+            all_cls[cls_idx] += all_cls_batch[cls_idx]
+
+    return all_cls
 
 def multi_gpu_test_net_on_dataset(num_images, output_dir):
     """Multi-gpu inference on a dataset."""
@@ -152,6 +198,56 @@ def multi_gpu_test_net_on_dataset(num_images, output_dir):
 
     return all_boxes, all_segms, all_keyps
 
+def test_cls_net(output_dir, ind_range=None, gpu_id=0):
+    """Run inference on all images in a dataset or over an index range of images
+    in a dataset using a single GPU.
+    """
+    assert cfg.TEST.WEIGHTS != '', \
+        'TEST.WEIGHTS must be set to the model file to test'
+    assert not cfg.MODEL.RPN_ONLY, \
+        'Use rpn_generate to generate proposals from RPN-only models'
+    assert cfg.TEST.DATASET != '', \
+        'TEST.DATASET must be set to the dataset name to test'
+
+    roidb, dataset, start_ind, end_ind, total_num_images = get_roidb_and_dataset(
+        ind_range,gt_cls=True
+    )
+    model = initialize_model_from_cfg(gpu_id=gpu_id)
+    num_images = len(roidb)
+    num_classes = cfg.MODEL.NUM_CLASSES
+    all_cls = []
+    all_labs = []
+    timers = defaultdict(Timer)
+    for i, entry in enumerate(roidb):
+
+        im = cv2.imread(entry['image'])
+        with c2_utils.NamedCudaScope(gpu_id):
+            cls_scores, _, _ = im_detect_all(
+                model, im, None, timers
+            )
+
+        all_cls.append(np.argmax(cls_scores))
+        all_labs.append(entry["gt_classes"][0])
+
+        if i % 10 == 0:  # Reduce log file size
+            ave_total_time = np.sum([t.average_time for t in timers.values()])
+            eta_seconds = ave_total_time * (num_images - i - 1)
+            eta = str(datetime.timedelta(seconds=int(eta_seconds)))
+            cls_time = (
+                timers['classify_im'].average_time
+            )
+            logger.info(
+                (
+                    'im_detect: range [{:d}, {:d}] of {:d}: '
+                    '{:d}/{:d} {:.3f}s  (eta: {})'
+                ).format(
+                    start_ind + 1, end_ind, total_num_images, start_ind + i + 1,
+                    start_ind + num_images, cls_time, eta
+                )
+            )
+    correct_pred = np.equal(np.array(all_cls), np.array(all_labs))
+    acc = np.mean(correct_pred.astype(np.float32))
+    return acc
 
 def test_net(output_dir, ind_range=None, gpu_id=0):
     """Run inference on all images in a dataset or over an index range of images
@@ -161,6 +257,8 @@ def test_net(output_dir, ind_range=None, gpu_id=0):
         'TEST.WEIGHTS must be set to the model file to test'
     assert not cfg.MODEL.RPN_ONLY, \
         'Use rpn_generate to generate proposals from RPN-only models'
+    assert not cfg.MODEL.CLASSIFICATION, \
+        'Use test_cls_net to test classification models'
     assert cfg.TEST.DATASET != '', \
         'TEST.DATASET must be set to the dataset name to test'
 
@@ -274,7 +372,7 @@ def initialize_model_from_cfg(gpu_id=0):
     return model
 
 
-def get_roidb_and_dataset(ind_range):
+def get_roidb_and_dataset(ind_range,gt_cls=False):
     """Get the roidb for the dataset specified in the global cfg. Optionally
     restrict it to a range of indices if ind_range is a pair of integers.
     """
@@ -285,7 +383,7 @@ def get_roidb_and_dataset(ind_range):
             proposal_limit=cfg.TEST.PROPOSAL_LIMIT
         )
     else:
-        roidb = dataset.get_roidb()
+        roidb = dataset.get_roidb(gt=gt_cls)
 
     if ind_range is not None:
         total_num_images = len(roidb)
