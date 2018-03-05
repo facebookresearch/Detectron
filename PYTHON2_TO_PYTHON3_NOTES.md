@@ -27,7 +27,9 @@
 
 Instead this repo remains Python2 code, and fixes issues that ``2to3`` won't fix by itself.
 
+This is tested on Ubuntu 16.04 with Python 2.7 and 3.5; it should work with ``tools/infer_simple.py`` and the tests in ``tests/``.
+
 # How to use with Python 3
 
-* To convert to python 3, run this from the root directory: ``2to3 -wn .``
-* Let ``#!/usr/bin/env python`` map to python 3 (I'd suggest using a python virtual environment)
+* To convert to python 3, run this from the root directory: ``./python2_to_python3_conversion_automated.sh``
+* Let ``#!/usr/bin/env python`` map to python 3 (maybe a python virtual environment, bash alias, or Docker)

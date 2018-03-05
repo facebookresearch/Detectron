@@ -6,7 +6,7 @@ This document covers how to install Detectron, its dependencies (including Caffe
 
 **Requirements:**
 
-- NVIDIA GPU, Linux, Python
+- NVIDIA GPU, Linux, Python2
 - Caffe2, various standard Python packages, and the COCO API; Instructions for installing these dependencies are found below
 
 **Notes:**
@@ -22,11 +22,11 @@ Please ensure that your Caffe2 installation was successful before proceeding by 
 
 ```
 # To check if Caffe2 build was successful
-python -c 'from caffe2.python import core' 2>/dev/null && echo "Success" || echo "Failure"
+python2 -c 'from caffe2.python import core' 2>/dev/null && echo "Success" || echo "Failure"
 
 # To check if Caffe2 GPU build was successful
 # This must print a number > 0 in order to use Detectron
-python -c 'from caffe2.python import workspace; print(workspace.NumCudaDevices())'
+python2 -c 'from caffe2.python import workspace; print(workspace.NumCudaDevices())'
 ```
 
 If the `caffe2` Python package is not found, you likely need to adjust your `PYTHONPATH` environment variable to include its location (`/path/to/caffe2/build`, where `build` is the Caffe2 CMake build directory).
@@ -49,7 +49,7 @@ cd $COCOAPI/PythonAPI
 make install
 # Alternatively, if you do not have permissions or prefer
 # not to install the COCO API into global site-packages
-python setup.py install --user
+python2 setup.py install --user
 ```
 
 Note that instructions like `# COCOAPI=/path/to/install/cocoapi` indicate that you should pick a path where you'd like to have the software cloned and then set an environment variable (`COCOAPI` in this case) accordingly.
@@ -72,7 +72,7 @@ cd $DETECTRON/lib && make
 Check that Detectron tests pass (e.g. for [`SpatialNarrowAsOp test`](tests/test_spatial_narrow_as_op.py)):
 
 ```
-python $DETECTRON/tests/test_spatial_narrow_as_op.py
+python2 $DETECTRON/tests/test_spatial_narrow_as_op.py
 ```
 
 ## That's All You Need for Inference
@@ -101,7 +101,7 @@ cd $DETECTRON/lib && make ops
 Check that the custom operator tests pass:
 
 ```
-python $DETECTRON/tests/test_zero_even_op.py
+python2 $DETECTRON/tests/test_zero_even_op.py
 ```
 
 ## Docker Image
@@ -118,7 +118,7 @@ docker build -t detectron:c2-cuda9-cudnn7 .
 Run the image (e.g. for [`BatchPermutationOp test`](tests/test_batch_permutation_op.py)):
 
 ```
-nvidia-docker run --rm -it detectron:c2-cuda9-cudnn7 python tests/test_batch_permutation_op.py
+nvidia-docker run --rm -it detectron:c2-cuda9-cudnn7 python2 tests/test_batch_permutation_op.py
 ```
 
 ## Troubleshooting
@@ -200,8 +200,8 @@ library and include dir by using:
 ```
 cmake .. \
   # insert your Caffe2 CMake flags here
-  -DPYTHON_LIBRARY=$(python -c "from distutils import sysconfig; print(sysconfig.get_python_lib())") \
-  -DPYTHON_INCLUDE_DIR=$(python -c "from distutils import sysconfig; print(sysconfig.get_python_inc())")
+  -DPYTHON_LIBRARY=$(python2 -c "from distutils import sysconfig; print(sysconfig.get_python_lib())") \
+  -DPYTHON_INCLUDE_DIR=$(python2 -c "from distutils import sysconfig; print(sysconfig.get_python_inc())")
 ```
 
 ### Caffe2 with NNPACK Build
