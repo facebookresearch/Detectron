@@ -228,7 +228,6 @@ def _get_retinanet_blobs(
     fg_inds = np.where(labels >= 1)[0]
     bg_inds = np.where(anchor_to_gt_max < cfg.RETINANET.NEGATIVE_OVERLAP)[0]
     labels[bg_inds] = 0
-    num_fg, num_bg = len(fg_inds), len(bg_inds)
 
     bbox_targets = np.zeros((num_inside, 4), dtype=np.float32)
     bbox_targets[fg_inds, :] = data_utils.compute_targets(
@@ -241,6 +240,7 @@ def _get_retinanet_blobs(
     # Split the generated labels, etc. into labels per each field of anchors
     blobs_out = []
     start_idx = 0
+    num_fg, num_bg = 0, 0
     for foa in foas:
         H = foa.field_size
         W = foa.field_size
@@ -281,8 +281,9 @@ def _get_retinanet_blobs(
                 retnet_roi_bbox_targets=_roi_bbox_targets.astype(np.float32),
                 retnet_roi_fg_bbox_locs=_roi_fg_bbox_locs.astype(np.float32),
             ))
+
+        num_fg += np.sum(blobs_out[-1]['retnet_cls_labels'] > 0)
+        num_bg += np.sum(blobs_out[-1]['retnet_cls_labels'] == 0)
     out_num_fg = np.array([num_fg + 1.0], dtype=np.float32)
-    out_num_bg = (
-        np.array([num_bg + 1.0]) * (cfg.MODEL.NUM_CLASSES - 1) +
-        out_num_fg * (cfg.MODEL.NUM_CLASSES - 2))
+    out_num_bg = np.array([num_bg + 1.0], dtype=np.float32)
     return blobs_out, out_num_fg, out_num_bg
