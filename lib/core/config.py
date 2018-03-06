@@ -641,6 +641,9 @@ __C.CLASSIFICATION.MLP_HEAD = b''
 # Num of hidden layers and their size to use for classification head
 __C.CLASSIFICATION.MLP_HEADS_DIM = [1024,1024]
 
+# Size of the final average kernel after conv body
+__C.CLASSIFICATION.FINAL_AVG_KERNEL = 7
+
 # ---------------------------------------------------------------------------- #
 # Fast R-CNN options
 # ---------------------------------------------------------------------------- #
