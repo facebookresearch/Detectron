@@ -20,7 +20,6 @@
 # Licensed under The MIT License [see LICENSE for details]
 # Written by Ross Girshick
 # --------------------------------------------------------
-
 """Detectron config system.
 
 This file specifies default config options for Detectron. You should not
@@ -77,6 +76,10 @@ __C.TRAIN.WEIGHTS = b''
 # Available dataset list: datasets.dataset_catalog.DATASETS.keys()
 # If multiple datasets are listed, the model is trained on their union
 __C.TRAIN.DATASETS = ()
+
+# Image directory to use if datasets are specified as file paths to existing
+# files in the mscoco format.
+__C.TRAIN.IM_DIR = ''
 
 # Scales to use during training
 # Each scale is the pixel size of an image's shortest side
@@ -212,6 +215,10 @@ __C.TEST.WEIGHTS = b''
 # Available dataset list: datasets.dataset_catalog.DATASETS.keys()
 # If multiple datasets are listed, testing is performed on each one sequentially
 __C.TEST.DATASETS = ()
+
+# Image directory to use if datasets are specified as file paths to existing
+# files in the mscoco format.
+__C.TEST.IM_DIR = ''
 
 # Scales to use during testing
 # Each scale is the pixel size of an image's shortest side
@@ -1040,7 +1047,10 @@ def get_output_dir(datasets, training=True):
     dataset_name = datasets if is_string else ':'.join(datasets)
     tag = 'train' if training else 'test'
     # <output-dir>/<train|test>/<dataset-name>/<model-type>/
-    outdir = osp.join(__C.OUTPUT_DIR, tag, dataset_name, __C.MODEL.TYPE)
+    from os.path import basename
+    from os.path import splitext
+    _name = splitext(basename(dataset_name))[0]
+    outdir = osp.join(__C.OUTPUT_DIR, tag, _name, __C.MODEL.TYPE)
     if not osp.exists(outdir):
         os.makedirs(outdir)
     return outdir
