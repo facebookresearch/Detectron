@@ -1,9 +1,13 @@
 
-"""network head for classification.
+"""
+    @author: Ouail Bendidi
+    Created on Wed Feb 28 17:18:36 2018
 
-The design is as follows:
+    network head for classification.
 
-... -> Feature Map -> MLP HEAD -> Classification loss
+    The design is as follows:
+
+    ... -> Feature Map -> MLP HEAD -> Classification loss
 
 """
 
@@ -54,6 +58,17 @@ def add_mlp_losses(model):
 def add_Xmlp_head(model, blob_in, dim_in):
 
     hidden_dims = cfg.CLASSIFICATION.MLP_HEADS_DIM
+    avg_kernel = cfg.CLASSIFICATION.FINAL_AVG_KERNEL
+
+    model.AveragePool(
+        blob_in,
+        'final_avg',
+        kernel=avg_kernel,
+        stride=1,
+        global_pooling=True,
+    )
+
+    blob_in = 'final_avg'
 
     for i,hidden_dim in enumerate(hidden_dims):
         model.FC(blob_in, 'fc'+str(6+i), dim_in , hidden_dim)
