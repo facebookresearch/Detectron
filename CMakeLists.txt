@@ -18,8 +18,8 @@ include(cmake/Summary.cmake)
 detectron_print_config_summary()
 
 # Collect custom ops sources.
-file(GLOB CUSTOM_OPS_CPU_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/ops/*.cc)
-file(GLOB CUSTOM_OPS_GPU_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/ops/*.cu)
+file(GLOB CUSTOM_OPS_CPU_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/detectron/ops/*.cc)
+file(GLOB CUSTOM_OPS_GPU_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/detectron/ops/*.cu)
 
 # Install custom CPU ops lib.
 add_library(
@@ -30,7 +30,7 @@ target_include_directories(
     caffe2_detectron_custom_ops PRIVATE
     ${CAFFE2_INCLUDE_DIRS})
 target_link_libraries(caffe2_detectron_custom_ops caffe2)
-install(TARGETS caffe2_detectron_custom_ops DESTINATION lib)
+install(TARGETS caffe2_detectron_custom_ops DESTINATION detectron)
 
 # Install custom GPU ops lib.
 if (HAVE_CUDA)
@@ -43,5 +43,5 @@ if (HAVE_CUDA)
       ${CUSTOM_OPS_GPU_SRCS})
 
   target_link_libraries(caffe2_detectron_custom_ops_gpu caffe2_gpu)
-  install(TARGETS caffe2_detectron_custom_ops_gpu DESTINATION lib)
+  install(TARGETS caffe2_detectron_custom_ops_gpu DESTINATION detectron)
 endif()
