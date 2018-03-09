@@ -1043,14 +1043,15 @@ def get_output_dir(datasets, training=True):
     """Get the output directory determined by the current global config."""
     assert isinstance(datasets, (tuple, list, basestring)), \
         'datasets argument must be of type tuple, list or string'
-    is_string = isinstance(datasets, basestring)
-    dataset_name = datasets if is_string else ':'.join(datasets)
+    from os.path import basename
+    if isinstance(datasets, basestring):
+        datasets = [datasets]
+    # If datasets are specified as paths to a file, use the filename without
+    # extensions as the database name in the output directory.
+    dataset_name = ':'.join(basename(p).split('.')[0] for p in datasets)
     tag = 'train' if training else 'test'
     # <output-dir>/<train|test>/<dataset-name>/<model-type>/
-    from os.path import basename
-    from os.path import splitext
-    _name = splitext(basename(dataset_name))[0]
-    outdir = osp.join(__C.OUTPUT_DIR, tag, _name, __C.MODEL.TYPE)
+    outdir = osp.join(__C.OUTPUT_DIR, tag, dataset_name, __C.MODEL.TYPE)
     if not osp.exists(outdir):
         os.makedirs(outdir)
     return outdir
