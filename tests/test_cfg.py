@@ -23,10 +23,10 @@ import tempfile
 import unittest
 import yaml
 
-from core.config import cfg
-from utils.collections import AttrDict
-import core.config
-import utils.logging
+from detectron.core.config import cfg
+from detectron.utils.collections import AttrDict
+import detectron.core.config
+import detectron.utils.logging
 
 
 class TestCfg(unittest.TestCase):
@@ -41,14 +41,14 @@ class TestCfg(unittest.TestCase):
         s = 'dummy0'
         cfg2 = copy.deepcopy(cfg)
         cfg2.MODEL.TYPE = s
-        core.config.merge_cfg_from_cfg(cfg2)
+        detectron.core.config.merge_cfg_from_cfg(cfg2)
         assert cfg.MODEL.TYPE == s
 
         # Test: merge from yaml
         s = 'dummy1'
         cfg2 = yaml.load(yaml.dump(cfg))
         cfg2.MODEL.TYPE = s
-        core.config.merge_cfg_from_cfg(cfg2)
+        detectron.core.config.merge_cfg_from_cfg(cfg2)
         assert cfg.MODEL.TYPE == s
 
         # Test: merge with a valid key
@@ -56,7 +56,7 @@ class TestCfg(unittest.TestCase):
         cfg2 = AttrDict()
         cfg2.MODEL = AttrDict()
         cfg2.MODEL.TYPE = s
-        core.config.merge_cfg_from_cfg(cfg2)
+        detectron.core.config.merge_cfg_from_cfg(cfg2)
         assert cfg.MODEL.TYPE == s
 
         # Test: merge with an invalid key
@@ -65,13 +65,13 @@ class TestCfg(unittest.TestCase):
         cfg2.FOO = AttrDict()
         cfg2.FOO.BAR = s
         with self.assertRaises(KeyError):
-            core.config.merge_cfg_from_cfg(cfg2)
+            detectron.core.config.merge_cfg_from_cfg(cfg2)
 
         # Test: merge with converted type
         cfg2 = AttrDict()
         cfg2.TRAIN = AttrDict()
         cfg2.TRAIN.SCALES = [1]
-        core.config.merge_cfg_from_cfg(cfg2)
+        detectron.core.config.merge_cfg_from_cfg(cfg2)
         assert type(cfg.TRAIN.SCALES) is tuple
         assert cfg.TRAIN.SCALES[0] == 1
 
@@ -80,7 +80,7 @@ class TestCfg(unittest.TestCase):
         cfg2.TRAIN = AttrDict()
         cfg2.TRAIN.SCALES = 1
         with self.assertRaises(ValueError):
-            core.config.merge_cfg_from_cfg(cfg2)
+            detectron.core.config.merge_cfg_from_cfg(cfg2)
 
     def test_merge_cfg_from_file(self):
         with tempfile.NamedTemporaryFile() as f:
@@ -88,7 +88,7 @@ class TestCfg(unittest.TestCase):
             s = cfg.MODEL.TYPE
             cfg.MODEL.TYPE = 'dummy'
             assert cfg.MODEL.TYPE != s
-            core.config.merge_cfg_from_file(f.name)
+            detectron.core.config.merge_cfg_from_file(f.name)
             assert cfg.MODEL.TYPE == s
 
     def test_merge_cfg_from_list(self):
@@ -99,7 +99,7 @@ class TestCfg(unittest.TestCase):
         assert cfg.TRAIN.SCALES[0] != 100
         assert cfg.MODEL.TYPE != 'foobar'
         assert cfg.NUM_GPUS != 2
-        core.config.merge_cfg_from_list(opts)
+        detectron.core.config.merge_cfg_from_list(opts)
         assert type(cfg.TRAIN.SCALES) is tuple
         assert len(cfg.TRAIN.SCALES) == 1
         assert cfg.TRAIN.SCALES[0] == 100
@@ -114,7 +114,7 @@ class TestCfg(unittest.TestCase):
             _ = cfg.FINAL_MSG  # noqa
         with self.assertRaises(AttributeError):
             _ = cfg.MODEL.DILATION  # noqa
-        core.config.merge_cfg_from_list(opts)
+        detectron.core.config.merge_cfg_from_list(opts)
         with self.assertRaises(AttributeError):
             _ = cfg.FINAL_MSG  # noqa
         with self.assertRaises(AttributeError):
@@ -129,7 +129,7 @@ class TestCfg(unittest.TestCase):
             yaml.dump(cfg2, f)
             with self.assertRaises(AttributeError):
                 _ = cfg.MODEL.DILATION  # noqa
-            core.config.merge_cfg_from_file(f.name)
+            detectron.core.config.merge_cfg_from_file(f.name)
             with self.assertRaises(AttributeError):
                 _ = cfg.MODEL.DILATION  # noqa
 
@@ -141,7 +141,7 @@ class TestCfg(unittest.TestCase):
         with self.assertRaises(AttributeError):
             _ = cfg.EXAMPLE.RENAMED.KEY  # noqa
         with self.assertRaises(KeyError):
-            core.config.merge_cfg_from_list(opts)
+            detectron.core.config.merge_cfg_from_list(opts)
 
     def test_renamed_key_from_file(self):
         # You should see logger messages like:
@@ -156,9 +156,9 @@ class TestCfg(unittest.TestCase):
             with self.assertRaises(AttributeError):
                 _ = cfg.EXAMPLE.RENAMED.KEY  # noqa
             with self.assertRaises(KeyError):
-                core.config.merge_cfg_from_file(f.name)
+                detectron.core.config.merge_cfg_from_file(f.name)
 
 
 if __name__ == '__main__':
-    utils.logging.setup_logging(__name__)
+    detectron.utils.logging.setup_logging(__name__)
     unittest.main()

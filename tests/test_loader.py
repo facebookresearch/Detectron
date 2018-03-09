@@ -25,9 +25,9 @@ import mock
 
 from caffe2.proto import caffe2_pb2
 from caffe2.python import core, workspace, muji
-from core.config import cfg, assert_and_infer_cfg
-from roi_data.loader import RoIDataLoader
-import utils.logging
+from detectron.core.config import cfg, assert_and_infer_cfg
+from detectron.roi_data.loader import RoIDataLoader
+import detectron.utils.logging
 
 
 def get_roidb_blobs(roidb):
@@ -102,7 +102,7 @@ class TestRoIDataLoader(unittest.TestCase):
 
 if __name__ == '__main__':
     workspace.GlobalInit(['caffe2', '--caffe2_log_level=0'])
-    logger = utils.logging.setup_logging(__name__)
+    logger = detectron.utils.logging.setup_logging(__name__)
     logger.setLevel(logging.DEBUG)
     logging.getLogger('roi_data.loader').setLevel(logging.INFO)
     np.random.seed(cfg.RNG_SEED)

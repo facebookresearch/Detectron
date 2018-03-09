@@ -35,22 +35,22 @@ import test_net
 from caffe2.python import memonger
 from caffe2.python import workspace
 
-from core.config import assert_and_infer_cfg
-from core.config import cfg
-from core.config import get_output_dir
-from core.config import merge_cfg_from_file
-from core.config import merge_cfg_from_list
-from datasets.roidb import combined_roidb_for_training
-from modeling import model_builder
-from utils import lr_policy
-from utils.logging import setup_logging
-from utils.training_stats import TrainingStats
-import utils.c2
-import utils.env as envu
-import utils.net as nu
+from detectron.core.config import assert_and_infer_cfg
+from detectron.core.config import cfg
+from detectron.core.config import get_output_dir
+from detectron.core.config import merge_cfg_from_file
+from detectron.core.config import merge_cfg_from_list
+from detectron.datasets.roidb import combined_roidb_for_training
+from detectron.modeling import model_builder
+from detectron.utils import lr_policy
+from detectron.utils.logging import setup_logging
+from detectron.utils.training_stats import TrainingStats
+import detectron.utils.c2
+import detectron.utils.env as envu
+import detectron.utils.net as nu
 
-utils.c2.import_contrib_ops()
-utils.c2.import_detectron_ops()
+detectron.utils.c2.import_contrib_ops()
+detectron.utils.c2.import_detectron_ops()
 
 # OpenCL may be enabled by default in OpenCV3; disable it because it's not
 # thread safe and causes unwanted GPU memory allocations.
@@ -82,7 +82,7 @@ def parse_args():
     )
     parser.add_argument(
         'opts',
-        help='See lib/core/config.py for all options',
+        help='See detectron/core/config.py for all options',
         default=None,
         nargs=argparse.REMAINDER
     )

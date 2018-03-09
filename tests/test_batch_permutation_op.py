@@ -26,8 +26,8 @@ from caffe2.python import core
 from caffe2.python import gradient_checker
 from caffe2.python import workspace
 
-import utils.c2
-import utils.logging
+import detectron.utils.c2
+import detectron.utils.logging
 
 
 class BatchPermutationOpTest(unittest.TestCase):
@@ -107,5 +107,5 @@ if __name__ == '__main__':
     workspace.GlobalInit(['caffe2', '--caffe2_log_level=0'])
     utils.c2.import_detectron_ops()
     assert 'BatchPermutation' in workspace.RegisteredOperators()
-    utils.logging.setup_logging(__name__)
+    detectron.utils.logging.setup_logging(__name__)
     unittest.main()

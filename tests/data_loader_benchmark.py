@@ -33,14 +33,14 @@ import time
 
 from caffe2.python import core, workspace, muji
 
-from core.config import assert_and_infer_cfg
-from core.config import cfg
-from core.config import merge_cfg_from_list
-from core.config import merge_cfg_from_file
-from datasets.roidb import combined_roidb_for_training
-from roi_data.loader import RoIDataLoader
-from utils.timer import Timer
-import utils.logging
+from detectron.core.config import assert_and_infer_cfg
+from detectron.core.config import cfg
+from detectron.core.config import merge_cfg_from_list
+from detectron.core.config import merge_cfg_from_file
+from detectron.datasets.roidb import combined_roidb_for_training
+from detectron.roi_data.loader import RoIDataLoader
+from detectron.utils.timer import Timer
+import detectron.utils.logging
 
 
 def parse_args():
@@ -78,7 +78,7 @@ def parse_args():
         '--profiler', dest='profiler', help='profile minibatch load time',
         action='store_true')
     parser.add_argument(
-        'opts', help='See lib/core/config.py for all options', default=None,
+        'opts', help='See detectron/core/config.py for all options', default=None,
         nargs=argparse.REMAINDER)
     if len(sys.argv) == 1:
         parser.print_help()
@@ -156,7 +156,7 @@ def main(opts):
 
 if __name__ == '__main__':
     workspace.GlobalInit(['caffe2', '--caffe2_log_level=0'])
-    logger = utils.logging.setup_logging(__name__)
+    logger = detectron.utils.logging.setup_logging(__name__)
     logger.setLevel(logging.DEBUG)
     logging.getLogger('roi_data.loader').setLevel(logging.INFO)
     np.random.seed(cfg.RNG_SEED)
