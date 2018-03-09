@@ -100,7 +100,7 @@ def parse_args():
         default=1,
         type=int)
     parser.add_argument(
-        'opts', help='See lib/core/config.py for all options', default=None,
+        'opts', help='See detectron/core/config.py for all options', default=None,
         nargs=argparse.REMAINDER)
     if len(sys.argv) == 1:
         parser.print_help()
