@@ -53,8 +53,8 @@ import uuid
 from caffe2.python import core, workspace
 
 from detectron.core.config import cfg
-from roi_data.minibatch import get_minibatch
-from roi_data.minibatch import get_minibatch_blob_names
+from detectron.modeling.name_compat import get_minibatch
+from detectron.modeling.name_compat import get_minibatch_blob_names
 from utils.coordinator import coordinated_get
 from utils.coordinator import coordinated_put
 from utils.coordinator import Coordinator

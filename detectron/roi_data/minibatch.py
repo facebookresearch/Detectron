@@ -33,9 +33,9 @@ import logging
 import numpy as np
 
 from detectron.core.config import cfg
-import roi_data.fast_rcnn
-import roi_data.retinanet
-import roi_data.rpn
+import detectron.roi_data.fast_rcnn
+import detectron.roi_data.retinanet
+import detectron.roi_data.rpn
 import detectron.utils.blob as blob_utils
 
 logger = logging.getLogger(__name__)
@@ -48,14 +48,14 @@ def get_minibatch_blob_names(is_training=True):
     blob_names = ['data']
     if cfg.RPN.RPN_ON:
         # RPN-only or end-to-end Faster R-CNN
-        blob_names += roi_data.rpn.get_rpn_blob_names(is_training=is_training)
+        blob_names += detectron.roi_data.rpn.get_rpn_blob_names(is_training=is_training)
     elif cfg.RETINANET.RETINANET_ON:
-        blob_names += roi_data.retinanet.get_retinanet_blob_names(
+        blob_names += detectron.roi_data.retinanet.get_retinanet_blob_names(
             is_training=is_training
         )
     else:
         # Fast R-CNN like models trained on precomputed proposals
-        blob_names += roi_data.fast_rcnn.get_fast_rcnn_blob_names(
+        blob_names += detectron.roi_data.fast_rcnn.get_fast_rcnn_blob_names(
             is_training=is_training
         )
     return blob_names
@@ -71,18 +71,18 @@ def get_minibatch(roidb):
     blobs['data'] = im_blob
     if cfg.RPN.RPN_ON:
         # RPN-only or end-to-end Faster/Mask R-CNN
-        valid = roi_data.rpn.add_rpn_blobs(blobs, im_scales, roidb)
+        valid = detectron.roi_data.rpn.add_rpn_blobs(blobs, im_scales, roidb)
     elif cfg.RETINANET.RETINANET_ON:
         im_width, im_height = im_blob.shape[3], im_blob.shape[2]
         # im_width, im_height corresponds to the network input: padded image
         # (if needed) width and height. We pass it as input and slice the data
         # accordingly so that we don't need to use SampleAsOp
-        valid = roi_data.retinanet.add_retinanet_blobs(
+        valid = detectron.roi_data.retinanet.add_retinanet_blobs(
             blobs, im_scales, roidb, im_width, im_height
         )
     else:
         # Fast R-CNN like models trained on precomputed proposals
-        valid = roi_data.fast_rcnn.add_fast_rcnn_blobs(blobs, im_scales, roidb)
+        valid = detectron.roi_data.fast_rcnn.add_fast_rcnn_blobs(blobs, im_scales, roidb)
     return blobs, valid
 
 

@@ -29,8 +29,8 @@ import numpy.random as npr
 
 from detectron.core.config import cfg
 import detectron.modeling.FPN as fpn
-import roi_data.keypoint_rcnn
-import roi_data.mask_rcnn
+import detectron.roi_data.keypoint_rcnn
+import detectron.roi_data.mask_rcnn
 import detectron.utils.blob as blob_utils
 import detectron.utils.boxes as box_utils
 
@@ -124,7 +124,7 @@ def add_fast_rcnn_blobs(blobs, im_scales, roidb):
     # all minibatch images
     valid = True
     if cfg.MODEL.KEYPOINTS_ON:
-        valid = roi_data.keypoint_rcnn.finalize_keypoint_minibatch(blobs, valid)
+        valid = detectron.roi_data.keypoint_rcnn.finalize_keypoint_minibatch(blobs, valid)
 
     return valid
 
@@ -203,13 +203,13 @@ def _sample_rois(roidb, im_scale, batch_idx):
 
     # Optionally add Mask R-CNN blobs
     if cfg.MODEL.MASK_ON:
-        roi_data.mask_rcnn.add_mask_rcnn_blobs(
+        detectron.roi_data.mask_rcnn.add_mask_rcnn_blobs(
             blob_dict, sampled_boxes, roidb, im_scale, batch_idx
         )
 
     # Optionally add Keypoint R-CNN blobs
     if cfg.MODEL.KEYPOINTS_ON:
-        roi_data.keypoint_rcnn.add_keypoint_rcnn_blobs(
+        detectron.roi_data.keypoint_rcnn.add_keypoint_rcnn_blobs(
             blob_dict, roidb, fg_rois_per_image, fg_inds, im_scale, batch_idx
         )
 

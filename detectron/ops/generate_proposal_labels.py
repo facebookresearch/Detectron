@@ -22,7 +22,7 @@ import logging
 
 from detectron.datasets import json_dataset
 from detectron.utils import blob as blob_utils
-import roi_data.fast_rcnn
+import detectron.roi_data.fast_rcnn
 
 logger = logging.getLogger(__name__)
 
@@ -40,13 +40,13 @@ class GenerateProposalLabelsOp(object):
         roidb = blob_utils.deserialize(inputs[1].data)
         im_info = inputs[2].data
         im_scales = im_info[:, 2]
-        output_blob_names = roi_data.fast_rcnn.get_fast_rcnn_blob_names()
+        output_blob_names = detectron.roi_data.fast_rcnn.get_fast_rcnn_blob_names()
         # For historical consistency with the original Faster R-CNN
         # implementation we are *not* filtering crowd proposals.
         # This choice should be investigated in the future (it likely does
         # not matter).
         json_dataset.add_proposals(roidb, rois, im_scales, crowd_thresh=0)
         blobs = {k: [] for k in output_blob_names}
-        roi_data.fast_rcnn.add_fast_rcnn_blobs(blobs, im_scales, roidb)
+        detectron.roi_data.fast_rcnn.add_fast_rcnn_blobs(blobs, im_scales, roidb)
         for i, k in enumerate(output_blob_names):
             blob_utils.py_op_copy_blob(blobs[k], outputs[i])

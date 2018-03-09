@@ -23,7 +23,7 @@ import numpy as np
 from detectron.core.config import cfg
 from detectron.datasets import json_dataset
 import detectron.modeling.FPN as fpn
-import roi_data.fast_rcnn
+import detectron.roi_data.fast_rcnn
 import detectron.utils.blob as blob_utils
 
 
@@ -55,9 +55,9 @@ class CollectAndDistributeFpnRpnProposalsOp(object):
             json_dataset.add_proposals(roidb, rois, im_scales, crowd_thresh=0)
             # Compute training labels for the RPN proposals; also handles
             # distributing the proposals over FPN levels
-            output_blob_names = roi_data.fast_rcnn.get_fast_rcnn_blob_names()
+            output_blob_names = detectron.roi_data.fast_rcnn.get_fast_rcnn_blob_names()
             blobs = {k: [] for k in output_blob_names}
-            roi_data.fast_rcnn.add_fast_rcnn_blobs(blobs, im_scales, roidb)
+            detectron.roi_data.fast_rcnn.add_fast_rcnn_blobs(blobs, im_scales, roidb)
             for i, k in enumerate(output_blob_names):
                 blob_utils.py_op_copy_blob(blobs[k], outputs[i])
         else:
@@ -88,7 +88,7 @@ def collect(inputs, is_training):
 
 def distribute(rois, label_blobs, outputs, train):
     """To understand the output blob order see return value of
-    roi_data.fast_rcnn.get_fast_rcnn_blob_names(is_training=False)
+    detectron.roi_data.fast_rcnn.get_fast_rcnn_blob_names(is_training=False)
     """
     lvl_min = cfg.FPN.ROI_MIN_LEVEL
     lvl_max = cfg.FPN.ROI_MAX_LEVEL

@@ -48,12 +48,12 @@ from roi_data.loader import RoIDataLoader
 import detectron.modeling.fast_rcnn_heads as fast_rcnn_heads
 import detectron.modeling.keypoint_rcnn_heads as keypoint_rcnn_heads
 import detectron.modeling.mask_rcnn_heads as mask_rcnn_heads
-import modeling.name_compat
+import detectron.modeling.name_compat
 import detectron.modeling.optimizer as optim
 import detectron.modeling.retinanet_heads as retinanet_heads
 import detectron.modeling.rfcn_heads as rfcn_heads
 import detectron.modeling.rpn_heads as rpn_heads
-import roi_data.minibatch
+import detectron.modeling.name_compat
 import detectron.utils.c2 as c2_utils
 
 logger = logging.getLogger(__name__)
@@ -131,7 +131,7 @@ def get_func(func_name):
     """
     if func_name == '':
         return None
-    new_func_name = modeling.name_compat.get_new_name(func_name)
+    new_func_name = detectron.modeling.name_compat.get_new_name(func_name)
     if new_func_name != func_name:
         logger.warn(
             'Remapping old function name: {} -> {}'.
@@ -385,7 +385,7 @@ def add_training_inputs(model, roidb=None):
             roidb, num_loaders=cfg.DATA_LOADER.NUM_THREADS
         )
     orig_num_op = len(model.net._net.op)
-    blob_names = roi_data.minibatch.get_minibatch_blob_names(
+    blob_names = detectron.modeling.name_compat.get_minibatch_blob_names(
         is_training=True
     )
     for gpu_id in range(cfg.NUM_GPUS):

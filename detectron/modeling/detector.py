@@ -34,7 +34,7 @@ from ops.collect_and_distribute_fpn_rpn_proposals \
     import CollectAndDistributeFpnRpnProposalsOp
 from ops.generate_proposal_labels import GenerateProposalLabelsOp
 from ops.generate_proposals import GenerateProposalsOp
-import roi_data.fast_rcnn
+import detectron.roi_data.fast_rcnn
 import detectron.utils.c2 as c2_utils
 
 logger = logging.getLogger(__name__)
@@ -158,7 +158,7 @@ class DetectionModelHelper(cnn.CNNModelHelper):
         # The list of blobs is not known before run-time because it depends on
         # the specific model being trained. Query the data loader to get the
         # list of output blob names.
-        blobs_out = roi_data.fast_rcnn.get_fast_rcnn_blob_names(
+        blobs_out = detectron.roi_data.fast_rcnn.get_fast_rcnn_blob_names(
             is_training=self.train
         )
         blobs_out = [core.ScopedBlobReference(b) for b in blobs_out]
@@ -213,7 +213,7 @@ class DetectionModelHelper(cnn.CNNModelHelper):
         )
 
         # Prepare output blobs
-        blobs_out = roi_data.fast_rcnn.get_fast_rcnn_blob_names(
+        blobs_out = detectron.roi_data.fast_rcnn.get_fast_rcnn_blob_names(
             is_training=self.train
         )
         blobs_out = [core.ScopedBlobReference(b) for b in blobs_out]
