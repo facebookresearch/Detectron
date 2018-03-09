@@ -40,7 +40,7 @@ from detectron.datasets import task_evaluation
 import detectron.utils.c2
 import detectron.utils.logging
 
-utils.c2.import_detectron_ops()
+detectron.utils.c2.import_detectron_ops()
 # OpenCL may be enabled by default in OpenCV3; disable it because it's not
 # thread safe and causes unwanted GPU memory allocations.
 cv2.ocl.setUseOpenCL(False)

@@ -53,7 +53,6 @@ import detectron.modeling.optimizer as optim
 import detectron.modeling.retinanet_heads as retinanet_heads
 import detectron.modeling.rfcn_heads as rfcn_heads
 import detectron.modeling.rpn_heads as rpn_heads
-import detectron.modeling.name_compat
 import detectron.utils.c2 as c2_utils
 
 logger = logging.getLogger(__name__)
