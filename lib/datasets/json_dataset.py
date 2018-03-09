@@ -61,12 +61,17 @@ class JsonDataset(object):
         assert os.path.exists(DATASETS[name][ANN_FN]), \
             'Annotation file \'{}\' not found'.format(DATASETS[name][ANN_FN])
         logger.debug('Creating: {}'.format(name))
-        self.name = name
+
         self.image_directory = DATASETS[name][IM_DIR]
         self.image_prefix = (
             '' if IM_PREFIX not in DATASETS[name] else DATASETS[name][IM_PREFIX]
         )
         self.COCO = COCO(DATASETS[name][ANN_FN])
+
+        # hack: name might be a path, so only take the filename
+        from os.path import basename
+        self.name = basename(name).split('.')[0]
+
         self.debug_timer = Timer()
         # Set up dataset classes
         category_ids = self.COCO.getCatIds()
