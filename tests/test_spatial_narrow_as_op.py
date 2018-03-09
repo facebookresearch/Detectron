@@ -26,7 +26,7 @@ from caffe2.python import core
 from caffe2.python import gradient_checker
 from caffe2.python import workspace
 
-import utils.c2
+import detectron.utils.c2
 import detectron.utils.logging
 
 

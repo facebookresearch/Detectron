@@ -45,7 +45,7 @@ from detectron.modeling import model_builder
 from detectron.utils import lr_policy
 from detectron.utils.logging import setup_logging
 from utils.training_stats import TrainingStats
-import utils.c2
+import detectron.utils.c2
 import detectron.utils.env as envu
 import detectron.utils.net as nu
 

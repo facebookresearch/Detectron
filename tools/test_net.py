@@ -37,7 +37,7 @@ from core.config import merge_cfg_from_file
 from core.config import merge_cfg_from_list
 from core.test_engine import run_inference
 from detectron.datasets import task_evaluation
-import utils.c2
+import detectron.utils.c2
 import detectron.utils.logging
 
 utils.c2.import_detectron_ops()

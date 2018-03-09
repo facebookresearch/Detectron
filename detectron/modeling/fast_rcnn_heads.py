@@ -33,8 +33,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from core.config import cfg
-from utils.c2 import const_fill
-from utils.c2 import gauss_fill
+from detectron.utils.c2 import const_fill
+from detectron.utils.c2 import gauss_fill
 import detectron.utils.blob as blob_utils
 
 

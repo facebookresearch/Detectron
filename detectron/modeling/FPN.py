@@ -25,8 +25,8 @@ import numpy as np
 
 from core.config import cfg
 from modeling.generate_anchors import generate_anchors
-from utils.c2 import const_fill
-from utils.c2 import gauss_fill
+from detectron.utils.c2 import const_fill
+from detectron.utils.c2 import gauss_fill
 import detectron.modeling.ResNet as ResNet
 import detectron.utils.blob as blob_utils
 import detectron.utils.boxes as box_utils
