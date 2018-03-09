@@ -35,9 +35,9 @@ from core.config import get_output_dir
 from core.rpn_generator import generate_rpn_on_dataset
 from core.rpn_generator import generate_rpn_on_range
 from core.test import im_detect_all
-from datasets import task_evaluation
+from detectron.datasets import task_evaluation
 from datasets.json_dataset import JsonDataset
-from modeling import model_builder
+from detectron.modeling import model_builder
 from utils.io import save_object
 from utils.timer import Timer
 import utils.c2 as c2_utils

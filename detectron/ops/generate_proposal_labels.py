@@ -20,8 +20,8 @@ from __future__ import unicode_literals
 
 import logging
 
-from datasets import json_dataset
-from utils import blob as blob_utils
+from detectron.datasets import json_dataset
+from detectron.utils import blob as blob_utils
 import roi_data.fast_rcnn
 
 logger = logging.getLogger(__name__)

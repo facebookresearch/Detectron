@@ -41,8 +41,8 @@ from core.config import get_output_dir
 from core.config import merge_cfg_from_file
 from core.config import merge_cfg_from_list
 from datasets.roidb import combined_roidb_for_training
-from modeling import model_builder
-from utils import lr_policy
+from detectron.modeling import model_builder
+from detectron.utils import lr_policy
 from utils.logging import setup_logging
 from utils.training_stats import TrainingStats
 import utils.c2

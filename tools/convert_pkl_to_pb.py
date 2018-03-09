@@ -46,7 +46,7 @@ from core.config import assert_and_infer_cfg
 from core.config import cfg
 from core.config import merge_cfg_from_file
 from core.config import merge_cfg_from_list
-from modeling import generate_anchors
+from detectron.modeling import generate_anchors
 import core.test_engine as test_engine
 import utils.c2 as c2_utils
 import utils.vis as vis_utils

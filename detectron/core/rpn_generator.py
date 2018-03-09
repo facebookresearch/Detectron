@@ -39,9 +39,9 @@ from caffe2.python import core
 from caffe2.python import workspace
 
 from core.config import cfg
-from datasets import task_evaluation
+from detectron.datasets import task_evaluation
 from datasets.json_dataset import JsonDataset
-from modeling import model_builder
+from detectron.modeling import model_builder
 from utils.blob import im_list_to_blob
 from utils.io import save_object
 from utils.timer import Timer
