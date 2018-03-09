@@ -35,7 +35,7 @@ from detectron.core.config import assert_and_infer_cfg
 from detectron.core.config import cfg
 from detectron.core.config import merge_cfg_from_file
 from detectron.core.config import merge_cfg_from_list
-from core.test_engine import run_inference
+from detectron.core.test_engine import run_inference
 from detectron.datasets import task_evaluation
 import detectron.utils.c2
 import detectron.utils.logging

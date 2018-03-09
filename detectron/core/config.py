@@ -44,7 +44,7 @@ from __future__ import unicode_literals
 
 from ast import literal_eval
 from past.builtins import basestring
-from utils.collections import AttrDict
+from detectron.utils.collections import AttrDict
 import copy
 import logging
 import numpy as np
@@ -52,7 +52,7 @@ import os
 import os.path as osp
 import yaml
 
-from utils.io import cache_url
+from detectron.utils.io import cache_url
 
 logger = logging.getLogger(__name__)
 

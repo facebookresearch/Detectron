@@ -29,7 +29,7 @@ import uuid
 from pycocotools.cocoeval import COCOeval
 
 from detectron.core.config import cfg
-from utils.io import save_object
+from detectron.utils.io import save_object
 import detectron.utils.boxes as box_utils
 
 logger = logging.getLogger(__name__)

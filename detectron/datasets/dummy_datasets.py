@@ -22,7 +22,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from utils.collections import AttrDict
+from detectron.utils.collections import AttrDict
 
 
 def get_coco_dataset():

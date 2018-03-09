@@ -25,7 +25,7 @@ import logging
 import numpy as np
 
 from detectron.core.config import cfg
-from datasets.json_dataset import JsonDataset
+from detectron.datasets.json_dataset import JsonDataset
 import detectron.utils.boxes as box_utils
 import detectron.utils.keypoints as keypoint_utils
 import detectron.utils.segms as segm_utils

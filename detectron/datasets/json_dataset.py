@@ -40,11 +40,11 @@ from pycocotools import mask as COCOmask
 from pycocotools.coco import COCO
 
 from detectron.core.config import cfg
-from datasets.dataset_catalog import ANN_FN
-from datasets.dataset_catalog import DATASETS
-from datasets.dataset_catalog import IM_DIR
-from datasets.dataset_catalog import IM_PREFIX
-from utils.timer import Timer
+from detectron.datasets.dataset_catalog import ANN_FN
+from detectron.datasets.dataset_catalog import DATASETS
+from detectron.datasets.dataset_catalog import IM_DIR
+from detectron.datasets.dataset_catalog import IM_PREFIX
+from detectron.utils.timer import Timer
 import detectron.utils.boxes as box_utils
 
 logger = logging.getLogger(__name__)

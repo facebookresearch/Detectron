@@ -29,7 +29,7 @@ from caffe2.python import utils as c2_py_utils
 from detectron.core.config import cfg
 from detectron.utils.logging import log_json_stats
 from detectron.utils.logging import SmoothedValue
-from utils.timer import Timer
+from detectron.utils.timer import Timer
 import detectron.utils.net as nu
 
 

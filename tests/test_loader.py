@@ -26,7 +26,7 @@ import mock
 from caffe2.proto import caffe2_pb2
 from caffe2.python import core, workspace, muji
 from detectron.core.config import cfg, assert_and_infer_cfg
-from roi_data.loader import RoIDataLoader
+from detectron.roi_data.loader import RoIDataLoader
 import detectron.utils.logging
 
 

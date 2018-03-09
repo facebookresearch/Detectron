@@ -52,7 +52,7 @@ import detectron.utils.c2 as c2_utils
 import detectron.utils.vis as vis_utils
 import detectron.utils.logging
 import detectron.utils.model_convert_utils as mutils
-from utils.model_convert_utils import op_filter, convert_op_in_proto
+from detectron.utils.model_convert_utils import op_filter, convert_op_in_proto
 
 c2_utils.import_contrib_ops()
 c2_utils.import_detectron_ops()

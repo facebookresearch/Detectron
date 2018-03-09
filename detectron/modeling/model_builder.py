@@ -43,8 +43,8 @@ from caffe2.python import core
 from caffe2.python import workspace
 
 from detectron.core.config import cfg
-from modeling.detector import DetectionModelHelper
-from roi_data.loader import RoIDataLoader
+from detectron.modeling.detector import DetectionModelHelper
+from detectron.roi_data.loader import RoIDataLoader
 import detectron.modeling.fast_rcnn_heads as fast_rcnn_heads
 import detectron.modeling.keypoint_rcnn_heads as keypoint_rcnn_heads
 import detectron.modeling.mask_rcnn_heads as mask_rcnn_heads

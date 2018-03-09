@@ -38,7 +38,7 @@ from caffe2.python import workspace
 import pycocotools.mask as mask_util
 
 from detectron.core.config import cfg
-from utils.timer import Timer
+from detectron.utils.timer import Timer
 import detectron.core.test_retinanet as test_retinanet
 import detectron.modeling.FPN as fpn
 import detectron.utils.blob as blob_utils

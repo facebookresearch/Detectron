@@ -55,9 +55,9 @@ from caffe2.python import core, workspace
 from detectron.core.config import cfg
 from detectron.modeling.name_compat import get_minibatch
 from detectron.modeling.name_compat import get_minibatch_blob_names
-from utils.coordinator import coordinated_get
-from utils.coordinator import coordinated_put
-from utils.coordinator import Coordinator
+from detectron.utils.coordinator import coordinated_get
+from detectron.utils.coordinator import coordinated_put
+from detectron.utils.coordinator import Coordinator
 import detectron.utils.c2 as c2_utils
 
 logger = logging.getLogger(__name__)

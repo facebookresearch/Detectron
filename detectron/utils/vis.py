@@ -26,7 +26,7 @@ import os
 
 import pycocotools.mask as mask_util
 
-from utils.colormap import colormap
+from detectron.utils.colormap import colormap
 import detectron.utils.env as envu
 import detectron.utils.keypoints as keypoint_utils
 

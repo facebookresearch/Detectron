@@ -38,7 +38,7 @@ import yaml
 
 from detectron.core.config import cfg
 from detectron.datasets import task_evaluation
-from datasets.json_dataset import JsonDataset
+from detectron.datasets.json_dataset import JsonDataset
 import detectron.core.config
 import detectron.utils.logging
 

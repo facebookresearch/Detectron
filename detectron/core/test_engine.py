@@ -32,14 +32,14 @@ from caffe2.python import workspace
 
 from detectron.core.config import cfg
 from detectron.core.config import get_output_dir
-from core.rpn_generator import generate_rpn_on_dataset
-from core.rpn_generator import generate_rpn_on_range
-from core.test import im_detect_all
+from detectron.core.rpn_generator import generate_rpn_on_dataset
+from detectron.core.rpn_generator import generate_rpn_on_range
+from detectron.core.test import im_detect_all
 from detectron.datasets import task_evaluation
-from datasets.json_dataset import JsonDataset
+from detectron.datasets.json_dataset import JsonDataset
 from detectron.modeling import model_builder
-from utils.io import save_object
-from utils.timer import Timer
+from detectron.utils.io import save_object
+from detectron.utils.timer import Timer
 import detectron.utils.c2 as c2_utils
 import detectron.utils.env as envu
 import detectron.utils.net as net_utils

@@ -28,7 +28,7 @@ import cv2
 import os
 import sys
 
-from datasets.json_dataset import JsonDataset
+from detectron.datasets.json_dataset import JsonDataset
 import detectron.utils.vis as vis_utils
 
 # OpenCL may be enabled by default in OpenCV3; disable it because it's not

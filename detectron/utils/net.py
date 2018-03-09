@@ -31,7 +31,7 @@ import yaml
 from caffe2.python import core
 from caffe2.python import workspace
 from detectron.core.config import cfg
-from utils.io import save_object
+from detectron.utils.io import save_object
 import detectron.utils.c2 as c2_utils
 
 logger = logging.getLogger(__name__)

@@ -24,7 +24,7 @@ import unittest
 import yaml
 
 from detectron.core.config import cfg
-from utils.collections import AttrDict
+from detectron.utils.collections import AttrDict
 import detectron.core.config
 import detectron.utils.logging
 

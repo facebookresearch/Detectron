@@ -27,9 +27,9 @@ from collections import defaultdict
 from caffe2.python import core, workspace
 
 from detectron.core.config import cfg
-from core.rpn_generator import _get_image_blob
-from modeling.generate_anchors import generate_anchors
-from utils.timer import Timer
+from detectron.core.rpn_generator import _get_image_blob
+from detectron.modeling.generate_anchors import generate_anchors
+from detectron.utils.timer import Timer
 
 import detectron.utils.boxes as box_utils
 

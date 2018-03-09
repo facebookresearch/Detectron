@@ -40,11 +40,11 @@ from caffe2.python import workspace
 
 from detectron.core.config import cfg
 from detectron.datasets import task_evaluation
-from datasets.json_dataset import JsonDataset
+from detectron.datasets.json_dataset import JsonDataset
 from detectron.modeling import model_builder
-from utils.blob import im_list_to_blob
-from utils.io import save_object
-from utils.timer import Timer
+from detectron.utils.blob import im_list_to_blob
+from detectron.utils.io import save_object
+from detectron.utils.timer import Timer
 import detectron.utils.c2 as c2_utils
 import detectron.utils.env as envu
 import detectron.utils.net as nu

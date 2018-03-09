@@ -37,9 +37,9 @@ from detectron.core.config import assert_and_infer_cfg
 from detectron.core.config import cfg
 from detectron.core.config import merge_cfg_from_list
 from detectron.core.config import merge_cfg_from_file
-from datasets.roidb import combined_roidb_for_training
-from roi_data.loader import RoIDataLoader
-from utils.timer import Timer
+from detectron.datasets.roidb import combined_roidb_for_training
+from detectron.roi_data.loader import RoIDataLoader
+from detectron.utils.timer import Timer
 import detectron.utils.logging
 
 

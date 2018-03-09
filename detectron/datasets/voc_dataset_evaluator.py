@@ -27,10 +27,10 @@ import shutil
 import uuid
 
 from detectron.core.config import cfg
-from datasets.dataset_catalog import DATASETS
-from datasets.dataset_catalog import DEVKIT_DIR
-from datasets.voc_eval import voc_eval
-from utils.io import save_object
+from detectron.datasets.dataset_catalog import DATASETS
+from detectron.datasets.dataset_catalog import DEVKIT_DIR
+from detectron.datasets.voc_eval import voc_eval
+from detectron.utils.io import save_object
 
 logger = logging.getLogger(__name__)
 
