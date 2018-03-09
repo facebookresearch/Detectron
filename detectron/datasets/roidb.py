@@ -24,7 +24,7 @@ from past.builtins import basestring
 import logging
 import numpy as np
 
-from core.config import cfg
+from detectron.core.config import cfg
 from datasets.json_dataset import JsonDataset
 import detectron.utils.boxes as box_utils
 import detectron.utils.keypoints as keypoint_utils

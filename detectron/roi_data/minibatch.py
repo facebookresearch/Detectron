@@ -32,7 +32,7 @@ import cv2
 import logging
 import numpy as np
 
-from core.config import cfg
+from detectron.core.config import cfg
 import roi_data.fast_rcnn
 import roi_data.retinanet
 import roi_data.rpn

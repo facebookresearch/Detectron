@@ -25,7 +25,7 @@ import logging
 
 import detectron.utils.boxes as box_utils
 import detectron.roi_data.data_utils as data_utils
-from core.config import cfg
+from detectron.core.config import cfg
 
 
 logger = logging.getLogger(__name__)

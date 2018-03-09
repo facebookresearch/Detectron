@@ -30,7 +30,7 @@ import subprocess
 import cPickle as pickle
 from six.moves import shlex_quote
 
-from core.config import cfg
+from detectron.core.config import cfg
 
 import logging
 logger = logging.getLogger(__name__)

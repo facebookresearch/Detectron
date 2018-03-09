@@ -26,7 +26,7 @@ import logging
 import numpy as np
 import threading
 
-from core.config import cfg
+from detectron.core.config import cfg
 from modeling.generate_anchors import generate_anchors
 import detectron.utils.boxes as box_utils
 

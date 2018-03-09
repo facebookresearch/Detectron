@@ -27,7 +27,7 @@ from __future__ import unicode_literals
 import logging
 import numpy as np
 
-from core.config import cfg
+from detectron.core.config import cfg
 import detectron.utils.blob as blob_utils
 import detectron.utils.keypoints as keypoint_utils
 

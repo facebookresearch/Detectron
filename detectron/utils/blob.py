@@ -34,7 +34,7 @@ import numpy as np
 
 from caffe2.proto import caffe2_pb2
 
-from core.config import cfg
+from detectron.core.config import cfg
 
 
 def im_list_to_blob(ims):

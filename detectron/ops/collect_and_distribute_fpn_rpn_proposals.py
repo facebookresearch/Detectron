@@ -20,7 +20,7 @@ from __future__ import unicode_literals
 
 import numpy as np
 
-from core.config import cfg
+from detectron.core.config import cfg
 from detectron.datasets import json_dataset
 import detectron.modeling.FPN as fpn
 import roi_data.fast_rcnn

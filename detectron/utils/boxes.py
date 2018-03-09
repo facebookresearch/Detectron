@@ -47,7 +47,7 @@ from __future__ import unicode_literals
 
 import numpy as np
 
-from core.config import cfg
+from detectron.core.config import cfg
 import detectron.utils.cython_bbox as cython_bbox
 import detectron.utils.cython_nms as cython_nms
 

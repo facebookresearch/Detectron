@@ -58,7 +58,7 @@ logger = logging.getLogger(__name__)
 
 __C = AttrDict()
 # Consumers can get config by:
-#   from core.config import cfg
+#   from detectron.core.config import cfg
 cfg = __C
 
 

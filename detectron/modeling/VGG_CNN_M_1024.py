@@ -20,7 +20,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from core.config import cfg
+from detectron.core.config import cfg
 
 
 def add_VGG_CNN_M_1024_conv5_body(model):

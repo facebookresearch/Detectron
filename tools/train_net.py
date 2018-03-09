@@ -35,11 +35,11 @@ import test_net
 from caffe2.python import memonger
 from caffe2.python import workspace
 
-from core.config import assert_and_infer_cfg
-from core.config import cfg
-from core.config import get_output_dir
-from core.config import merge_cfg_from_file
-from core.config import merge_cfg_from_list
+from detectron.core.config import assert_and_infer_cfg
+from detectron.core.config import cfg
+from detectron.core.config import get_output_dir
+from detectron.core.config import merge_cfg_from_file
+from detectron.core.config import merge_cfg_from_list
 from datasets.roidb import combined_roidb_for_training
 from detectron.modeling import model_builder
 from detectron.utils import lr_policy

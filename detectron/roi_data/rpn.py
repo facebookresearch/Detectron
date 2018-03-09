@@ -24,7 +24,7 @@ import logging
 import numpy as np
 import numpy.random as npr
 
-from core.config import cfg
+from detectron.core.config import cfg
 import detectron.roi_data.data_utils as data_utils
 import detectron.utils.blob as blob_utils
 import detectron.utils.boxes as box_utils

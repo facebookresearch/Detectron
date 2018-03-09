@@ -42,7 +42,7 @@ import logging
 from caffe2.python import core
 from caffe2.python import workspace
 
-from core.config import cfg
+from detectron.core.config import cfg
 from modeling.detector import DetectionModelHelper
 from roi_data.loader import RoIDataLoader
 import detectron.modeling.fast_rcnn_heads as fast_rcnn_heads

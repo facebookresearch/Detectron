@@ -35,9 +35,9 @@ import time
 
 from caffe2.python import workspace
 
-from core.config import assert_and_infer_cfg
-from core.config import cfg
-from core.config import merge_cfg_from_file
+from detectron.core.config import assert_and_infer_cfg
+from detectron.core.config import cfg
+from detectron.core.config import merge_cfg_from_file
 from utils.timer import Timer
 import detectron.core.test_engine as infer_engine
 import detectron.datasets.dummy_datasets as dummy_datasets

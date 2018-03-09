@@ -29,7 +29,7 @@ from caffe2.python import workspace
 from caffe2.python.modeling import initializers
 from caffe2.python.modeling.parameter_info import ParameterTags
 
-from core.config import cfg
+from detectron.core.config import cfg
 from ops.collect_and_distribute_fpn_rpn_proposals \
     import CollectAndDistributeFpnRpnProposalsOp
 from ops.generate_proposal_labels import GenerateProposalLabelsOp

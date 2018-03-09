@@ -18,7 +18,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from core.config import cfg
+from detectron.core.config import cfg
 from modeling.generate_anchors import generate_anchors
 from detectron.utils.c2 import const_fill
 from detectron.utils.c2 import gauss_fill

@@ -35,10 +35,10 @@ import yaml
 
 from caffe2.python import workspace
 
-from core.config import assert_and_infer_cfg
-from core.config import cfg
-from core.config import merge_cfg_from_cfg
-from core.config import merge_cfg_from_file
+from detectron.core.config import assert_and_infer_cfg
+from detectron.core.config import cfg
+from detectron.core.config import merge_cfg_from_cfg
+from detectron.core.config import merge_cfg_from_file
 import detectron.core.rpn_generator as rpn_engine
 import detectron.core.test_engine as model_engine
 import detectron.datasets.dummy_datasets as dummy_datasets

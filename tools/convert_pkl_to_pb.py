@@ -42,10 +42,10 @@ import caffe2.python.utils as putils
 from caffe2.python import core, workspace
 from caffe2.proto import caffe2_pb2
 
-from core.config import assert_and_infer_cfg
-from core.config import cfg
-from core.config import merge_cfg_from_file
-from core.config import merge_cfg_from_list
+from detectron.core.config import assert_and_infer_cfg
+from detectron.core.config import cfg
+from detectron.core.config import merge_cfg_from_file
+from detectron.core.config import merge_cfg_from_list
 from detectron.modeling import generate_anchors
 import detectron.core.test_engine as test_engine
 import detectron.utils.c2 as c2_utils

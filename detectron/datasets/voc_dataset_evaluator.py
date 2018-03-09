@@ -26,7 +26,7 @@ import os
 import shutil
 import uuid
 
-from core.config import cfg
+from detectron.core.config import cfg
 from datasets.dataset_catalog import DATASETS
 from datasets.dataset_catalog import DEVKIT_DIR
 from datasets.voc_eval import voc_eval

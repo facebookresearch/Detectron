@@ -38,7 +38,7 @@ import yaml
 from caffe2.python import core
 from caffe2.python import workspace
 
-from core.config import cfg
+from detectron.core.config import cfg
 from detectron.datasets import task_evaluation
 from datasets.json_dataset import JsonDataset
 from detectron.modeling import model_builder

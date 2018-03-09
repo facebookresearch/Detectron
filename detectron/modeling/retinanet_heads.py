@@ -22,7 +22,7 @@ from __future__ import unicode_literals
 
 import numpy as np
 
-from core.config import cfg
+from detectron.core.config import cfg
 import detectron.utils.blob as blob_utils
 
 

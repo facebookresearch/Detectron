@@ -39,7 +39,7 @@ envu.set_up_matplotlib()
 from pycocotools import mask as COCOmask
 from pycocotools.coco import COCO
 
-from core.config import cfg
+from detectron.core.config import cfg
 from datasets.dataset_catalog import ANN_FN
 from datasets.dataset_catalog import DATASETS
 from datasets.dataset_catalog import IM_DIR

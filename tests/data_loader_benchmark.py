@@ -33,10 +33,10 @@ import time
 
 from caffe2.python import core, workspace, muji
 
-from core.config import assert_and_infer_cfg
-from core.config import cfg
-from core.config import merge_cfg_from_list
-from core.config import merge_cfg_from_file
+from detectron.core.config import assert_and_infer_cfg
+from detectron.core.config import cfg
+from detectron.core.config import merge_cfg_from_list
+from detectron.core.config import merge_cfg_from_file
 from datasets.roidb import combined_roidb_for_training
 from roi_data.loader import RoIDataLoader
 from utils.timer import Timer

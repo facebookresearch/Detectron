@@ -28,7 +28,7 @@ import uuid
 
 from pycocotools.cocoeval import COCOeval
 
-from core.config import cfg
+from detectron.core.config import cfg
 from utils.io import save_object
 import detectron.utils.boxes as box_utils
 

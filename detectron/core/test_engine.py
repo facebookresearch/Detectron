@@ -30,8 +30,8 @@ import yaml
 
 from caffe2.python import workspace
 
-from core.config import cfg
-from core.config import get_output_dir
+from detectron.core.config import cfg
+from detectron.core.config import get_output_dir
 from core.rpn_generator import generate_rpn_on_dataset
 from core.rpn_generator import generate_rpn_on_range
 from core.test import im_detect_all

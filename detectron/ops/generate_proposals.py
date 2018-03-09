@@ -23,7 +23,7 @@
 
 import numpy as np
 
-from core.config import cfg
+from detectron.core.config import cfg
 import detectron.utils.boxes as box_utils
 
 

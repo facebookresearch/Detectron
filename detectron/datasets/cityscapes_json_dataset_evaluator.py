@@ -27,7 +27,7 @@ import uuid
 
 import pycocotools.mask as mask_util
 
-from core.config import cfg
+from detectron.core.config import cfg
 from datasets.dataset_catalog import DATASETS
 from datasets.dataset_catalog import RAW_DIR
 

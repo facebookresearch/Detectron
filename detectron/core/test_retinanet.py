@@ -26,7 +26,7 @@ from collections import defaultdict
 
 from caffe2.python import core, workspace
 
-from core.config import cfg
+from detectron.core.config import cfg
 from core.rpn_generator import _get_image_blob
 from modeling.generate_anchors import generate_anchors
 from utils.timer import Timer

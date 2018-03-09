@@ -30,7 +30,7 @@ import yaml
 
 from caffe2.python import core
 from caffe2.python import workspace
-from core.config import cfg
+from detectron.core.config import cfg
 from utils.io import save_object
 import detectron.utils.c2 as c2_utils
 

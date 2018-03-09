@@ -27,7 +27,7 @@ import logging
 import numpy as np
 import numpy.random as npr
 
-from core.config import cfg
+from detectron.core.config import cfg
 import detectron.modeling.FPN as fpn
 import roi_data.keypoint_rcnn
 import roi_data.mask_rcnn
