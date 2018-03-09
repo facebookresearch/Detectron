@@ -36,7 +36,7 @@ from core.config import cfg
 import roi_data.fast_rcnn
 import roi_data.retinanet
 import roi_data.rpn
-import utils.blob as blob_utils
+import detectron.utils.blob as blob_utils
 
 logger = logging.getLogger(__name__)
 

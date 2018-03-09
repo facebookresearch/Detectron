@@ -26,9 +26,9 @@ import numpy as np
 
 from core.config import cfg
 from datasets.json_dataset import JsonDataset
-import utils.boxes as box_utils
-import utils.keypoints as keypoint_utils
-import utils.segms as segm_utils
+import detectron.utils.boxes as box_utils
+import detectron.utils.keypoints as keypoint_utils
+import detectron.utils.segms as segm_utils
 
 logger = logging.getLogger(__name__)
 

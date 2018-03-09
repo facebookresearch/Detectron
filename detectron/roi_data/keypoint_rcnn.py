@@ -28,8 +28,8 @@ import logging
 import numpy as np
 
 from core.config import cfg
-import utils.blob as blob_utils
-import utils.keypoints as keypoint_utils
+import detectron.utils.blob as blob_utils
+import detectron.utils.keypoints as keypoint_utils
 
 logger = logging.getLogger(__name__)
 

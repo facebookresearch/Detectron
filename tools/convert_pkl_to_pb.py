@@ -47,11 +47,11 @@ from core.config import cfg
 from core.config import merge_cfg_from_file
 from core.config import merge_cfg_from_list
 from detectron.modeling import generate_anchors
-import core.test_engine as test_engine
-import utils.c2 as c2_utils
-import utils.vis as vis_utils
+import detectron.core.test_engine as test_engine
+import detectron.utils.c2 as c2_utils
+import detectron.utils.vis as vis_utils
 import utils.logging
-import utils.model_convert_utils as mutils
+import detectron.utils.model_convert_utils as mutils
 from utils.model_convert_utils import op_filter, convert_op_in_proto
 
 c2_utils.import_contrib_ops()

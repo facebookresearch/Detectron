@@ -27,8 +27,8 @@ import os
 import pycocotools.mask as mask_util
 
 from utils.colormap import colormap
-import utils.env as envu
-import utils.keypoints as keypoint_utils
+import detectron.utils.env as envu
+import detectron.utils.keypoints as keypoint_utils
 
 # Matplotlib requires certain adjustments in some environments
 # Must happen before importing matplotlib

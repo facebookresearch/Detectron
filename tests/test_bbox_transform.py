@@ -23,7 +23,7 @@ import unittest
 
 from pycocotools import mask as COCOmask
 
-import utils.boxes as box_utils
+import detectron.utils.boxes as box_utils
 
 
 def random_boxes(mean_box, stdev, N):

@@ -33,7 +33,7 @@ import os
 import scipy.sparse
 
 # Must happen before importing COCO API (which imports matplotlib)
-import utils.env as envu
+import detectron.utils.env as envu
 envu.set_up_matplotlib()
 # COCO API
 from pycocotools import mask as COCOmask
@@ -45,7 +45,7 @@ from datasets.dataset_catalog import DATASETS
 from datasets.dataset_catalog import IM_DIR
 from datasets.dataset_catalog import IM_PREFIX
 from utils.timer import Timer
-import utils.boxes as box_utils
+import detectron.utils.boxes as box_utils
 
 logger = logging.getLogger(__name__)
 

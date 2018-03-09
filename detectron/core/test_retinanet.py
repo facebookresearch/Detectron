@@ -31,7 +31,7 @@ from core.rpn_generator import _get_image_blob
 from modeling.generate_anchors import generate_anchors
 from utils.timer import Timer
 
-import utils.boxes as box_utils
+import detectron.utils.boxes as box_utils
 
 logger = logging.getLogger(__name__)
 

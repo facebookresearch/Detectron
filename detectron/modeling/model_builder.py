@@ -45,16 +45,16 @@ from caffe2.python import workspace
 from core.config import cfg
 from modeling.detector import DetectionModelHelper
 from roi_data.loader import RoIDataLoader
-import modeling.fast_rcnn_heads as fast_rcnn_heads
-import modeling.keypoint_rcnn_heads as keypoint_rcnn_heads
-import modeling.mask_rcnn_heads as mask_rcnn_heads
+import detectron.modeling.fast_rcnn_heads as fast_rcnn_heads
+import detectron.modeling.keypoint_rcnn_heads as keypoint_rcnn_heads
+import detectron.modeling.mask_rcnn_heads as mask_rcnn_heads
 import modeling.name_compat
-import modeling.optimizer as optim
-import modeling.retinanet_heads as retinanet_heads
-import modeling.rfcn_heads as rfcn_heads
-import modeling.rpn_heads as rpn_heads
+import detectron.modeling.optimizer as optim
+import detectron.modeling.retinanet_heads as retinanet_heads
+import detectron.modeling.rfcn_heads as rfcn_heads
+import detectron.modeling.rpn_heads as rpn_heads
 import roi_data.minibatch
-import utils.c2 as c2_utils
+import detectron.utils.c2 as c2_utils
 
 logger = logging.getLogger(__name__)
 
@@ -430,9 +430,9 @@ def add_inference_inputs(model):
 #
 # ---------------------------------------------------------------------------- #
 
-import modeling.ResNet as ResNet
-import modeling.VGG16 as VGG16
-import modeling.VGG_CNN_M_1024 as VGG_CNN_M_1024
+import detectron.modeling.ResNet as ResNet
+import detectron.modeling.VGG16 as VGG16
+import detectron.modeling.VGG_CNN_M_1024 as VGG_CNN_M_1024
 
 
 def fast_rcnn(model):

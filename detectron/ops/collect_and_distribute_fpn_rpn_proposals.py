@@ -22,9 +22,9 @@ import numpy as np
 
 from core.config import cfg
 from detectron.datasets import json_dataset
-import modeling.FPN as fpn
+import detectron.modeling.FPN as fpn
 import roi_data.fast_rcnn
-import utils.blob as blob_utils
+import detectron.utils.blob as blob_utils
 
 
 class CollectAndDistributeFpnRpnProposalsOp(object):

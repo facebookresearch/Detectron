@@ -35,7 +35,7 @@ from ops.collect_and_distribute_fpn_rpn_proposals \
 from ops.generate_proposal_labels import GenerateProposalLabelsOp
 from ops.generate_proposals import GenerateProposalsOp
 import roi_data.fast_rcnn
-import utils.c2 as c2_utils
+import detectron.utils.c2 as c2_utils
 
 logger = logging.getLogger(__name__)
 

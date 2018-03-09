@@ -24,7 +24,7 @@ import cv2
 import numpy as np
 
 from core.config import cfg
-import utils.blob as blob_utils
+import detectron.utils.blob as blob_utils
 
 
 def get_keypoints():

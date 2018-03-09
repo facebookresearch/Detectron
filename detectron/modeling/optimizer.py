@@ -25,7 +25,7 @@ import logging
 from caffe2.python import muji
 
 from core.config import cfg
-import utils.c2 as c2_utils
+import detectron.utils.c2 as c2_utils
 
 logger = logging.getLogger(__name__)
 

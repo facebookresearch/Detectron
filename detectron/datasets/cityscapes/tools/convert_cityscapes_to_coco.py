@@ -12,8 +12,8 @@ import sys
 
 import cityscapesscripts.evaluation.instances2dict_with_polygons as cs
 
-import utils.segms as segms_util
-import utils.boxes as bboxs_util
+import detectron.utils.segms as segms_util
+import detectron.utils.boxes as bboxs_util
 
 
 def parse_args():

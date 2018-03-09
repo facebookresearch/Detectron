@@ -46,8 +46,8 @@ from detectron.utils import lr_policy
 from utils.logging import setup_logging
 from utils.training_stats import TrainingStats
 import utils.c2
-import utils.env as envu
-import utils.net as nu
+import detectron.utils.env as envu
+import detectron.utils.net as nu
 
 utils.c2.import_contrib_ops()
 utils.c2.import_detectron_ops()

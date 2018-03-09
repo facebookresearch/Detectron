@@ -30,7 +30,7 @@ from pycocotools.cocoeval import COCOeval
 
 from core.config import cfg
 from utils.io import save_object
-import utils.boxes as box_utils
+import detectron.utils.boxes as box_utils
 
 logger = logging.getLogger(__name__)
 

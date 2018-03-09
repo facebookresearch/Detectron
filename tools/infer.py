@@ -39,12 +39,12 @@ from core.config import assert_and_infer_cfg
 from core.config import cfg
 from core.config import merge_cfg_from_cfg
 from core.config import merge_cfg_from_file
-import core.rpn_generator as rpn_engine
-import core.test_engine as model_engine
-import datasets.dummy_datasets as dummy_datasets
-import utils.c2 as c2_utils
+import detectron.core.rpn_generator as rpn_engine
+import detectron.core.test_engine as model_engine
+import detectron.datasets.dummy_datasets as dummy_datasets
+import detectron.utils.c2 as c2_utils
 import utils.logging
-import utils.vis as vis_utils
+import detectron.utils.vis as vis_utils
 
 c2_utils.import_detectron_ops()
 # OpenCL may be enabled by default in OpenCV3; disable it because it's not

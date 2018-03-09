@@ -28,7 +28,7 @@ import threading
 
 from core.config import cfg
 from modeling.generate_anchors import generate_anchors
-import utils.boxes as box_utils
+import detectron.utils.boxes as box_utils
 
 logger = logging.getLogger(__name__)
 

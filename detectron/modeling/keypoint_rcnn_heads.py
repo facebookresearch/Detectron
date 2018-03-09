@@ -35,8 +35,8 @@ from __future__ import unicode_literals
 from core.config import cfg
 from utils.c2 import const_fill
 from utils.c2 import gauss_fill
-import modeling.ResNet as ResNet
-import utils.blob as blob_utils
+import detectron.modeling.ResNet as ResNet
+import detectron.utils.blob as blob_utils
 
 
 # ---------------------------------------------------------------------------- #

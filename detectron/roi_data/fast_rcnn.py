@@ -28,11 +28,11 @@ import numpy as np
 import numpy.random as npr
 
 from core.config import cfg
-import modeling.FPN as fpn
+import detectron.modeling.FPN as fpn
 import roi_data.keypoint_rcnn
 import roi_data.mask_rcnn
-import utils.blob as blob_utils
-import utils.boxes as box_utils
+import detectron.utils.blob as blob_utils
+import detectron.utils.boxes as box_utils
 
 logger = logging.getLogger(__name__)
 

@@ -30,7 +30,7 @@ from core.config import cfg
 from utils.logging import log_json_stats
 from utils.logging import SmoothedValue
 from utils.timer import Timer
-import utils.net as nu
+import detectron.utils.net as nu
 
 
 class TrainingStats(object):

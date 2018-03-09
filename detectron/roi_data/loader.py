@@ -58,7 +58,7 @@ from roi_data.minibatch import get_minibatch_blob_names
 from utils.coordinator import coordinated_get
 from utils.coordinator import coordinated_put
 from utils.coordinator import Coordinator
-import utils.c2 as c2_utils
+import detectron.utils.c2 as c2_utils
 
 logger = logging.getLogger(__name__)
 

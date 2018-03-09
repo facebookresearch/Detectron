@@ -40,11 +40,11 @@ from datasets.json_dataset import JsonDataset
 from detectron.modeling import model_builder
 from utils.io import save_object
 from utils.timer import Timer
-import utils.c2 as c2_utils
-import utils.env as envu
-import utils.net as net_utils
-import utils.subprocess as subprocess_utils
-import utils.vis as vis_utils
+import detectron.utils.c2 as c2_utils
+import detectron.utils.env as envu
+import detectron.utils.net as net_utils
+import detectron.utils.subprocess as subprocess_utils
+import detectron.utils.vis as vis_utils
 
 logger = logging.getLogger(__name__)
 

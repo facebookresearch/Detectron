@@ -23,8 +23,8 @@ from __future__ import unicode_literals
 import numpy as np
 import logging
 
-import utils.boxes as box_utils
-import roi_data.data_utils as data_utils
+import detectron.utils.boxes as box_utils
+import detectron.roi_data.data_utils as data_utils
 from core.config import cfg
 
 

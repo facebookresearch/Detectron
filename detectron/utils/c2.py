@@ -28,7 +28,7 @@ from caffe2.python import core
 from caffe2.python import dyndep
 from caffe2.python import scope
 
-import utils.env as envu
+import detectron.utils.env as envu
 
 
 def import_contrib_ops():

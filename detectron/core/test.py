@@ -39,12 +39,12 @@ import pycocotools.mask as mask_util
 
 from core.config import cfg
 from utils.timer import Timer
-import core.test_retinanet as test_retinanet
-import modeling.FPN as fpn
-import utils.blob as blob_utils
-import utils.boxes as box_utils
-import utils.image as image_utils
-import utils.keypoints as keypoint_utils
+import detectron.core.test_retinanet as test_retinanet
+import detectron.modeling.FPN as fpn
+import detectron.utils.blob as blob_utils
+import detectron.utils.boxes as box_utils
+import detectron.utils.image as image_utils
+import detectron.utils.keypoints as keypoint_utils
 
 logger = logging.getLogger(__name__)
 
