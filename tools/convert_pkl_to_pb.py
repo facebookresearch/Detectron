@@ -50,14 +50,14 @@ from detectron.modeling import generate_anchors
 import detectron.core.test_engine as test_engine
 import detectron.utils.c2 as c2_utils
 import detectron.utils.vis as vis_utils
-import utils.logging
+import detectron.utils.logging
 import detectron.utils.model_convert_utils as mutils
 from utils.model_convert_utils import op_filter, convert_op_in_proto
 
 c2_utils.import_contrib_ops()
 c2_utils.import_detectron_ops()
 
-logger = utils.logging.setup_logging(__name__)
+logger = detectron.utils.logging.setup_logging(__name__)
 
 
 def parse_args():

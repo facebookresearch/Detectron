@@ -43,7 +43,7 @@ from core.config import merge_cfg_from_list
 from datasets.roidb import combined_roidb_for_training
 from detectron.modeling import model_builder
 from detectron.utils import lr_policy
-from utils.logging import setup_logging
+from detectron.utils.logging import setup_logging
 from utils.training_stats import TrainingStats
 import utils.c2
 import detectron.utils.env as envu

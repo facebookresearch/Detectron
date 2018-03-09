@@ -40,7 +40,7 @@ from core.config import cfg
 from detectron.datasets import task_evaluation
 from datasets.json_dataset import JsonDataset
 import core.config
-import utils.logging
+import detectron.utils.logging
 
 
 def parse_args():
@@ -104,7 +104,7 @@ def do_reval(dataset_name, output_dir, args):
 
 
 if __name__ == '__main__':
-    utils.logging.setup_logging(__name__)
+    detectron.utils.logging.setup_logging(__name__)
     args = parse_args()
     if args.comp_mode:
         cfg.TEST.COMPETITION_MODE = True

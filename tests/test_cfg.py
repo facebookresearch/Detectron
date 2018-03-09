@@ -26,7 +26,7 @@ import yaml
 from core.config import cfg
 from utils.collections import AttrDict
 import core.config
-import utils.logging
+import detectron.utils.logging
 
 
 class TestCfg(unittest.TestCase):
@@ -160,5 +160,5 @@ class TestCfg(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    utils.logging.setup_logging(__name__)
+    detectron.utils.logging.setup_logging(__name__)
     unittest.main()

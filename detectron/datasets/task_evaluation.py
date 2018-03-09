@@ -41,7 +41,7 @@ import os
 import pprint
 
 from core.config import cfg
-from utils.logging import send_email
+from detectron.utils.logging import send_email
 import detectron.datasets.cityscapes_json_dataset_evaluator as cs_json_dataset_evaluator
 import detectron.datasets.json_dataset_evaluator as json_dataset_evaluator
 import detectron.datasets.voc_dataset_evaluator as voc_dataset_evaluator

@@ -38,7 +38,7 @@ from core.config import merge_cfg_from_list
 from core.test_engine import run_inference
 from detectron.datasets import task_evaluation
 import utils.c2
-import utils.logging
+import detectron.utils.logging
 
 utils.c2.import_detectron_ops()
 # OpenCL may be enabled by default in OpenCV3; disable it because it's not
@@ -106,7 +106,7 @@ def main(ind_range=None, multi_gpu_testing=False):
 
 if __name__ == '__main__':
     workspace.GlobalInit(['caffe2', '--caffe2_log_level=0'])
-    logger = utils.logging.setup_logging(__name__)
+    logger = detectron.utils.logging.setup_logging(__name__)
     args = parse_args()
     logger.info('Called with args:')
     logger.info(args)

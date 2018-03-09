@@ -40,7 +40,7 @@ from core.config import merge_cfg_from_file
 from datasets.roidb import combined_roidb_for_training
 from roi_data.loader import RoIDataLoader
 from utils.timer import Timer
-import utils.logging
+import detectron.utils.logging
 
 
 def parse_args():
@@ -156,7 +156,7 @@ def main(opts):
 
 if __name__ == '__main__':
     workspace.GlobalInit(['caffe2', '--caffe2_log_level=0'])
-    logger = utils.logging.setup_logging(__name__)
+    logger = detectron.utils.logging.setup_logging(__name__)
     logger.setLevel(logging.DEBUG)
     logging.getLogger('roi_data.loader').setLevel(logging.INFO)
     np.random.seed(cfg.RNG_SEED)
