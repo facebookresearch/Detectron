@@ -89,9 +89,9 @@ def do_reval(dataset_name, output_dir, args):
         dets = pickle.load(f)
     # Override config with the one saved in the detections file
     if args.cfg_file is not None:
-        core.config.merge_cfg_from_cfg(yaml.load(dets['cfg']))
+        core.config.merge_cfg_from_cfg(yaml.safe_load(dets['cfg']))
     else:
-        core.config._merge_a_into_b(yaml.load(dets['cfg']), cfg)
+        core.config._merge_a_into_b(yaml.safe_load(dets['cfg']), cfg)
     results = task_evaluation.evaluate_all(
         dataset,
         dets['all_boxes'],
