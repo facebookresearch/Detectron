@@ -1,8 +1,20 @@
+# Copyright (c) 2017-present, Facebook, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##############################################################################
 
 """
     @author: Ouail Bendidi
-    Created on Wed Feb 28 17:18:36 2018
-
     network head for classification.
 
     The design is as follows:
@@ -59,6 +71,8 @@ def add_Xmlp_head(model, blob_in, dim_in):
 
     hidden_dims = cfg.CLASSIFICATION.MLP_HEADS_DIM
     avg_kernel = cfg.CLASSIFICATION.FINAL_AVG_KERNEL
+    dropout_rate = cfg.CLASSIFICATION.DROPOUT_RATE
+    is_test = False
 
     model.AveragePool(
         blob_in,
@@ -73,6 +87,10 @@ def add_Xmlp_head(model, blob_in, dim_in):
     for i,hidden_dim in enumerate(hidden_dims):
         model.FC(blob_in, 'fc'+str(6+i), dim_in , hidden_dim)
         model.Relu('fc'+str(6+i), 'fc'+str(6+i))
-        blob_in = 'fc'+str(6+i)
+        if not model.train:
+            is_test = True
+        model.Dropout('fc'+str(6+i), 'drop_fc'+str(6+i),
+                        ratio=dropout_rate, is_test=is_test)
+        blob_in = 'drop_fc'+str(6+i)
         dim_in = hidden_dim
     return blob_in, dim_in

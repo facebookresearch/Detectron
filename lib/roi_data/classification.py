@@ -54,8 +54,6 @@ def add_classification_blobs(blobs, im_scales, roidb):
     for k, v in blobs.items():
         if isinstance(v, list) and len(v) > 0:
             blobs[k] = np.concatenate(v)
-    # Perform any final work and validity checks after the collating blobs for
-    # all minibatch images
     valid = True
 
     return valid

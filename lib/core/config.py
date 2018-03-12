@@ -118,7 +118,7 @@ __C.TRAIN.BBOX_THRESH = 0.5
 # Snapshot (model checkpoint) period
 # Divide by NUM_GPUS to determine actual period (e.g., 20000/8 => 2500 iters)
 # to allow for linear training schedule scaling
-__C.TRAIN.SNAPSHOT_ITERS = 20000
+__C.TRAIN.SNAPSHOT_ITERS = 10000
 
 # Train using these proposals
 # During training, all proposals specified in the file are used (no limit is
@@ -263,7 +263,7 @@ __C.TEST.SCORE_THRESH = 0.05
 # Save detection results files if True
 # If false, results files are cleaned up (they can be large) after local
 # evaluation
-__C.TEST.COMPETITION_MODE = True
+__C.TEST.COMPETITION_MODE = False
 
 # Evaluate detections with the COCO json dataset eval code even if it's not the
 # evaluation code for the dataset (e.g. evaluate PASCAL VOC results using the
@@ -643,6 +643,9 @@ __C.CLASSIFICATION.MLP_HEADS_DIM = [1024,1024]
 
 # Size of the final average kernel after conv body
 __C.CLASSIFICATION.FINAL_AVG_KERNEL = 7
+
+# dropout for classification head if training
+__C.CLASSIFICATION.DROPOUT_RATE = 0.85
 
 # ---------------------------------------------------------------------------- #
 # Fast R-CNN options
