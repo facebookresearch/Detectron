@@ -3,7 +3,6 @@
 
 """
     @author: Ouail Bendidi
-    Created on Wed Jan 31 16:45:36 2018
 
     Script to convert Cifar-100 dataset into coco format,
     with empty boxes and empty segmentation , each image maps to one
@@ -23,6 +22,7 @@ import cv2
 import pprint
 import argparse
 import json
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -54,7 +54,8 @@ def parse_args():
         sys.exit(1)
     return parser.parse_args()
 
-def add_annotations(annotID, labelID, imageID, area=0,bbox=[],seg=[]):
+
+def add_annotations(annotID, labelID, imageID, area=0, bbox=[], seg=[]):
     return {
         u"area": area,
         u"id": annotID,
@@ -75,6 +76,7 @@ def add_image(imageID, fileName, Width, Height):
         u"height": Height
     }
 
+
 def main(arg):
 
     save_path_annotation = os.path.join(arg.savePath, "annotations/")
@@ -83,10 +85,10 @@ def main(arg):
 
     labels = pickle.load(open(os.path.join(arg.cifar, 'meta'), 'rb'))
     if arg.coarse:
-        id_to_label = {name:i+1 for i,name in
+        id_to_label = {name: i + 1 for i, name in
                        enumerate(labels["coarse_label_names"])}
-    else :
-        id_to_label = {name:i+1 for i,name in
+    else:
+        id_to_label = {name: i + 1 for i, name in
                        enumerate(labels["fine_label_names"])}
     pprint.pprint(id_to_label)
 
@@ -95,9 +97,11 @@ def main(arg):
 
         fpath = os.path.join(arg.cifar, batch)
 
-        if batch == 'test':batch="val"
+        if batch == 'test':
+            batch = "val"
 
-        save_path_image = os.path.join(arg.savePath, "coco_{}2014".format(batch))
+        save_path_image = os.path.join(
+            arg.savePath, "coco_{}2014".format(batch))
         anot_file_name = os.path.join(
             save_path_annotation, "instances_{}2014.json".format(batch))
         if not os.path.exists(save_path_image):
@@ -129,25 +133,25 @@ def main(arg):
             if arg.coarse:
                 labelID = id_to_label[labels['coarse_label_names']
                                       [d['coarse_labels'][i]]]
-            else :
+            else:
                 labelID = id_to_label[labels['fine_label_names']
                                       [d['fine_labels'][i]]]
 
             json_data["annotations"].append(
-                        add_annotations(annotID,
-                                        labelID,
-                                        annotID,
-                                        area=1)
-                        )
-
+                add_annotations(annotID,
+                                labelID,
+                                annotID,
+                                area=1)
+            )
 
             json_data["images"].append(
                 add_image(annotID, filename, 32, 32)
-                                       )
+            )
             img = d['data'][i]
-            out_name = os.path.join(save_path_image,filename)
-            img = img.reshape((32, 32, 3), order='F').swapaxes(0,1)[:, :, (2, 1, 0)]
-            cv2.imwrite(out_name,img)
+            out_name = os.path.join(save_path_image, filename)
+            img = img.reshape((32, 32, 3), order='F').swapaxes(0, 1)[
+                :, :, (2, 1, 0)]
+            cv2.imwrite(out_name, img)
 
             annotID += 1
         for key in id_to_label:
@@ -158,7 +162,8 @@ def main(arg):
         with io.open(anot_file_name, 'w+', encoding='utf-8') as f:
             f.write(json.dumps(json_data, ensure_ascii=False))
         print("\n")
-    print("num of labels is ",len(id_to_label))
+    print("num of labels is ", len(id_to_label))
+
 
 if __name__ == '__main__':
     args = parse_args()
