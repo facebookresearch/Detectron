@@ -54,7 +54,6 @@ import modeling.optimizer as optim
 import modeling.retinanet_heads as retinanet_heads
 import modeling.rfcn_heads as rfcn_heads
 import modeling.rpn_heads as rpn_heads
-import modeling.classification_heads as cls_heads
 import roi_data.minibatch
 import utils.c2 as c2_utils
 
