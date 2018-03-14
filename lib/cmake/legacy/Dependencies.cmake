@@ -1,12 +1,5 @@
 # Adapted from https://github.com/caffe2/caffe2/blob/master/cmake/Dependencies.cmake
 
-# Find the Caffe2 package.
-# Caffe2 exports the required targets, so find_package should work for
-# the standard Caffe2 installation. If you encounter problems with finding
-# the Caffe2 package, make sure you have run `make install` when installing
-# Caffe2 (`make install` populates your share/cmake/Caffe2).
-find_package(Caffe2 REQUIRED)
-
 # Find CUDA.
 include(cmake/Cuda.cmake)
 if (HAVE_CUDA)
