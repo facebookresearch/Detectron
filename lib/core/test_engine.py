@@ -32,6 +32,8 @@ from caffe2.python import workspace
 
 from core.config import cfg
 from core.config import get_output_dir
+from core.rpn_generator import generate_rpn_on_dataset
+from core.rpn_generator import generate_rpn_on_range
 from core.test import im_detect_all
 from datasets import task_evaluation
 from datasets.json_dataset import JsonDataset
@@ -47,9 +49,54 @@ import utils.vis as vis_utils
 logger = logging.getLogger(__name__)
 
 
-def test_net_on_dataset(multi_gpu=False):
+def get_eval_functions():
+    # Determine which parent or child function should handle inference
+    if cfg.MODEL.RPN_ONLY:
+        child_func = generate_rpn_on_range
+        parent_func = generate_rpn_on_dataset
+    else:
+        # Generic case that handles all network types other than RPN-only nets
+        # and RetinaNet
+        child_func = test_net
+        parent_func = test_net_on_dataset
+
+    return parent_func, child_func
+
+
+def run_inference(ind_range=None, multi_gpu_testing=False, gpu_id=0):
+    parent_func, child_func = get_eval_functions()
+
+    is_parent = ind_range is None
+    if is_parent:
+        # Parent case:
+        # In this case we're either running inference on the entire dataset in a
+        # single process or (if multi_gpu_testing is True) using this process to
+        # launch subprocesses that each run inference on a range of the dataset
+        if len(cfg.TEST.DATASETS) == 0:
+            cfg.TEST.DATASETS = (cfg.TEST.DATASET, )
+            cfg.TEST.PROPOSAL_FILES = (cfg.TEST.PROPOSAL_FILE, )
+
+        all_results = {}
+        for i in range(len(cfg.TEST.DATASETS)):
+            cfg.TEST.DATASET = cfg.TEST.DATASETS[i]
+            if cfg.TEST.PRECOMPUTED_PROPOSALS:
+                cfg.TEST.PROPOSAL_FILE = cfg.TEST.PROPOSAL_FILES[i]
+            output_dir = get_output_dir(cfg.TEST.DATASET, training=False)
+            results = parent_func(output_dir, multi_gpu=multi_gpu_testing)
+            all_results.update(results)
+
+        return all_results
+    else:
+        # Subprocess child case:
+        # In this case test_net was called via subprocess.Popen to execute on a
+        # range of inputs on a single dataset (i.e., use cfg.TEST.DATASET and
+        # don't loop over cfg.TEST.DATASETS)
+        output_dir = get_output_dir(cfg.TEST.DATASET, training=False)
+        return child_func(output_dir, ind_range=ind_range, gpu_id=gpu_id)
+
+
+def test_net_on_dataset(output_dir, multi_gpu=False, gpu_id=0):
     """Run inference on a dataset."""
-    output_dir = get_output_dir(training=False)
     dataset = JsonDataset(cfg.TEST.DATASET)
     test_timer = Timer()
     test_timer.tic()
@@ -59,7 +106,7 @@ def test_net_on_dataset(multi_gpu=False):
             num_images, output_dir
         )
     else:
-        all_boxes, all_segms, all_keyps = test_net()
+        all_boxes, all_segms, all_keyps = test_net(output_dir, gpu_id=gpu_id)
     test_timer.toc()
     logger.info('Total inference time: {:.3f}s'.format(test_timer.average_time))
     results = task_evaluation.evaluate_all(
@@ -109,7 +156,7 @@ def multi_gpu_test_net_on_dataset(num_images, output_dir):
     return all_boxes, all_segms, all_keyps
 
 
-def test_net(ind_range=None):
+def test_net(output_dir, ind_range=None, gpu_id=0):
     """Run inference on all images in a dataset or over an index range of images
     in a dataset using a single GPU.
     """
@@ -120,21 +167,16 @@ def test_net(ind_range=None):
     assert cfg.TEST.DATASET != '', \
         'TEST.DATASET must be set to the dataset name to test'
 
-    output_dir = get_output_dir(training=False)
     roidb, dataset, start_ind, end_ind, total_num_images = get_roidb_and_dataset(
         ind_range
     )
-    model = initialize_model_from_cfg()
+    model = initialize_model_from_cfg(gpu_id=gpu_id)
     num_images = len(roidb)
     num_classes = cfg.MODEL.NUM_CLASSES
     all_boxes, all_segms, all_keyps = empty_results(num_classes, num_images)
     timers = defaultdict(Timer)
     for i, entry in enumerate(roidb):
-        if cfg.MODEL.FASTER_RCNN:
-            # Faster R-CNN type models generate proposals on-the-fly with an
-            # in-network RPN
-            box_proposals = None
-        else:
+        if cfg.TEST.PRECOMPUTED_PROPOSALS:
             # The roidb may contain ground-truth rois (for example, if the roidb
             # comes from the training or val split). We only want to evaluate
             # detection on the *non*-ground-truth rois. We select only the rois
@@ -143,9 +185,13 @@ def test_net(ind_range=None):
             box_proposals = entry['boxes'][entry['gt_classes'] == 0]
             if len(box_proposals) == 0:
                 continue
+        else:
+            # Faster R-CNN type models generate proposals on-the-fly with an
+            # in-network RPN; 1-stage models don't require proposals.
+            box_proposals = None
 
         im = cv2.imread(entry['image'])
-        with c2_utils.NamedCudaScope(0):
+        with c2_utils.NamedCudaScope(gpu_id):
             cls_boxes_i, cls_segms_i, cls_keyps_i = im_detect_all(
                 model, im, box_proposals, timers
             )
@@ -213,13 +259,13 @@ def test_net(ind_range=None):
     return all_boxes, all_segms, all_keyps
 
 
-def initialize_model_from_cfg():
+def initialize_model_from_cfg(gpu_id=0):
     """Initialize a model from the global cfg. Loads test-time weights and
     creates the networks in the Caffe2 workspace.
     """
-    model = model_builder.create(cfg.MODEL.TYPE, train=False)
-    net_utils.initialize_from_weights_file(
-        model, cfg.TEST.WEIGHTS, broadcast=False
+    model = model_builder.create(cfg.MODEL.TYPE, train=False, gpu_id=gpu_id)
+    net_utils.initialize_gpu_from_weights_file(
+        model, cfg.TEST.WEIGHTS, gpu_id=gpu_id,
     )
     model_builder.add_inference_inputs(model)
     workspace.CreateNet(model.net)
@@ -236,13 +282,13 @@ def get_roidb_and_dataset(ind_range):
     restrict it to a range of indices if ind_range is a pair of integers.
     """
     dataset = JsonDataset(cfg.TEST.DATASET)
-    if cfg.MODEL.FASTER_RCNN:
-        roidb = dataset.get_roidb()
-    else:
+    if cfg.TEST.PRECOMPUTED_PROPOSALS:
         roidb = dataset.get_roidb(
             proposal_file=cfg.TEST.PROPOSAL_FILE,
             proposal_limit=cfg.TEST.PROPOSAL_LIMIT
         )
+    else:
+        roidb = dataset.get_roidb()
 
     if ind_range is not None:
         total_num_images = len(roidb)

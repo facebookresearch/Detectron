@@ -24,7 +24,6 @@ from __future__ import unicode_literals
 
 import argparse
 import cv2  # NOQA (Must import before importing caffe2 due to bug in cv2)
-import datetime
 import logging
 import numpy as np
 import os
@@ -34,7 +33,6 @@ import sys
 import test_net
 
 from caffe2.python import memonger
-from caffe2.python import utils as c2_py_utils
 from caffe2.python import workspace
 
 from core.config import assert_and_infer_cfg
@@ -44,10 +42,9 @@ from core.config import merge_cfg_from_file
 from core.config import merge_cfg_from_list
 from datasets.roidb import combined_roidb_for_training
 from modeling import model_builder
-from utils.logging import log_json_stats
+from utils import lr_policy
 from utils.logging import setup_logging
-from utils.logging import SmoothedValue
-from utils.timer import Timer
+from utils.training_stats import TrainingStats
 import utils.c2
 import utils.env as envu
 import utils.net as nu
@@ -95,80 +92,6 @@ def parse_args():
     return parser.parse_args()
 
 
-class TrainingStats(object):
-    """Track vital training statistics."""
-
-    def __init__(self, model):
-        # Window size for smoothing tracked values (with median filtering)
-        self.WIN_SZ = 20
-        # Output logging period in SGD iterations
-        self.LOG_PERIOD = 20
-        self.smoothed_losses_and_metrics = {
-            key: SmoothedValue(self.WIN_SZ)
-            for key in model.losses + model.metrics
-        }
-        self.losses_and_metrics = {
-            key: 0
-            for key in model.losses + model.metrics
-        }
-        self.smoothed_total_loss = SmoothedValue(self.WIN_SZ)
-        self.smoothed_mb_qsize = SmoothedValue(self.WIN_SZ)
-        self.iter_total_loss = np.nan
-        self.iter_timer = Timer()
-        self.model = model
-
-    def IterTic(self):
-        self.iter_timer.tic()
-
-    def IterToc(self):
-        return self.iter_timer.toc(average=False)
-
-    def ResetIterTimer(self):
-        self.iter_timer.reset()
-
-    def UpdateIterStats(self):
-        """Update tracked iteration statistics."""
-        for k in self.losses_and_metrics.keys():
-            if k in self.model.losses:
-                self.losses_and_metrics[k] = nu.sum_multi_gpu_blob(k)
-            else:
-                self.losses_and_metrics[k] = nu.average_multi_gpu_blob(k)
-        for k, v in self.smoothed_losses_and_metrics.items():
-            v.AddValue(self.losses_and_metrics[k])
-        self.iter_total_loss = np.sum(
-            np.array([self.losses_and_metrics[k] for k in self.model.losses])
-        )
-        self.smoothed_total_loss.AddValue(self.iter_total_loss)
-        self.smoothed_mb_qsize.AddValue(
-            self.model.roi_data_loader._minibatch_queue.qsize()
-        )
-
-    def LogIterStats(self, cur_iter, lr):
-        """Log the tracked statistics."""
-        if (cur_iter % self.LOG_PERIOD == 0 or
-                cur_iter == cfg.SOLVER.MAX_ITER - 1):
-            eta_seconds = self.iter_timer.average_time * (
-                cfg.SOLVER.MAX_ITER - cur_iter
-            )
-            eta = str(datetime.timedelta(seconds=int(eta_seconds)))
-            mem_stats = c2_py_utils.GetGPUMemoryUsageStats()
-            mem_usage = np.max(mem_stats['max_by_gpu'][:cfg.NUM_GPUS])
-            stats = dict(
-                iter=cur_iter,
-                lr=float(lr),
-                time=self.iter_timer.average_time,
-                loss=self.smoothed_total_loss.GetMedianValue(),
-                eta=eta,
-                mb_qsize=int(
-                    np.round(self.smoothed_mb_qsize.GetMedianValue())
-                ),
-                mem=int(np.ceil(mem_usage / 1024 / 1024))
-            )
-            for k, v in self.smoothed_losses_and_metrics.items():
-                stats[k] = v.GetMedianValue()
-            log_json_stats(stats)
-
-
 def main():
     # Initialize C2
     workspace.GlobalInit(
@@ -213,7 +136,7 @@ def train_model():
 
     for cur_iter in range(start_iter, cfg.SOLVER.MAX_ITER):
         training_stats.IterTic()
-        lr = model.UpdateWorkspaceLr(cur_iter)
+        lr = model.UpdateWorkspaceLr(cur_iter, lr_policy.get_lr_at_iter(cur_iter))
         workspace.RunNet(model.net.Proto().name)
         if cur_iter == start_iter:
             nu.print_net(model)
@@ -252,7 +175,7 @@ def create_model():
     logger = logging.getLogger(__name__)
     start_iter = 0
     checkpoints = {}
-    output_dir = get_output_dir(training=True)
+    output_dir = get_output_dir(cfg.TRAIN.DATASETS, training=True)
     if cfg.TRAIN.AUTO_RESUME:
         # Check for the final model (indicates training already finished)
         final_path = os.path.join(output_dir, 'model_final.pkl')
@@ -309,7 +232,7 @@ def setup_model_for_training(model, output_dir):
 
     if cfg.TRAIN.WEIGHTS:
         # Override random weight initialization with weights from a saved model
-        nu.initialize_gpu_0_from_weights_file(model, cfg.TRAIN.WEIGHTS)
+        nu.initialize_gpu_from_weights_file(model, cfg.TRAIN.WEIGHTS, gpu_id=0)
     # Even if we're randomly initializing we still need to synchronize
     # parameters across GPUs
     nu.broadcast_parameters(model)

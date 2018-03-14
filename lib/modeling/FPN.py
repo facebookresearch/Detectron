@@ -412,7 +412,7 @@ def add_fpn_rpn_losses(model):
             'loss_rpn_cls_fpn' + slvl,
             normalize=0,
             scale=(
-                1. / cfg.NUM_GPUS / cfg.TRAIN.RPN_BATCH_SIZE_PER_IM /
+                model.GetLossScale() / cfg.TRAIN.RPN_BATCH_SIZE_PER_IM /
                 cfg.TRAIN.IMS_PER_BATCH
             )
         )
@@ -427,7 +427,7 @@ def add_fpn_rpn_losses(model):
             ],
             'loss_rpn_bbox_fpn' + slvl,
             beta=1. / 9.,
-            scale=1. / cfg.NUM_GPUS
+            scale=model.GetLossScale(),
         )
         loss_gradients.update(
             blob_utils.

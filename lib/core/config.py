@@ -270,11 +270,6 @@ __C.TEST.COMPETITION_MODE = True
 # COCO API to get COCO style AP on PASCAL VOC)
 __C.TEST.FORCE_JSON_DATASET_EVAL = False
 
-# Number of images to test on - presently used in RetinaNet Inference only
-# If the dataset name include 'test-dev' or 'test', this is ignored (i.e.,
-# it's intended to apply to a validation set)
-__C.TEST.NUM_TEST_IMAGES = 5000
-
 # [Inferred value; do not set directly in a config]
 # Indicates if precomputed proposals are used at test time
 # Not set for 1-stage models and 2-stage models with RPN subnetwork enabled
@@ -981,6 +976,7 @@ _DEPCRECATED_KEYS = set(
         'TRAIN.BBOX_NORMALIZE_TARGETS_PRECOMPUTED',
         'TRAIN.DROPOUT',
         'USE_GPU_NMS',
+        'TEST.NUM_TEST_IMAGES',
     )
 )
 
@@ -1036,13 +1032,15 @@ def cache_cfg_urls():
     )
 
 
-def get_output_dir(training=True):
+def get_output_dir(datasets, training=True):
     """Get the output directory determined by the current global config."""
-    dataset = __C.TRAIN.DATASETS if training else __C.TEST.DATASETS
-    dataset = ':'.join(dataset)
+    assert isinstance(datasets, (tuple, list, basestring)), \
+        'datasets argument must be of type tuple, list or string'
+    is_string = isinstance(datasets, basestring)
+    dataset_name = datasets if is_string else ':'.join(datasets)
     tag = 'train' if training else 'test'
-    # <output-dir>/<train|test>/<dataset>/<model-type>/
-    outdir = osp.join(__C.OUTPUT_DIR, tag, dataset, __C.MODEL.TYPE)
+    # <output-dir>/<train|test>/<dataset-name>/<model-type>/
+    outdir = osp.join(__C.OUTPUT_DIR, tag, dataset_name, __C.MODEL.TYPE)
     if not osp.exists(outdir):
         os.makedirs(outdir)
     return outdir

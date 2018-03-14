@@ -37,11 +37,15 @@ All models available for download through this document are licensed under the [
 
 The backbone models pretrained on ImageNet are available in the format used by Detectron. Unless otherwise noted, these models are trained on the standard ImageNet-1k dataset.
 
-- [R-50.pkl](https://s3-us-west-2.amazonaws.com/detectron/imNetPretrained/MSRA/R-50.pkl): converted copy of MSRA's original ResNet-50 model
-- [R-101.pkl](https://s3-us-west-2.amazonaws.com/detectron/imNetPretrained/MSRA/R-101.pkl): converted copy of MSRA's original ResNet-101 model
-- [X-101-64x4d.pkl](https://s3-us-west-2.amazonaws.com/detectron/imNetPretrained/FBResNeXt/X-101-64x4d.pkl): converted copy of FB's original ResNeXt-101-64x4d model trained with Torch7
-- [X-101-32x8d.pkl](https://s3-us-west-2.amazonaws.com/detectron/imNetPretrained/20171220/X-101-32x8d.pkl): ResNeXt-101-32x8d model trained with Caffe2 at FB
-- [X-152-32x8d-IN5k.pkl](https://s3-us-west-2.amazonaws.com/detectron/imNetPretrained/25093814/X-152-32x8d-IN5k.pkl): ResNeXt-152-32x8d model **trained on ImageNet-5k** with Caffe2 at FB (see our [ResNeXt paper](https://arxiv.org/abs/1611.05431) for details on ImageNet-5k)
+- [R-50.pkl](https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/MSRA/R-50.pkl): converted copy of MSRA's original ResNet-50 model
+- [R-101.pkl](https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/MSRA/R-101.pkl): converted copy of MSRA's original ResNet-101 model
+- [X-101-64x4d.pkl](https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/FBResNeXt/X-101-64x4d.pkl): converted copy of FB's original ResNeXt-101-64x4d model trained with Torch7
+- [X-101-32x8d.pkl](https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/20171220/X-101-32x8d.pkl): ResNeXt-101-32x8d model trained with Caffe2 at FB
+- [X-152-32x8d-IN5k.pkl](https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/25093814/X-152-32x8d-IN5k.pkl): ResNeXt-152-32x8d model **trained on ImageNet-5k** with Caffe2 at FB (see our [ResNeXt paper](https://arxiv.org/abs/1611.05431) for details on ImageNet-5k)
+
+#### Log Files
+
+[Training and inference logs](https://s3-us-west-2.amazonaws.com/detectron/logs/model_zoo_12_2017_baseline_logs.tgz) are available for most models in the model zoo.
 
 ## Proposal, Box, and Mask Detection Baselines
 

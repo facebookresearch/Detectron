@@ -188,12 +188,12 @@ def _compute_and_log_stats(roidb):
             (entry['gt_classes'] > 0) & (entry['is_crowd'] == 0))[0]
         gt_classes = entry['gt_classes'][gt_inds]
         gt_hist += np.histogram(gt_classes, bins=hist_bins)[0]
-    logger.info('Ground-truth class histogram:')
+    logger.debug('Ground-truth class histogram:')
     for i, v in enumerate(gt_hist):
-        logger.info(
+        logger.debug(
             '{:d}{:s}: {:d}'.format(
                 i, classes[i].rjust(char_len), v))
-    logger.info('-' * char_len)
-    logger.info(
+    logger.debug('-' * char_len)
+    logger.debug(
         '{:s}: {:d}'.format(
             'total'.rjust(char_len), np.sum(gt_hist)))

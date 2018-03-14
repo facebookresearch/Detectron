@@ -136,7 +136,7 @@ def add_single_scale_rpn_losses(model):
     loss_rpn_cls = model.net.SigmoidCrossEntropyLoss(
         ['rpn_cls_logits', 'rpn_labels_int32'],
         'loss_rpn_cls',
-        scale=1. / cfg.NUM_GPUS
+        scale=model.GetLossScale()
     )
     loss_rpn_bbox = model.net.SmoothL1Loss(
         [
@@ -145,7 +145,7 @@ def add_single_scale_rpn_losses(model):
         ],
         'loss_rpn_bbox',
         beta=1. / 9.,
-        scale=1. / cfg.NUM_GPUS
+        scale=model.GetLossScale()
     )
     loss_gradients = blob_utils.get_loss_gradients(
         model, [loss_rpn_cls, loss_rpn_bbox]

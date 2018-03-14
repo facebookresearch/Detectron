@@ -266,7 +266,7 @@ def add_fpn_retinanet_losses(model):
             ],
             'retnet_loss_bbox_' + suffix,
             beta=cfg.RETINANET.BBOX_REG_BETA,
-            scale=1. / cfg.NUM_GPUS * cfg.RETINANET.BBOX_REG_WEIGHT
+            scale=model.GetLossScale() * cfg.RETINANET.BBOX_REG_WEIGHT
         )
         gradients.append(bbox_loss)
         losses.append('retnet_loss_bbox_' + suffix)
@@ -286,7 +286,8 @@ def add_fpn_retinanet_losses(model):
                 ['fl_{}'.format(suffix)],
                 gamma=cfg.RETINANET.LOSS_GAMMA,
                 alpha=cfg.RETINANET.LOSS_ALPHA,
-                scale=(1. / cfg.NUM_GPUS)
+                scale=model.GetLossScale(),
+                num_classes=model.num_classes - 1
             )
             gradients.append(cls_focal_loss)
             losses.append('fl_{}'.format(suffix))
@@ -299,7 +300,8 @@ def add_fpn_retinanet_losses(model):
                 ['fl_{}'.format(suffix), 'retnet_prob_{}'.format(suffix)],
                 gamma=cfg.RETINANET.LOSS_GAMMA,
                 alpha=cfg.RETINANET.LOSS_ALPHA,
-                scale=(1. / cfg.NUM_GPUS),
+                scale=model.GetLossScale(),
+                num_classes=model.num_classes
             )
             gradients.append(cls_focal_loss)
             losses.append('fl_{}'.format(suffix))

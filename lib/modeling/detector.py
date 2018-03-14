@@ -26,13 +26,14 @@ import logging
 from caffe2.python import cnn
 from caffe2.python import core
 from caffe2.python import workspace
+from caffe2.python.modeling import initializers
+from caffe2.python.modeling.parameter_info import ParameterTags
 
 from core.config import cfg
 from ops.collect_and_distribute_fpn_rpn_proposals \
     import CollectAndDistributeFpnRpnProposalsOp
 from ops.generate_proposal_labels import GenerateProposalLabelsOp
 from ops.generate_proposals import GenerateProposalsOp
-from utils import lr_policy
 import roi_data.fast_rcnn
 import utils.c2 as c2_utils
 
@@ -76,26 +77,27 @@ class DetectionModelHelper(cnn.CNNModelHelper):
                  str(p).find('gpu_{}'.format(gpu_id)) == 0)
             )]
 
-    def AffineChannel(self, blob_in, blob_out, share_with=None, inplace=False):
+    def AffineChannel(self, blob_in, blob_out, dim, inplace=False):
         """Affine transformation to replace BN in networks where BN cannot be
         used (e.g., because the minibatch size is too small).
 
-        The AffineChannel parameters may be shared with another AffineChannelOp
-        by specifying its blob name (excluding the '_{s,b}' suffix) in the
-        share_with argument. The operations can be done in place to save memory.
+        The operations can be done in place to save memory.
         """
         blob_out = blob_out or self.net.NextName()
-        is_not_sharing = share_with is None
-        param_prefix = blob_out if is_not_sharing else share_with
-        scale = core.ScopedBlobReference(
-            param_prefix + '_s', self.param_init_net)
-        bias = core.ScopedBlobReference(
-            param_prefix + '_b', self.param_init_net)
-        if is_not_sharing:
-            self.net.Proto().external_input.extend([str(scale), str(bias)])
-            self.params.extend([scale, bias])
-            self.weights.append(scale)
-            self.biases.append(bias)
+        param_prefix = blob_out
+
+        scale = self.create_param(
+            param_name=param_prefix + '_s',
+            initializer=initializers.Initializer("ConstantFill", value=1.),
+            tags=ParameterTags.WEIGHT,
+            shape=[dim, ],
+        )
+        bias = self.create_param(
+            param_name=param_prefix + '_b',
+            initializer=initializers.Initializer("ConstantFill", value=0.),
+            tags=ParameterTags.BIAS,
+            shape=[dim, ],
+        )
         if inplace:
             return self.net.AffineChannel([blob_in, scale, bias], blob_in)
         else:
@@ -128,9 +130,10 @@ class DetectionModelHelper(cnn.CNNModelHelper):
             (extracted from rpn_cls_probs; see above).
         """
         name = 'GenerateProposalsOp:' + ','.join([str(b) for b in blobs_in])
+        # spatial_scale passed to the Python op is only used in convert_pkl_to_pb
         self.net.Python(
             GenerateProposalsOp(anchors, spatial_scale, self.train).forward
-        )(blobs_in, blobs_out, name=name)
+        )(blobs_in, blobs_out, name=name, spatial_scale=spatial_scale)
         return blobs_out
 
     def GenerateProposalLabels(self, blobs_in):
@@ -403,7 +406,7 @@ class DetectionModelHelper(cnn.CNNModelHelper):
             no_bias=1
         )
         blob_out = self.AffineChannel(
-            conv_blob, prefix + suffix, inplace=inplace
+            conv_blob, prefix + suffix, dim=dim_out, inplace=inplace
         )
         return blob_out
 
@@ -416,14 +419,13 @@ class DetectionModelHelper(cnn.CNNModelHelper):
         self.use_cudnn = self.prev_use_cudnn
         self.prev_use_cudnn = prev_use_cudnn
 
-    def UpdateWorkspaceLr(self, cur_iter):
+    def UpdateWorkspaceLr(self, cur_iter, new_lr):
         """Updates the model's current learning rate and the workspace (learning
         rate and update history/momentum blobs).
         """
         # The workspace is the one source of truth for the lr
         # The lr is always the same on all GPUs
         cur_lr = workspace.FetchBlob('gpu_0/lr')[0]
-        new_lr = lr_policy.get_lr_at_iter(cur_iter)
         # There are no type conversions between the lr in Python and the lr in
         # the GPU (both are float32), so exact comparision is ok
         if cur_lr != new_lr:
@@ -468,6 +470,13 @@ class DetectionModelHelper(cnn.CNNModelHelper):
                         'Scale', [param + '_momentum'], [param + '_momentum'],
                         scale=correction)
                     workspace.RunOperatorOnce(op)
+
+    def GetLossScale(self):
+        """Allow a way to configure the loss scale dynamically.
+
+        This may be used in a distributed data parallel setting.
+        """
+        return 1.0 / cfg.NUM_GPUS
 
     def AddLosses(self, losses):
         if not isinstance(losses, list):

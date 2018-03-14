@@ -39,6 +39,7 @@ import pycocotools.mask as mask_util
 
 from core.config import cfg
 from utils.timer import Timer
+import core.test_retinanet as test_retinanet
 import modeling.FPN as fpn
 import utils.blob as blob_utils
 import utils.boxes as box_utils
@@ -51,6 +52,11 @@ logger = logging.getLogger(__name__)
 def im_detect_all(model, im, box_proposals, timers=None):
     if timers is None:
         timers = defaultdict(Timer)
+
+    # Handle RetinaNet testing separately for now
+    if cfg.RETINANET.RETINANET_ON:
+        cls_boxes = test_retinanet.im_detect_bbox(model, im, timers)
+        return cls_boxes, None, None
 
     timers['im_detect_bbox'].tic()
     if cfg.TEST.BBOX_AUG.ENABLED:

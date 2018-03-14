@@ -42,29 +42,61 @@ Similarly, the union of `valminusminival` and the 2014 `train` is exactly equiva
 
 ## Creating Symlinks for PASCAL VOC
 
-Symlink the PASCAL VOC dataset:
+We assume that your symlinked `lib/datasets/data/VOC<year>` directory has the following structure:
 
 ```
-# VOC 2007
-mkdir -p $DETECTRON/lib/datasets/data/VOC2007
-ln -s /path/to/VOC2007/JPEG/images $DETECTRON/lib/datasets/data/VOC2007/JPEGImages
-ln -s /path/to/VOC2007/json/annotations $DETECTRON/lib/datasets/annotations
-ln -s /path/to/VOC2007/devkit $DETECTRON/lib/datasets/VOCdevkit2007
-
-# VOC 2012
-mkdir -p $DETECTRON/lib/datasets/data/VOC2012
-ln -s /path/to/VOC2012/JPEG/images $DETECTRON/lib/datasets/data/VOC2012/JPEGImages
-ln -s /path/to/VOC2012/json/annotations $DETECTRON/lib/datasets/annotations
-ln -s /path/to/VOC2012/devkit $DETECTRON/lib/datasets/VOCdevkit2012
+VOC<year>
+|_ JPEGImages
+|  |_ <im-1-name>.jpg
+|  |_ ...
+|  |_ <im-N-name>.jpg
+|_ annotations
+|  |_ voc_<year>_trainval.json
+|  |_ ...
+|_ VOCdevkit<year>
 ```
+
+Create symlinks for `VOC<year>`:
+
+```
+mkdir -p $DETECTRON/lib/datasets/data/VOC<year>
+ln -s /path/to/VOC<year>/JPEGImages $DETECTRON/lib/datasets/data/VOC<year>/JPEGImages
+ln -s /path/to/VOC<year>/json/annotations $DETECTRON/lib/datasets/data/VOC<year>annotations
+ln -s /path/to/VOC<year>/devkit $DETECTRON/lib/datasets/VOC<year>/VOCdevkit<year>
+```
+
+### PASCAL VOC Annotations in COCO Format
+
+We expect PASCAL VOC annotations converted to COCO json format, which are available for download [here](https://storage.googleapis.com/coco-dataset/external/PASCAL_VOC.zip ).
 
 ## Creating Symlinks for Cityscapes:
 
-Symlink the Cityscapes dataset:
+We assume that your symlinked `lib/datasets/data/cityscapes` directory has the following structure:
+
+```
+cityscapes
+|_ images
+|  |_ <im-1-name>.jpg
+|  |_ ...
+|  |_ <im-N-name>.jpg
+|_ annotations
+|  |_ instanceonly_gtFile_train.json
+|  |_ ...
+|_ raw
+   |_ gtFine
+   |_ ...
+   |_ README.md
+```
+
+Create symlinks for `cityscapes`:
 
 ```
 mkdir -p $DETECTRON/lib/datasets/data/cityscapes
 ln -s /path/to/cityscapes/images $DETECTRON/lib/datasets/data/cityscapes/images
 ln -s /path/to/cityscapes/json/annotations $DETECTRON/lib/datasets/data/cityscapes/annotations
-ln -s /path/to/cityscapes/root/dir $DETECTRON/lib/datasets/data/cityscapes/raw
+ln -s /path/to/cityscapes/root $DETECTRON/lib/datasets/data/cityscapes/raw
 ```
+
+### Cityscapes Annotations in COCO Format
+
+We expect Cityscapes annotations converted to COCO json format, which we will make available for download soon.
