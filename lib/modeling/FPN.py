@@ -31,6 +31,8 @@ import modeling.ResNet as ResNet
 import utils.blob as blob_utils
 import utils.boxes as box_utils
 
+from caffe2.python import brew
+
 # Lowest and highest pyramid levels in the backbone network. For FPN, we assume
 # that all networks have 5 spatial reductions, each by a factor of 2. Level 1
 # would correspond to the input image, hence it does not make sense to use it.
@@ -139,7 +141,8 @@ def add_fpn(model, fpn_level_info):
     xavier_fill = ('XavierFill', {})
 
     # For the coarest backbone level: 1x1 conv only seeds recursion
-    model.Conv(
+    brew.conv(
+        model,
         lateral_input_blobs[0],
         output_blobs[0],
         dim_in=fpn_dim_lateral[0],
@@ -170,7 +173,8 @@ def add_fpn(model, fpn_level_info):
     blobs_fpn = []
     spatial_scales = []
     for i in range(num_backbone_stages):
-        fpn_blob = model.Conv(
+        fpn_blob = brew.conv(
+            model,
             output_blobs[i],
             'fpn_{}'.format(fpn_level_info.blobs[i]),
             dim_in=fpn_dim,
@@ -206,7 +210,8 @@ def add_fpn(model, fpn_level_info):
             fpn_blob_in = fpn_blob
             if i > HIGHEST_BACKBONE_LVL + 1:
                 fpn_blob_in = model.Relu(fpn_blob, fpn_blob + '_relu')
-            fpn_blob = model.Conv(
+            fpn_blob = brew.conv(
+                model,
                 fpn_blob_in,
                 'fpn_' + str(i),
                 dim_in=dim_in,
@@ -229,7 +234,8 @@ def add_topdown_lateral_module(
 ):
     """Add a top-down lateral module."""
     # Lateral 1x1 conv
-    lat = model.Conv(
+    lat = brew.conv(
+        model,
         fpn_lateral,
         fpn_bottom + '_lateral',
         dim_in=dim_lateral,
@@ -289,7 +295,8 @@ def add_fpn_rpn_outputs(model, blobs_in, dim_in, spatial_scales):
             # zeroed biases for the first FPN level; these will be shared by
             # all other FPN levels
             # RPN hidden representation
-            conv_rpn_fpn = model.Conv(
+            conv_rpn_fpn = brew.conv(
+                model,
                 bl_in,
                 'conv_rpn_fpn' + slvl,
                 dim_in,
@@ -302,7 +309,8 @@ def add_fpn_rpn_outputs(model, blobs_in, dim_in, spatial_scales):
             )
             model.Relu(conv_rpn_fpn, conv_rpn_fpn)
             # Proposal classification scores
-            rpn_cls_logits_fpn = model.Conv(
+            rpn_cls_logits_fpn = brew.conv(
+                model,
                 conv_rpn_fpn,
                 'rpn_cls_logits_fpn' + slvl,
                 dim_in,
@@ -314,7 +322,8 @@ def add_fpn_rpn_outputs(model, blobs_in, dim_in, spatial_scales):
                 bias_init=const_fill(0.0)
             )
             # Proposal bbox regression deltas
-            rpn_bbox_pred_fpn = model.Conv(
+            rpn_bbox_pred_fpn = brew.conv(
+                model,
                 conv_rpn_fpn,
                 'rpn_bbox_pred_fpn' + slvl,
                 dim_in,

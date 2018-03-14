@@ -22,38 +22,40 @@ from __future__ import unicode_literals
 
 from core.config import cfg
 
+from caffe2.python import brew
+
 
 def add_VGG16_conv5_body(model):
-    model.Conv('data', 'conv1_1', 3, 64, 3, pad=1, stride=1)
+    brew.conv(model, 'data', 'conv1_1', 3, 64, 3, pad=1, stride=1)
     model.Relu('conv1_1', 'conv1_1')
-    model.Conv('conv1_1', 'conv1_2', 64, 64, 3, pad=1, stride=1)
+    brew.conv(model, 'conv1_1', 'conv1_2', 64, 64, 3, pad=1, stride=1)
     model.Relu('conv1_2', 'conv1_2')
     model.MaxPool('conv1_2', 'pool1', kernel=2, pad=0, stride=2)
-    model.Conv('pool1', 'conv2_1', 64, 128, 3, pad=1, stride=1)
+    brew.conv(model, 'pool1', 'conv2_1', 64, 128, 3, pad=1, stride=1)
     model.Relu('conv2_1', 'conv2_1')
-    model.Conv('conv2_1', 'conv2_2', 128, 128, 3, pad=1, stride=1)
+    brew.conv(model, 'conv2_1', 'conv2_2', 128, 128, 3, pad=1, stride=1)
     model.Relu('conv2_2', 'conv2_2')
     model.MaxPool('conv2_2', 'pool2', kernel=2, pad=0, stride=2)
     model.StopGradient('pool2', 'pool2')
-    model.Conv('pool2', 'conv3_1', 128, 256, 3, pad=1, stride=1)
+    brew.conv(model, 'pool2', 'conv3_1', 128, 256, 3, pad=1, stride=1)
     model.Relu('conv3_1', 'conv3_1')
-    model.Conv('conv3_1', 'conv3_2', 256, 256, 3, pad=1, stride=1)
+    brew.conv(model, 'conv3_1', 'conv3_2', 256, 256, 3, pad=1, stride=1)
     model.Relu('conv3_2', 'conv3_2')
-    model.Conv('conv3_2', 'conv3_3', 256, 256, 3, pad=1, stride=1)
+    brew.conv(model, 'conv3_2', 'conv3_3', 256, 256, 3, pad=1, stride=1)
     model.Relu('conv3_3', 'conv3_3')
     model.MaxPool('conv3_3', 'pool3', kernel=2, pad=0, stride=2)
-    model.Conv('pool3', 'conv4_1', 256, 512, 3, pad=1, stride=1)
+    brew.conv(model, 'pool3', 'conv4_1', 256, 512, 3, pad=1, stride=1)
     model.Relu('conv4_1', 'conv4_1')
-    model.Conv('conv4_1', 'conv4_2', 512, 512, 3, pad=1, stride=1)
+    brew.conv(model, 'conv4_1', 'conv4_2', 512, 512, 3, pad=1, stride=1)
     model.Relu('conv4_2', 'conv4_2')
-    model.Conv('conv4_2', 'conv4_3', 512, 512, 3, pad=1, stride=1)
+    brew.conv(model, 'conv4_2', 'conv4_3', 512, 512, 3, pad=1, stride=1)
     model.Relu('conv4_3', 'conv4_3')
     model.MaxPool('conv4_3', 'pool4', kernel=2, pad=0, stride=2)
-    model.Conv('pool4', 'conv5_1', 512, 512, 3, pad=1, stride=1)
+    brew.conv(model, 'pool4', 'conv5_1', 512, 512, 3, pad=1, stride=1)
     model.Relu('conv5_1', 'conv5_1')
-    model.Conv('conv5_1', 'conv5_2', 512, 512, 3, pad=1, stride=1)
+    brew.conv(model, 'conv5_1', 'conv5_2', 512, 512, 3, pad=1, stride=1)
     model.Relu('conv5_2', 'conv5_2')
-    model.Conv('conv5_2', 'conv5_3', 512, 512, 3, pad=1, stride=1)
+    brew.conv(model, 'conv5_2', 'conv5_3', 512, 512, 3, pad=1, stride=1)
     blob_out = model.Relu('conv5_3', 'conv5_3')
     return blob_out, 512, 1. / 16.
 

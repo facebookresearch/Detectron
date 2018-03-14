@@ -38,6 +38,8 @@ from utils.c2 import gauss_fill
 import modeling.ResNet as ResNet
 import utils.blob as blob_utils
 
+from caffe2.python import brew
+
 
 # ---------------------------------------------------------------------------- #
 # Mask R-CNN outputs and losses
@@ -67,7 +69,8 @@ def add_mask_rcnn_outputs(model, blob_in, dim):
             cfg.MRCNN.CONV_INIT
             if cfg.MRCNN.CLS_SPECIFIC_MASK else 'GaussianFill'
         )
-        blob_out = model.Conv(
+        blob_out = brew.conv(
+            model,
             blob_in,
             'mask_fcn_logits',
             dim,
@@ -139,7 +142,8 @@ def mask_rcnn_fcn_head_v1upXconvs(
     dim_inner = cfg.MRCNN.DIM_REDUCED
 
     for i in range(num_convs):
-        current = model.Conv(
+        current = brew.conv(
+            model,
             current,
             '_[mask]_fcn' + str(i + 1),
             dim_in,

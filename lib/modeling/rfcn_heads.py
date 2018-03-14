@@ -22,6 +22,8 @@ from core.config import cfg
 from utils.c2 import const_fill
 from utils.c2 import gauss_fill
 
+from caffe2.python import brew
+
 
 # ---------------------------------------------------------------------------- #
 # R-FCN outputs and losses
@@ -30,7 +32,8 @@ from utils.c2 import gauss_fill
 def add_rfcn_outputs(model, blob_in, dim_in, dim_reduce, spatial_scale):
     if dim_reduce is not None:
         # Optional dim reduction
-        blob_in = model.Conv(
+        blob_in = brew.conv(
+            model,
             blob_in,
             'conv_dim_reduce',
             dim_in,
@@ -44,7 +47,8 @@ def add_rfcn_outputs(model, blob_in, dim_in, dim_reduce, spatial_scale):
         blob_in = model.Relu(blob_in, blob_in)
         dim_in = dim_reduce
     # Classification conv
-    model.Conv(
+    brew.conv(
+        model,
         blob_in,
         'conv_cls',
         dim_in,
@@ -59,7 +63,8 @@ def add_rfcn_outputs(model, blob_in, dim_in, dim_reduce, spatial_scale):
     num_bbox_reg_classes = (
         2 if cfg.MODEL.CLS_AGNOSTIC_BBOX_REG else model.num_classes
     )
-    model.Conv(
+    brew.conv(
+        model,
         blob_in,
         'conv_bbox_pred',
         dim_in,

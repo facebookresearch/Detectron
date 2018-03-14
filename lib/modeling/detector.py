@@ -83,8 +83,8 @@ class DetectionModelHelper(model_helper.ModelHelper):
             )]
 
     # taken from CNNModelHelper
-    def Conv(self, *args, **kwargs):
-        return brew.conv(self, *args, **kwargs)
+    #def Conv(self, *args, **kwargs):
+    #    return brew.conv(self, *args, **kwargs)
 
     # taken from CNNModelHelper
     def ConvTranspose(self, *args, **kwargs):
@@ -341,9 +341,7 @@ class DetectionModelHelper(model_helper.ModelHelper):
     ):
         """Add conv op that shares weights and/or biases with another conv op.
         """
-        use_bias = (
-            False if ('no_bias' in kwargs and kwargs['no_bias']) else True
-        )
+        use_bias = not kwargs.get("no_bias", False)
 
         #if self.use_cudnn:
         #    kwargs['engine'] = 'CUDNN'

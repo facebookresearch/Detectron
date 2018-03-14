@@ -38,6 +38,8 @@ from utils.c2 import gauss_fill
 import modeling.ResNet as ResNet
 import utils.blob as blob_utils
 
+from caffe2.python import brew
+
 
 # ---------------------------------------------------------------------------- #
 # Keypoint R-CNN outputs and losses
@@ -85,7 +87,8 @@ def add_keypoint_outputs(model, blob_in, dim):
         )
     else:
         # Use Conv to predict heatmaps; does no upsampling
-        blob_out = model.Conv(
+        blob_out = brew.conv(
+            model,
             blob_in,
             blob_name,
             dim,
@@ -200,7 +203,8 @@ def add_roi_pose_head_v1convX(model, blob_in, dim_in, spatial_scale):
     )
 
     for i in range(cfg.KRCNN.NUM_STACKED_CONVS):
-        current = model.Conv(
+        current = brew.conv(
+            model,
             current,
             'conv_fcn' + str(i + 1),
             dim_in,

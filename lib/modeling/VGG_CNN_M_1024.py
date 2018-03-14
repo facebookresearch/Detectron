@@ -22,24 +22,26 @@ from __future__ import unicode_literals
 
 from core.config import cfg
 
+from caffe2.python import brew
+
 
 def add_VGG_CNN_M_1024_conv5_body(model):
-    model.Conv('data', 'conv1', 3, 96, 7, pad=0, stride=2)
+    brew.conv(model, 'data', 'conv1', 3, 96, 7, pad=0, stride=2)
     model.Relu('conv1', 'conv1')
     model.LRN('conv1', 'norm1', size=5, alpha=0.0005, beta=0.75, bias=2.)
     model.MaxPool('norm1', 'pool1', kernel=3, pad=0, stride=2)
     model.StopGradient('pool1', 'pool1')
     # No updates at conv1 and below (norm1 and pool1 have no params,
     # so we can stop gradients before them, too)
-    model.Conv('pool1', 'conv2', 96, 256, 5, pad=0, stride=2)
+    brew.conv(model, 'pool1', 'conv2', 96, 256, 5, pad=0, stride=2)
     model.Relu('conv2', 'conv2')
     model.LRN('conv2', 'norm2', size=5, alpha=0.0005, beta=0.75, bias=2.)
     model.MaxPool('norm2', 'pool2', kernel=3, pad=0, stride=2)
-    model.Conv('pool2', 'conv3', 256, 512, 3, pad=1, stride=1)
+    brew.conv(model, 'pool2', 'conv3', 256, 512, 3, pad=1, stride=1)
     model.Relu('conv3', 'conv3')
-    model.Conv('conv3', 'conv4', 512, 512, 3, pad=1, stride=1)
+    brew.conv(model, 'conv3', 'conv4', 512, 512, 3, pad=1, stride=1)
     model.Relu('conv4', 'conv4')
-    model.Conv('conv4', 'conv5', 512, 512, 3, pad=1, stride=1)
+    brew.conv(model, 'conv4', 'conv5', 512, 512, 3, pad=1, stride=1)
     blob_out = model.Relu('conv5', 'conv5')
     return blob_out, 512, 1. / 16.
 

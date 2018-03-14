@@ -25,6 +25,8 @@ from __future__ import unicode_literals
 
 from core.config import cfg
 
+from caffe2.python import brew
+
 # ---------------------------------------------------------------------------- #
 # Bits for specific architectures (ResNet50, ResNet101, ...)
 # ---------------------------------------------------------------------------- #
@@ -91,7 +93,7 @@ def add_ResNet_convX_body(model, block_counts, freeze_at=2):
     The final res5/conv5 stage may be optionally excluded (hence convX, where
     X = 4 or 5)."""
     assert freeze_at in [0, 2, 3, 4, 5]
-    p = model.Conv('data', 'conv1', 3, 64, 7, pad=3, stride=2, no_bias=1)
+    p = brew.conv(model, 'data', 'conv1', 3, 64, 7, pad=3, stride=2, no_bias=1)
     p = model.AffineChannel(p, 'res_conv1_bn', dim=64, inplace=True)
     p = model.Relu(p, p)
     p = model.MaxPool(p, 'pool1', kernel=3, pad=1, stride=2)
@@ -195,7 +197,8 @@ def add_shortcut(model, prefix, blob_in, dim_in, dim_out, stride):
     if dim_in == dim_out:
         return blob_in
 
-    c = model.Conv(
+    c = brew.conv(
+        model,
         blob_in,
         prefix + '_branch1',
         dim_in,
