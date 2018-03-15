@@ -61,8 +61,8 @@ Create symlinks for `VOC<year>`:
 ```
 mkdir -p $DETECTRON/lib/datasets/data/VOC<year>
 ln -s /path/to/VOC<year>/JPEGImages $DETECTRON/lib/datasets/data/VOC<year>/JPEGImages
-ln -s /path/to/VOC<year>/json/annotations $DETECTRON/lib/datasets/data/VOC<year>annotations
-ln -s /path/to/VOC<year>/devkit $DETECTRON/lib/datasets/VOC<year>/VOCdevkit<year>
+ln -s /path/to/VOC<year>/json/annotations $DETECTRON/lib/datasets/data/VOC<year>/annotations
+ln -s /path/to/VOC<year>/devkit $DETECTRON/lib/datasets/data/VOC<year>/VOCdevkit<year>
 ```
 
 ### PASCAL VOC Annotations in COCO Format
