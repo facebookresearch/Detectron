@@ -185,5 +185,18 @@ DATASETS = {
             _DATA_DIR + '/VOC2012/annotations/voc_2012_trainval.json',
         DEVKIT_DIR:
             _DATA_DIR + '/VOC2012/VOCdevkit2012'
+    },
+    'dsb_2018_train': {
+        IM_DIR:
+            _DATA_DIR + '/nuclei/nuclei_train2018',
+        ANN_FN:
+            _DATA_DIR + '/nuclei/annotations/instances_dsb2018_train.json'
+    },
+    'dsb_2018_val': {
+        IM_DIR:
+            _DATA_DIR + '/nuclei/nuclei_val2018',
+        ANN_FN:
+            _DATA_DIR + '/nuclei/annotations/instances_dsb2018_val.json'
     }
+
 }
