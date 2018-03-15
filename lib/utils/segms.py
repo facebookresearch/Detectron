@@ -199,7 +199,7 @@ def rle_mask_nms(masks, dets, thresh, mode='IOU'):
     """Performs greedy non-maximum suppression based on an overlap measurement
     between masks. The type of measurement is determined by `mode` and can be
     either 'IOU' (standard intersection over union) or 'IOMA' (intersection over
-    mininum area).
+    minimum area).
     """
     if len(masks) == 0:
         return []

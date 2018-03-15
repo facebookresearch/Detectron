@@ -55,7 +55,7 @@ class GenerateProposalsOp(object):
 
         # predicted probability of fg object for each RPN anchor
         scores = inputs[0].data
-        # predicted achors transformations
+        # predicted anchors transformations
         bbox_deltas = inputs[1].data
         # input image (height, width, scale), in which scale is the scale factor
         # applied to the original dataset image to get the network input image
@@ -71,7 +71,7 @@ class GenerateProposalsOp(object):
         shifts = np.vstack((shift_x.ravel(), shift_y.ravel(),
                             shift_x.ravel(), shift_y.ravel())).transpose()
 
-        # Broacast anchors over shifts to enumerate all anchors at all positions
+        # Broadcast anchors over shifts to enumerate all anchors at all positions
         # in the (H, W) grid:
         #   - add A anchors of shape (1, A, 4) to
         #   - K shifts of shape (K, 1, 4) to get

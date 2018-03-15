@@ -15,7 +15,7 @@
 
 """Construct minibatches for Mask R-CNN training. Handles the minibatch blobs
 that are specific to Mask R-CNN. Other blobs that are generic to RPN or
-Fast/er R-CNN are handled by their respecitive roi_data modules.
+Fast/er R-CNN are handled by their respective roi_data modules.
 """
 
 from __future__ import absolute_import

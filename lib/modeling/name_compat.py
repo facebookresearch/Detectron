@@ -38,16 +38,16 @@ from __future__ import unicode_literals
 
 
 _RENAME = {
-    # Removed "ResNet_" from the name because it wasn't relevent
+    # Removed "ResNet_" from the name because it wasn't relevant
     'mask_rcnn_heads.ResNet_mask_rcnn_fcn_head_v1up4convs':
         'mask_rcnn_heads.mask_rcnn_fcn_head_v1up4convs',
-    # Removed "ResNet_" from the name because it wasn't relevent
+    # Removed "ResNet_" from the name because it wasn't relevant
     'mask_rcnn_heads.ResNet_mask_rcnn_fcn_head_v1up':
         'mask_rcnn_heads.mask_rcnn_fcn_head_v1up',
-    # Removed "ResNet_" from the name because it wasn't relevent
+    # Removed "ResNet_" from the name because it wasn't relevant
     'mask_rcnn_heads.ResNet_mask_rcnn_fcn_head_v0upshare':
         'mask_rcnn_heads.mask_rcnn_fcn_head_v0upshare',
-    # Removed "ResNet_" from the name because it wasn't relevent
+    # Removed "ResNet_" from the name because it wasn't relevant
     'mask_rcnn_heads.ResNet_mask_rcnn_fcn_head_v0up':
         'mask_rcnn_heads.mask_rcnn_fcn_head_v0up',
     # Removed head_builder module in favor of the more specific fast_rcnn name

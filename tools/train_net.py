@@ -112,7 +112,7 @@ def main():
     logger.info(pprint.pformat(cfg))
     # Note that while we set the numpy random seed network training will not be
     # deterministic in general. There are sources of non-determinism that cannot
-    # be removed with a reasonble execution-speed tradeoff (such as certain
+    # be removed with a reasonable execution-speed tradeoff (such as certain
     # non-deterministic cudnn functions).
     np.random.seed(cfg.RNG_SEED)
     # Execute the training run

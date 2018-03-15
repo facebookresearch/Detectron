@@ -28,7 +28,7 @@ import utils.blob as blob_utils
 
 
 def get_keypoints():
-    """Get the COCO keypoints and their left/right flip coorespondence map."""
+    """Get the COCO keypoints and their left/right flip correspondence map."""
     # Keypoints are not available in the COCO json for the test split, so we
     # provide them here.
     keypoints = [

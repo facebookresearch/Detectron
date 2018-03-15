@@ -13,7 +13,7 @@
 # limitations under the License.
 ##############################################################################
 
-"""Common utility functions for RPN and RetinaNet minibtach blobs preparation.
+"""Common utility functions for RPN and RetinaNet minibatch blobs preparation.
 """
 
 from __future__ import absolute_import
@@ -76,7 +76,7 @@ def get_field_of_anchors(
     shift_y = shift_y.ravel()
     shifts = np.vstack((shift_x, shift_y, shift_x, shift_y)).transpose()
 
-    # Broacast anchors over shifts to enumerate all anchors at all positions
+    # Broadcast anchors over shifts to enumerate all anchors at all positions
     # in the (H, W) grid:
     #   - add A cell anchors of shape (1, A, 4) to
     #   - K shifts of shape (K, 1, 4) to get

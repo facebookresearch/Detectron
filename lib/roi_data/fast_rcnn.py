@@ -15,7 +15,7 @@
 
 """Construct minibatches for Fast R-CNN training. Handles the minibatch blobs
 that are specific to Fast R-CNN. Other blobs that are generic to RPN, etc.
-are handled by their respecitive roi_data modules.
+are handled by their respective roi_data modules.
 """
 
 from __future__ import absolute_import
@@ -52,7 +52,7 @@ def get_fast_rcnn_blob_names(is_training=True):
         # targets per class
         blob_names += ['bbox_targets']
         # bbox_inside_weights blob: At most 4 targets per roi are active
-        # this binary vector sepcifies the subset of active targets
+        # this binary vector specifies the subset of active targets
         blob_names += ['bbox_inside_weights']
         blob_names += ['bbox_outside_weights']
     if is_training and cfg.MODEL.MASK_ON:

@@ -96,7 +96,7 @@ def add_fpn_onto_conv_body(
 ):
     """Add the specified conv body to the model and then add FPN levels to it.
     """
-    # Note: blobs_conv is in revsersed order: [fpn5, fpn4, fpn3, fpn2]
+    # Note: blobs_conv is in reversed order: [fpn5, fpn4, fpn3, fpn2]
     # similarly for dims_conv: [2048, 1024, 512, 256]
     # similarly for spatial_scales_fpn: [1/32, 1/16, 1/8, 1/4]
 

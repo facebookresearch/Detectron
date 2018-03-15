@@ -16,7 +16,7 @@
 ##############################################################################
 
 """Script for converting Caffe (<= 1.0) models into the the simple state dict
-format used by Detectron. For example, this script can convert the orignal
+format used by Detectron. For example, this script can convert the original
 ResNet models released by MSRA.
 """
 

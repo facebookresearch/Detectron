@@ -104,7 +104,7 @@ class DetectionModelHelper(cnn.CNNModelHelper):
             return self.net.AffineChannel([blob_in, scale, bias], blob_out)
 
     def GenerateProposals(self, blobs_in, blobs_out, anchors, spatial_scale):
-        """Op for generating RPN porposals.
+        """Op for generating RPN proposals.
 
         blobs_in:
           - 'rpn_cls_probs': 4D tensor of shape (N, A, H, W), where N is the

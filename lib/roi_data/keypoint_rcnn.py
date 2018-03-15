@@ -16,7 +16,7 @@
 """Construct minibatches for Mask R-CNN training when keypoints are enabled.
 Handles the minibatch blobs that are specific to training Mask R-CNN for
 keypoint detection. Other blobs that are generic to RPN or Fast/er R-CNN are
-handled by their respecitive roi_data modules.
+handled by their respective roi_data modules.
 """
 
 from __future__ import absolute_import
