@@ -20,7 +20,6 @@
 # Licensed under The MIT License [see LICENSE for details]
 # Written by Ross Girshick
 # --------------------------------------------------------
-
 """Detectron config system.
 
 This file specifies default config options for Detectron. You should not
@@ -77,6 +76,10 @@ __C.TRAIN.WEIGHTS = b''
 # Available dataset list: datasets.dataset_catalog.DATASETS.keys()
 # If multiple datasets are listed, the model is trained on their union
 __C.TRAIN.DATASETS = ()
+
+# Image directory to use if datasets are specified as file paths to existing
+# files in the mscoco format.
+__C.TRAIN.IM_DIR = ''
 
 # Scales to use during training
 # Each scale is the pixel size of an image's shortest side
@@ -212,6 +215,10 @@ __C.TEST.WEIGHTS = b''
 # Available dataset list: datasets.dataset_catalog.DATASETS.keys()
 # If multiple datasets are listed, testing is performed on each one sequentially
 __C.TEST.DATASETS = ()
+
+# Image directory to use if datasets are specified as file paths to existing
+# files in the mscoco format.
+__C.TEST.IM_DIR = ''
 
 # Scales to use during testing
 # Each scale is the pixel size of an image's shortest side
@@ -1036,8 +1043,12 @@ def get_output_dir(datasets, training=True):
     """Get the output directory determined by the current global config."""
     assert isinstance(datasets, (tuple, list, basestring)), \
         'datasets argument must be of type tuple, list or string'
-    is_string = isinstance(datasets, basestring)
-    dataset_name = datasets if is_string else ':'.join(datasets)
+    from os.path import basename
+    if isinstance(datasets, basestring):
+        datasets = [datasets]
+    # If datasets are specified as paths to a file, use the filename without
+    # extensions as the database name in the output directory.
+    dataset_name = ':'.join(basename(p).split('.')[0] for p in datasets)
     tag = 'train' if training else 'test'
     # <output-dir>/<train|test>/<dataset-name>/<model-type>/
     outdir = osp.join(__C.OUTPUT_DIR, tag, dataset_name, __C.MODEL.TYPE)

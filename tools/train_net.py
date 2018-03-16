@@ -115,6 +115,7 @@ def main():
     # be removed with a reasonble execution-speed tradeoff (such as certain
     # non-deterministic cudnn functions).
     np.random.seed(cfg.RNG_SEED)
+    _hack_register_config_datasets()
     # Execute the training run
     checkpoints = train_model()
     # Test the trained model
@@ -247,10 +248,34 @@ def setup_model_for_training(model, output_dir):
     return output_dir
 
 
+def _hack_register_config_datasets():
+    # Allow the user to specify custom datasets without modifing core code.
+    logger = logging.getLogger(__name__)
+
+    def _hack(names, im_dir, root):
+        from datasets import dataset_catalog
+        for name in names:
+            if name not in dataset_catalog.DATASETS:
+                # If name is a file path the user might have given us a hint
+                fpath = os.path.join(root, name)
+                if os.path.exists(fpath):
+                    logger.info('Hack register dataset: {}'.format(name))
+                    # HACK this dataset into the catelog
+                    dataset_catalog.DATASETS[name] = {
+                        dataset_catalog.IM_DIR: im_dir,
+                        dataset_catalog.ANN_FN: fpath,
+                    }
+
+    logger.info('HACKING CUSTOM DATASETS')
+    _hack(cfg.TRAIN.DATASETS, cfg.TRAIN.IM_DIR, cfg.ROOT_DIR)
+    _hack(cfg.TEST.DATASETS, cfg.TEST.IM_DIR, cfg.ROOT_DIR)
+
+
 def add_model_training_inputs(model):
     """Load the training dataset and attach the training inputs to the model."""
     logger = logging.getLogger(__name__)
     logger.info('Loading dataset: {}'.format(cfg.TRAIN.DATASETS))
+
     roidb = combined_roidb_for_training(
         cfg.TRAIN.DATASETS, cfg.TRAIN.PROPOSAL_FILES
     )
