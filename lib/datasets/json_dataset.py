@@ -126,7 +126,8 @@ class JsonDataset(object):
                 '_add_proposals_from_file took {:.3f}s'.
                 format(self.debug_timer.toc(average=False))
             )
-        _add_class_assignments(roidb)
+        if not cfg.MODEL.CLASSIFICATION:
+            _add_class_assignments(roidb)
         return roidb
 
     def _prep_roidb_entry(self, entry):
@@ -142,21 +143,22 @@ class JsonDataset(object):
         entry['flipped'] = False
         entry['has_visible_keypoints'] = False
         # Empty placeholders
-        entry['boxes'] = np.empty((0, 4), dtype=np.float32)
-        entry['segms'] = []
         entry['gt_classes'] = np.empty((0), dtype=np.int32)
-        entry['seg_areas'] = np.empty((0), dtype=np.float32)
-        entry['gt_overlaps'] = scipy.sparse.csr_matrix(
-            np.empty((0, self.num_classes), dtype=np.float32)
-        )
         entry['is_crowd'] = np.empty((0), dtype=np.bool)
-        # 'box_to_gt_ind_map': Shape is (#rois). Maps from each roi to the index
-        # in the list of rois that satisfy np.where(entry['gt_classes'] > 0)
-        entry['box_to_gt_ind_map'] = np.empty((0), dtype=np.int32)
-        if self.keypoints is not None:
-            entry['gt_keypoints'] = np.empty(
-                (0, 3, self.num_keypoints), dtype=np.int32
+        if not cfg.MODEL.CLASSIFICATION:
+            entry['boxes'] = np.empty((0, 4), dtype=np.float32)
+            entry['segms'] = []
+            entry['seg_areas'] = np.empty((0), dtype=np.float32)
+            entry['gt_overlaps'] = scipy.sparse.csr_matrix(
+                np.empty((0, self.num_classes), dtype=np.float32)
             )
+            # 'box_to_gt_ind_map': Shape is (#rois). Maps from each roi to the index
+            # in the list of rois that satisfy np.where(entry['gt_classes'] > 0)
+            entry['box_to_gt_ind_map'] = np.empty((0), dtype=np.int32)
+            if self.keypoints is not None:
+                entry['gt_keypoints'] = np.empty(
+                    (0, 3, self.num_keypoints), dtype=np.int32
+                )
         # Remove unwanted fields that come from the json file (if they exist)
         for k in ['date_captured', 'url', 'license', 'file_name']:
             if k in entry:
@@ -171,84 +173,91 @@ class JsonDataset(object):
         valid_segms = []
         width = entry['width']
         height = entry['height']
-        for obj in objs:
-            # crowd regions are RLE encoded and stored as dicts
-            if isinstance(obj['segmentation'], list):
-                # Valid polygons have >= 3 points, so require >= 6 coordinates
-                obj['segmentation'] = [
-                    p for p in obj['segmentation'] if len(p) >= 6
-                ]
-            if obj['area'] < cfg.TRAIN.GT_MIN_AREA:
-                continue
-            if 'ignore' in obj and obj['ignore'] == 1:
-                continue
-            # Convert form (x1, y1, w, h) to (x1, y1, x2, y2)
-            x1, y1, x2, y2 = box_utils.xywh_to_xyxy(obj['bbox'])
-            x1, y1, x2, y2 = box_utils.clip_xyxy_to_image(
-                x1, y1, x2, y2, height, width
-            )
-            # Require non-zero seg area and more than 1x1 box size
-            if obj['area'] > 0 and x2 > x1 and y2 > y1:
-                obj['clean_bbox'] = [x1, y1, x2, y2]
-                valid_objs.append(obj)
-                valid_segms.append(obj['segmentation'])
+        if cfg.MODEL.CLASSIFICATION :
+            valid_objs = objs
+        else :
+            for obj in objs:
+                # crowd regions are RLE encoded and stored as dicts
+                if isinstance(obj['segmentation'], list):
+                    # Valid polygons have >= 3 points, so require >= 6 coordinates
+                    obj['segmentation'] = [
+                        p for p in obj['segmentation'] if len(p) >= 6
+                    ]
+                if obj['area'] < cfg.TRAIN.GT_MIN_AREA:
+                    continue
+                if 'ignore' in obj and obj['ignore'] == 1:
+                    continue
+                # Convert form (x1, y1, w, h) to (x1, y1, x2, y2)
+                x1, y1, x2, y2 = box_utils.xywh_to_xyxy(obj['bbox'])
+                x1, y1, x2, y2 = box_utils.clip_xyxy_to_image(
+                    x1, y1, x2, y2, height, width
+                )
+                # Require non-zero seg area and more than 1x1 box size
+                if obj['area'] > 0 and x2 > x1 and y2 > y1:
+                    obj['clean_bbox'] = [x1, y1, x2, y2]
+                    valid_objs.append(obj)
+                    valid_segms.append(obj['segmentation'])
+
         num_valid_objs = len(valid_objs)
-
-        boxes = np.zeros((num_valid_objs, 4), dtype=entry['boxes'].dtype)
         gt_classes = np.zeros((num_valid_objs), dtype=entry['gt_classes'].dtype)
-        gt_overlaps = np.zeros(
-            (num_valid_objs, self.num_classes),
-            dtype=entry['gt_overlaps'].dtype
-        )
-        seg_areas = np.zeros((num_valid_objs), dtype=entry['seg_areas'].dtype)
         is_crowd = np.zeros((num_valid_objs), dtype=entry['is_crowd'].dtype)
-        box_to_gt_ind_map = np.zeros(
-            (num_valid_objs), dtype=entry['box_to_gt_ind_map'].dtype
-        )
-        if self.keypoints is not None:
-            gt_keypoints = np.zeros(
-                (num_valid_objs, 3, self.num_keypoints),
-                dtype=entry['gt_keypoints'].dtype
+        if not cfg.MODEL.CLASSIFICATION:
+            boxes = np.zeros((num_valid_objs, 4), dtype=entry['boxes'].dtype)
+            gt_overlaps = np.zeros(
+                (num_valid_objs, self.num_classes),
+                dtype=entry['gt_overlaps'].dtype
             )
+            seg_areas = np.zeros((num_valid_objs), dtype=entry['seg_areas'].dtype)
+            box_to_gt_ind_map = np.zeros(
+                (num_valid_objs), dtype=entry['box_to_gt_ind_map'].dtype
+            )
+            if self.keypoints is not None:
+                gt_keypoints = np.zeros(
+                    (num_valid_objs, 3, self.num_keypoints),
+                    dtype=entry['gt_keypoints'].dtype
+                )
 
-        im_has_visible_keypoints = False
+            im_has_visible_keypoints = False
         for ix, obj in enumerate(valid_objs):
             cls = self.json_category_id_to_contiguous_id[obj['category_id']]
-            boxes[ix, :] = obj['clean_bbox']
             gt_classes[ix] = cls
-            seg_areas[ix] = obj['area']
             is_crowd[ix] = obj['iscrowd']
-            box_to_gt_ind_map[ix] = ix
-            if self.keypoints is not None:
-                gt_keypoints[ix, :, :] = self._get_gt_keypoints(obj)
-                if np.sum(gt_keypoints[ix, 2, :]) > 0:
-                    im_has_visible_keypoints = True
-            if obj['iscrowd']:
-                # Set overlap to -1 for all classes for crowd objects
-                # so they will be excluded during training
-                gt_overlaps[ix, :] = -1.0
-            else:
-                gt_overlaps[ix, cls] = 1.0
-        entry['boxes'] = np.append(entry['boxes'], boxes, axis=0)
-        entry['segms'].extend(valid_segms)
-        # To match the original implementation:
-        # entry['boxes'] = np.append(
-        #     entry['boxes'], boxes.astype(np.int).astype(np.float), axis=0)
+            if not cfg.MODEL.CLASSIFICATION:
+                boxes[ix, :] = obj['clean_bbox']
+                seg_areas[ix] = obj['area']
+                box_to_gt_ind_map[ix] = ix
+                if self.keypoints is not None:
+                    gt_keypoints[ix, :, :] = self._get_gt_keypoints(obj)
+                    if np.sum(gt_keypoints[ix, 2, :]) > 0:
+                        im_has_visible_keypoints = True
+                if obj['iscrowd']:
+                    # Set overlap to -1 for all classes for crowd objects
+                    # so they will be excluded during training
+                    gt_overlaps[ix, :] = -1.0
+                else:
+                    gt_overlaps[ix, cls] = 1.0
         entry['gt_classes'] = np.append(entry['gt_classes'], gt_classes)
-        entry['seg_areas'] = np.append(entry['seg_areas'], seg_areas)
-        entry['gt_overlaps'] = np.append(
-            entry['gt_overlaps'].toarray(), gt_overlaps, axis=0
-        )
-        entry['gt_overlaps'] = scipy.sparse.csr_matrix(entry['gt_overlaps'])
         entry['is_crowd'] = np.append(entry['is_crowd'], is_crowd)
-        entry['box_to_gt_ind_map'] = np.append(
-            entry['box_to_gt_ind_map'], box_to_gt_ind_map
-        )
-        if self.keypoints is not None:
-            entry['gt_keypoints'] = np.append(
-                entry['gt_keypoints'], gt_keypoints, axis=0
+        if not cfg.MODEL.CLASSIFICATION:
+            entry['boxes'] = np.append(entry['boxes'], boxes, axis=0)
+            entry['segms'].extend(valid_segms)
+            # To match the original implementation:
+            # entry['boxes'] = np.append(
+            #     entry['boxes'], boxes.astype(np.int).astype(np.float), axis=0)
+
+            entry['seg_areas'] = np.append(entry['seg_areas'], seg_areas)
+            entry['gt_overlaps'] = np.append(
+                entry['gt_overlaps'].toarray(), gt_overlaps, axis=0
             )
-            entry['has_visible_keypoints'] = im_has_visible_keypoints
+            entry['gt_overlaps'] = scipy.sparse.csr_matrix(entry['gt_overlaps'])
+            entry['box_to_gt_ind_map'] = np.append(
+                entry['box_to_gt_ind_map'], box_to_gt_ind_map
+            )
+            if self.keypoints is not None:
+                entry['gt_keypoints'] = np.append(
+                    entry['gt_keypoints'], gt_keypoints, axis=0
+                )
+                entry['has_visible_keypoints'] = im_has_visible_keypoints
 
     def _add_proposals_from_file(
         self, roidb, proposal_file, min_proposal_size, top_k, crowd_thresh

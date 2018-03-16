@@ -95,7 +95,7 @@ def main(ind_range=None, multi_gpu_testing=False):
     all_results = run_inference(
         ind_range=ind_range, multi_gpu_testing=multi_gpu_testing
     )
-    if not ind_range:
+    if not ind_range and not cfg.MODEL.CLASSIFICATION:
         task_evaluation.check_expected_results(
             all_results,
             atol=cfg.EXPECTED_RESULTS_ATOL,
