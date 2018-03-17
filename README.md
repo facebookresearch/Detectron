@@ -82,7 +82,7 @@ python2 tools/infer_simple.py --cfg experiments/e2e_faster_rcnn_resnet-50-FPN_pa
     --output-dir /tmp/detectron-visualizations --wts /tmp/detectron-download-cache/voc2007/model_final.pkl \
     demo2
 ```
-Unfortunately, I found all person is labeld as bird. This maybe caused by the json dataset is not corrrectly converted.
+Unfortunately, I found all persons are labeld as bird. This may be caused by the json datasets which are not corrrectly converted.
 
 ## 9. Run test_net.py on pascal 2007 test dataset.
 ```
