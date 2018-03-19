@@ -87,10 +87,13 @@ def vis(dataset, detections_pkl, thresh, output_dir, limit=0):
     with open(detections_pkl) as f:
         dets = pickle.load(f)
 
-    all_boxes = dets['all_boxes']    
-    all_segms = dets.get('all_segms', None)        
-    all_keyps = dets.get('all_keyps', None)
-        
+    assert all(k in dets for k in ['all_boxes', 'all_segms', 'all_keyps']), \
+        'Expected detections pkl file in the format used by test_engine.py'
+
+    all_boxes = dets['all_boxes']
+    all_segms = dets['all_segms']
+    all_keyps = dets['all_keyps']
+    
     def id_or_index(ix, val):
         if not val:
             return val
@@ -101,8 +104,10 @@ def vis(dataset, detections_pkl, thresh, output_dir, limit=0):
             break
         if not ix % 10:
             print('{:d}/{:d}'.format(ix + 1, len(roidb)))
+
         im = cv2.imread(entry['image'])
         im_name = os.path.splitext(os.path.basename(entry['image']))[0]
+
         cls_boxes_i = [
             id_or_index(ix, j) for j in all_boxes)
         ]

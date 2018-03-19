@@ -31,6 +31,7 @@ import yaml
 from caffe2.python import workspace
 
 from core.config import cfg
+from core.config import get_output_dir
 from core.rpn_generator import generate_rpn_on_dataset
 from core.rpn_generator import generate_rpn_on_range
 from core.test import im_detect_all
@@ -62,7 +63,7 @@ def get_eval_functions():
     return parent_func, child_func
 
 
-def run_inference(output_dir, ind_range=None, multi_gpu_testing=False, gpu_id=0):
+def run_inference(ind_range=None, multi_gpu_testing=False, gpu_id=0):
     parent_func, child_func = get_eval_functions()
 
     is_parent = ind_range is None
@@ -80,6 +81,7 @@ def run_inference(output_dir, ind_range=None, multi_gpu_testing=False, gpu_id=0)
             cfg.TEST.DATASET = cfg.TEST.DATASETS[i]
             if cfg.TEST.PRECOMPUTED_PROPOSALS:
                 cfg.TEST.PROPOSAL_FILE = cfg.TEST.PROPOSAL_FILES[i]
+            output_dir = get_output_dir(cfg.TEST.DATASET, training=False)
             results = parent_func(output_dir, multi_gpu=multi_gpu_testing)
             all_results.update(results)
 
@@ -89,6 +91,7 @@ def run_inference(output_dir, ind_range=None, multi_gpu_testing=False, gpu_id=0)
         # In this case test_net was called via subprocess.Popen to execute on a
         # range of inputs on a single dataset (i.e., use cfg.TEST.DATASET and
         # don't loop over cfg.TEST.DATASETS)
+        output_dir = get_output_dir(cfg.TEST.DATASET, training=False)
         return child_func(output_dir, ind_range=ind_range, gpu_id=gpu_id)
 
 

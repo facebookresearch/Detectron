@@ -104,7 +104,7 @@ def vis_mask(img, mask, col, alpha=0.4, show_border=True, border_thick=1):
     img[idx[0], idx[1], :] += alpha * col
 
     if show_border:
-        contours, _ = cv2.findContours(
+        _, contours, _ = cv2.findContours(
             mask.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
         cv2.drawContours(img, contours, -1, _WHITE, border_thick, cv2.LINE_AA)
 
@@ -210,7 +210,7 @@ def vis_one_image_opencv(
     if boxes is None or boxes.shape[0] == 0 or max(boxes[:, 4]) < thresh:
         return im
 
-    if segms is not None:
+    if segms is not None and len(segms) > 0:
         masks = mask_util.decode(segms)
         color_list = colormap()
         mask_color_id = 0
@@ -265,7 +265,7 @@ def vis_one_image(
 
     dataset_keypoints, _ = keypoint_utils.get_keypoints()
 
-    if segms is not None:
+    if segms is not None and len(segms) > 0:
         masks = mask_util.decode(segms)
 
     color_list = colormap(rgb=True) / 255

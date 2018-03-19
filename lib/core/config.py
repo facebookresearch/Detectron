@@ -1032,13 +1032,15 @@ def cache_cfg_urls():
     )
 
 
-def get_output_dir(training=True):
+def get_output_dir(datasets, training=True):
     """Get the output directory determined by the current global config."""
-    dataset = __C.TRAIN.DATASETS if training else __C.TEST.DATASETS
-    dataset = ':'.join(dataset)
+    assert isinstance(datasets, (tuple, list, basestring)), \
+        'datasets argument must be of type tuple, list or string'
+    is_string = isinstance(datasets, basestring)
+    dataset_name = datasets if is_string else ':'.join(datasets)
     tag = 'train' if training else 'test'
-    # <output-dir>/<train|test>/<dataset>/<model-type>/
-    outdir = osp.join(__C.OUTPUT_DIR, tag, dataset, __C.MODEL.TYPE)
+    # <output-dir>/<train|test>/<dataset-name>/<model-type>/
+    outdir = osp.join(__C.OUTPUT_DIR, tag, dataset_name, __C.MODEL.TYPE)
     if not osp.exists(outdir):
         os.makedirs(outdir)
     return outdir

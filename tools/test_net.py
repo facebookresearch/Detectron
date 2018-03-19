@@ -33,7 +33,6 @@ from caffe2.python import workspace
 
 from core.config import assert_and_infer_cfg
 from core.config import cfg
-from core.config import get_output_dir
 from core.config import merge_cfg_from_file
 from core.config import merge_cfg_from_list
 from core.test_engine import run_inference
@@ -93,9 +92,8 @@ def parse_args():
 
 
 def main(ind_range=None, multi_gpu_testing=False):
-    output_dir = get_output_dir(training=False)
     all_results = run_inference(
-        output_dir, ind_range=ind_range, multi_gpu_testing=multi_gpu_testing
+        ind_range=ind_range, multi_gpu_testing=multi_gpu_testing
     )
     if not ind_range:
         task_evaluation.check_expected_results(
