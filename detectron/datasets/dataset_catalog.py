@@ -162,11 +162,19 @@ _DATASETS = {
         _ANN_FN:
             _DATA_DIR + '/coco/annotations/image_info_test-dev2015.json'
     },
-    'voc_2007_trainval': {
+    'voc_2007_train': {
         _IM_DIR:
             _DATA_DIR + '/VOC2007/JPEGImages',
         _ANN_FN:
-            _DATA_DIR + '/VOC2007/annotations/voc_2007_trainval.json',
+            _DATA_DIR + '/VOC2007/annotations/voc_2007_train.json',
+        _DEVKIT_DIR:
+            _DATA_DIR + '/VOC2007/VOCdevkit2007'
+    },
+    'voc_2007_val': {
+        _IM_DIR:
+            _DATA_DIR + '/VOC2007/JPEGImages',
+        _ANN_FN:
+            _DATA_DIR + '/VOC2007/annotations/voc_2007_val.json',
         _DEVKIT_DIR:
             _DATA_DIR + '/VOC2007/VOCdevkit2007'
     },
@@ -178,11 +186,19 @@ _DATASETS = {
         _DEVKIT_DIR:
             _DATA_DIR + '/VOC2007/VOCdevkit2007'
     },
-    'voc_2012_trainval': {
+    'voc_2012_train': {
         _IM_DIR:
             _DATA_DIR + '/VOC2012/JPEGImages',
         _ANN_FN:
-            _DATA_DIR + '/VOC2012/annotations/voc_2012_trainval.json',
+            _DATA_DIR + '/VOC2012/annotations/voc_2012_train.json',
+        _DEVKIT_DIR:
+            _DATA_DIR + '/VOC2012/VOCdevkit2012'
+    },
+    'voc_2012_val': {
+        _IM_DIR:
+            _DATA_DIR + '/VOC2012/JPEGImages',
+        _ANN_FN:
+            _DATA_DIR + '/VOC2012/annotations/voc_2012_val.json',
         _DEVKIT_DIR:
             _DATA_DIR + '/VOC2012/VOCdevkit2012'
     }
