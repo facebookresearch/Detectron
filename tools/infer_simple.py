@@ -94,6 +94,7 @@ def main(args):
     logger = logging.getLogger(__name__)
     merge_cfg_from_file(args.cfg)
     cfg.TEST.WEIGHTS = args.weights
+    cfg.TRAIN.WEIGHTS = args.weights
     cfg.NUM_GPUS = 1
     assert_and_infer_cfg()
     model = infer_engine.initialize_model_from_cfg()
