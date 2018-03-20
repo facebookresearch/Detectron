@@ -82,7 +82,9 @@ def get_inference_dataset(index, is_parent=True):
     return dataset_name, proposal_file
 
 
-def run_inference(ind_range=None, multi_gpu_testing=False, gpu_id=0):
+def run_inference(
+    weights_file, ind_range=None, multi_gpu_testing=False, gpu_id=0
+):
     parent_func, child_func = get_eval_functions()
 
     is_parent = ind_range is None
@@ -96,6 +98,7 @@ def run_inference(ind_range=None, multi_gpu_testing=False, gpu_id=0):
             dataset_name, proposal_file = get_inference_dataset(i)
             output_dir = get_output_dir(dataset_name, training=False)
             results = parent_func(
+                weights_file,
                 dataset_name,
                 proposal_file,
                 output_dir,
@@ -111,6 +114,7 @@ def run_inference(ind_range=None, multi_gpu_testing=False, gpu_id=0):
         dataset_name, proposal_file = get_inference_dataset(0, is_parent=False)
         output_dir = get_output_dir(dataset_name, training=False)
         return child_func(
+            weights_file,
             dataset_name,
             proposal_file,
             output_dir,
@@ -120,7 +124,12 @@ def run_inference(ind_range=None, multi_gpu_testing=False, gpu_id=0):
 
 
 def test_net_on_dataset(
-    dataset_name, proposal_file, output_dir, multi_gpu=False, gpu_id=0
+    weights_file,
+    dataset_name,
+    proposal_file,
+    output_dir,
+    multi_gpu=False,
+    gpu_id=0
 ):
     """Run inference on a dataset."""
     dataset = JsonDataset(dataset_name)
@@ -129,11 +138,11 @@ def test_net_on_dataset(
     if multi_gpu:
         num_images = len(dataset.get_roidb())
         all_boxes, all_segms, all_keyps = multi_gpu_test_net_on_dataset(
-            dataset_name, proposal_file, num_images, output_dir
+            weights_file, dataset_name, proposal_file, num_images, output_dir
         )
     else:
         all_boxes, all_segms, all_keyps = test_net(
-            dataset_name, proposal_file, output_dir, gpu_id=gpu_id
+            weights_file, dataset_name, proposal_file, output_dir, gpu_id=gpu_id
         )
     test_timer.toc()
     logger.info('Total inference time: {:.3f}s'.format(test_timer.average_time))
@@ -144,7 +153,7 @@ def test_net_on_dataset(
 
 
 def multi_gpu_test_net_on_dataset(
-    dataset_name, proposal_file, num_images, output_dir
+    weights_file, dataset_name, proposal_file, num_images, output_dir
 ):
     """Multi-gpu inference on a dataset."""
     binary_dir = envu.get_runtime_dir()
@@ -154,6 +163,7 @@ def multi_gpu_test_net_on_dataset(
 
     # Pass the target dataset and proposal file (if any) via the command line
     opts = ['TEST.DATASETS', '("{}",)'.format(dataset_name)]
+    opts += ['TEST.WEIGHTS', weights_file]
     if proposal_file:
         opts += ['TEST.PROPOSAL_FILES', '("{}",)'.format(proposal_file)]
 
@@ -191,19 +201,24 @@ def multi_gpu_test_net_on_dataset(
     return all_boxes, all_segms, all_keyps
 
 
-def test_net(dataset_name, proposal_file, output_dir, ind_range=None, gpu_id=0):
+def test_net(
+    weights_file,
+    dataset_name,
+    proposal_file,
+    output_dir,
+    ind_range=None,
+    gpu_id=0
+):
     """Run inference on all images in a dataset or over an index range of images
     in a dataset using a single GPU.
     """
-    assert cfg.TEST.WEIGHTS != '', \
-        'TEST.WEIGHTS must be set to the model file to test'
     assert not cfg.MODEL.RPN_ONLY, \
         'Use rpn_generate to generate proposals from RPN-only models'
 
     roidb, dataset, start_ind, end_ind, total_num_images = get_roidb_and_dataset(
         dataset_name, proposal_file, ind_range
     )
-    model = initialize_model_from_cfg(gpu_id=gpu_id)
+    model = initialize_model_from_cfg(weights_file, gpu_id=gpu_id)
     num_images = len(roidb)
     num_classes = cfg.MODEL.NUM_CLASSES
     all_boxes, all_segms, all_keyps = empty_results(num_classes, num_images)
@@ -292,13 +307,13 @@ def test_net(dataset_name, proposal_file, output_dir, ind_range=None, gpu_id=0):
     return all_boxes, all_segms, all_keyps
 
 
-def initialize_model_from_cfg(gpu_id=0):
+def initialize_model_from_cfg(weights_file, gpu_id=0):
     """Initialize a model from the global cfg. Loads test-time weights and
     creates the networks in the Caffe2 workspace.
     """
     model = model_builder.create(cfg.MODEL.TYPE, train=False, gpu_id=gpu_id)
     net_utils.initialize_gpu_from_weights_file(
-        model, cfg.TEST.WEIGHTS, gpu_id=gpu_id,
+        model, weights_file, gpu_id=gpu_id,
     )
     model_builder.add_inference_inputs(model)
     workspace.CreateNet(model.net)

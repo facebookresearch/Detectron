@@ -54,7 +54,12 @@ logger = logging.getLogger(__name__)
 
 
 def generate_rpn_on_dataset(
-    dataset_name, _proposal_file_ignored, output_dir, multi_gpu=False, gpu_id=0
+    weights_file,
+    dataset_name,
+    _proposal_file_ignored,
+    output_dir,
+    multi_gpu=False,
+    gpu_id=0
 ):
     """Run inference on a dataset."""
     dataset = JsonDataset(dataset_name)
@@ -63,12 +68,17 @@ def generate_rpn_on_dataset(
     if multi_gpu:
         num_images = len(dataset.get_roidb())
         _boxes, _scores, _ids, rpn_file = multi_gpu_generate_rpn_on_dataset(
-            dataset_name, _proposal_file_ignored, num_images, output_dir
+            weights_file, dataset_name, _proposal_file_ignored, num_images,
+            output_dir
         )
     else:
         # Processes entire dataset range by default
         _boxes, _scores, _ids, rpn_file = generate_rpn_on_range(
-            dataset_name, _proposal_file_ignored, output_dir, gpu_id=gpu_id
+            weights_file,
+            dataset_name,
+            _proposal_file_ignored,
+            output_dir,
+            gpu_id=gpu_id
         )
     test_timer.toc()
     logger.info('Total inference time: {:.3f}s'.format(test_timer.average_time))
@@ -76,7 +86,7 @@ def generate_rpn_on_dataset(
 
 
 def multi_gpu_generate_rpn_on_dataset(
-    dataset_name, _proposal_file_ignored, num_images, output_dir
+    weights_file, dataset_name, _proposal_file_ignored, num_images, output_dir
 ):
     """Multi-gpu inference on a dataset."""
     # Retrieve the test_net binary path
@@ -87,6 +97,7 @@ def multi_gpu_generate_rpn_on_dataset(
 
     # Pass the target dataset via the command line
     opts = ['TEST.DATASETS', '("{}",)'.format(dataset_name)]
+    opts += ['TEST.WEIGHTS', weights_file]
 
     # Run inference in parallel in subprocesses
     outputs = subprocess_utils.process_in_parallel(
@@ -109,13 +120,16 @@ def multi_gpu_generate_rpn_on_dataset(
 
 
 def generate_rpn_on_range(
-    dataset_name, _proposal_file_ignored, output_dir, ind_range=None, gpu_id=0
+    weights_file,
+    dataset_name,
+    _proposal_file_ignored,
+    output_dir,
+    ind_range=None,
+    gpu_id=0
 ):
     """Run inference on all images in a dataset or over an index range of images
     in a dataset using a single GPU.
     """
-    assert cfg.TEST.WEIGHTS != '', \
-        'TEST.WEIGHTS must be set to the model file to test'
     assert cfg.MODEL.RPN_ONLY or cfg.MODEL.FASTER_RCNN
 
     roidb, start_ind, end_ind, total_num_images = get_roidb(
@@ -127,7 +141,7 @@ def generate_rpn_on_range(
 
     model = model_builder.create(cfg.MODEL.TYPE, train=False, gpu_id=gpu_id)
     nu.initialize_gpu_from_weights_file(
-        model, cfg.TEST.WEIGHTS, gpu_id=gpu_id,
+        model, weights_file, gpu_id=gpu_id,
     )
     model_builder.add_inference_inputs(model)
     workspace.CreateNet(model.net)

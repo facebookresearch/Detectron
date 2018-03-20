@@ -270,12 +270,10 @@ def dump_proto_files(model, output_dir):
 
 def test_model(model_file, multi_gpu_testing, opts=None):
     """Test a model."""
-    # All arguments to inference functions are passed via cfg
-    cfg.TEST.WEIGHTS = model_file
     # Clear memory before inference
     workspace.ResetWorkspace()
     # Run inference
-    test_net.main(multi_gpu_testing=multi_gpu_testing)
+    test_net.main(model_file, multi_gpu_testing=multi_gpu_testing)
 
 
 if __name__ == '__main__':

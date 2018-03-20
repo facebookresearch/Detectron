@@ -98,14 +98,13 @@ def parse_args():
 
 def get_rpn_box_proposals(im, args):
     merge_cfg_from_file(args.rpn_cfg)
-    cfg.TEST.WEIGHTS = args.rpn_pkl
     cfg.NUM_GPUS = 1
     cfg.MODEL.RPN_ONLY = True
     cfg.TEST.RPN_PRE_NMS_TOP_N = 10000
     cfg.TEST.RPN_POST_NMS_TOP_N = 2000
     assert_and_infer_cfg()
 
-    model = model_engine.initialize_model_from_cfg()
+    model = model_engine.initialize_model_from_cfg(args.rpn_pkl)
     with c2_utils.NamedCudaScope(0):
         boxes, scores = rpn_engine.im_proposals(model, im)
     return boxes, scores
@@ -129,10 +128,12 @@ def main(args):
         merge_cfg_from_cfg(cfg_orig)
         merge_cfg_from_file(yml)
         if len(pkl) > 0:
-            cfg.TEST.WEIGHTS = pkl
+            weights_file = pkl
+        else:
+            weights_file = cfg.TEST.WEIGHTS
         cfg.NUM_GPUS = 1
         assert_and_infer_cfg()
-        model = model_engine.initialize_model_from_cfg()
+        model = model_engine.initialize_model_from_cfg(weights_file)
         with c2_utils.NamedCudaScope(0):
             cls_boxes_, cls_segms_, cls_keyps_ = \
                 model_engine.im_detect_all(model, im, proposal_boxes)
