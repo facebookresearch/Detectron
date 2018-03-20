@@ -97,6 +97,7 @@ def parse_args():
 
 
 def get_rpn_box_proposals(im, args):
+    cfg.immutable(False)
     merge_cfg_from_file(args.rpn_cfg)
     cfg.NUM_GPUS = 1
     cfg.MODEL.RPN_ONLY = True
@@ -125,6 +126,7 @@ def main(args):
     for i in range(0, len(args.models_to_run), 2):
         pkl = args.models_to_run[i]
         yml = args.models_to_run[i + 1]
+        cfg.immutable(False)
         merge_cfg_from_cfg(cfg_orig)
         merge_cfg_from_file(yml)
         if len(pkl) > 0:

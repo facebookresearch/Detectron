@@ -1013,13 +1013,22 @@ _RENAMED_KEYS = {
 }
 
 
-def assert_and_infer_cfg(cache_urls=True):
+def assert_and_infer_cfg(cache_urls=True, make_immutable=True):
+    """Call this function in your script after you have finished setting all cfg
+    values that are necessary (e.g., merging a config from a file, merging
+    command line config options, etc.). By default, this function will also
+    mark the global cfg as immutable to prevent changing the global cfg settings
+    during script execution (which can lead to hard to debug errors or code
+    that's harder to understand than is necessary).
+    """
     if __C.MODEL.RPN_ONLY or __C.MODEL.FASTER_RCNN:
         __C.RPN.RPN_ON = True
     if __C.RPN.RPN_ON or __C.RETINANET.RETINANET_ON:
         __C.TEST.PRECOMPUTED_PROPOSALS = False
     if cache_urls:
         cache_cfg_urls()
+    if make_immutable:
+        cfg.immutable(True)
 
 
 def cache_cfg_urls():
@@ -1029,10 +1038,10 @@ def cache_cfg_urls():
     __C.TRAIN.WEIGHTS = cache_url(__C.TRAIN.WEIGHTS, __C.DOWNLOAD_CACHE)
     __C.TEST.WEIGHTS = cache_url(__C.TEST.WEIGHTS, __C.DOWNLOAD_CACHE)
     __C.TRAIN.PROPOSAL_FILES = tuple(
-        [cache_url(f, __C.DOWNLOAD_CACHE) for f in __C.TRAIN.PROPOSAL_FILES]
+        cache_url(f, __C.DOWNLOAD_CACHE) for f in __C.TRAIN.PROPOSAL_FILES
     )
     __C.TEST.PROPOSAL_FILES = tuple(
-        [cache_url(f, __C.DOWNLOAD_CACHE) for f in __C.TEST.PROPOSAL_FILES]
+        cache_url(f, __C.DOWNLOAD_CACHE) for f in __C.TEST.PROPOSAL_FILES
     )
 
 
