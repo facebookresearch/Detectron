@@ -187,7 +187,7 @@ def im_proposals(model, im):
     """Generate RPN proposals on a single image."""
     inputs = {}
     inputs['data'], im_scale, inputs['im_info'] = \
-        blob_utils.get_image_blob_for_inference(im)
+        blob_utils.get_image_blob(im, cfg.TEST.SCALE, cfg.TEST.MAX_SIZE)
     for k, v in inputs.items():
         workspace.FeedBlob(core.ScopedName(k), v.astype(np.float32, copy=False))
     workspace.RunNet(model.net.Proto().name)

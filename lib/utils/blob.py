@@ -37,8 +37,8 @@ from caffe2.proto import caffe2_pb2
 from core.config import cfg
 
 
-def get_image_blob_for_inference(im):
-    """Converts an image into a network input.
+def get_image_blob(im, target_scale, target_max_size):
+    """Convert an image into a network input.
 
     Arguments:
         im (ndarray): a color image in BGR order
@@ -49,7 +49,7 @@ def get_image_blob_for_inference(im):
         im_info (ndarray)
     """
     processed_im, im_scale = prep_im_for_blob(
-        im, cfg.PIXEL_MEANS, cfg.TEST.SCALE, cfg.TEST.MAX_SIZE
+        im, cfg.PIXEL_MEANS, target_scale, target_max_size
     )
     blob = im_list_to_blob(processed_im)
     # NOTE: this height and width may be larger than actual scaled input image
