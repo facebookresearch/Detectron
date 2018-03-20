@@ -272,14 +272,6 @@ __C.TEST.FORCE_JSON_DATASET_EVAL = False
 # Not set for 1-stage models and 2-stage models with RPN subnetwork enabled
 __C.TEST.PRECOMPUTED_PROPOSALS = True
 
-# [Inferred value; do not set directly in a config]
-# Active dataset to test on
-__C.TEST.DATASET = b''
-
-# [Inferred value; do not set directly in a config]
-# Active proposal file to use
-__C.TEST.PROPOSAL_FILE = b''
-
 
 # ---------------------------------------------------------------------------- #
 # Test-time augmentations for bounding box detection
@@ -1007,6 +999,16 @@ _RENAMED_KEYS = {
         'TEST.SCALE',
         "Also convert from a tuple, e.g. (600, ), " +
         "to a integer, e.g. 600."
+    ),
+    'TEST.DATASET': (
+        'TEST.DATASETS',
+        "Also convert from a string, e.g 'coco_2014_minival', " +
+        "to a tuple, e.g. ('coco_2014_minival', )."
+    ),
+    'TEST.PROPOSAL_FILE': (
+        'TEST.PROPOSAL_FILES',
+        "Also convert from a string, e.g. '/path/to/props.pkl', " +
+        "to a tuple, e.g. ('/path/to/props.pkl', )."
     ),
 }
 

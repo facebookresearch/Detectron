@@ -53,27 +53,31 @@ import utils.subprocess as subprocess_utils
 logger = logging.getLogger(__name__)
 
 
-def generate_rpn_on_dataset(output_dir, multi_gpu=False, gpu_id=0):
+def generate_rpn_on_dataset(
+    dataset_name, _proposal_file_ignored, output_dir, multi_gpu=False, gpu_id=0
+):
     """Run inference on a dataset."""
-    dataset = JsonDataset(cfg.TEST.DATASET)
+    dataset = JsonDataset(dataset_name)
     test_timer = Timer()
     test_timer.tic()
     if multi_gpu:
         num_images = len(dataset.get_roidb())
         _boxes, _scores, _ids, rpn_file = multi_gpu_generate_rpn_on_dataset(
-            num_images, output_dir
+            dataset_name, _proposal_file_ignored, num_images, output_dir
         )
     else:
         # Processes entire dataset range by default
         _boxes, _scores, _ids, rpn_file = generate_rpn_on_range(
-            output_dir, gpu_id=gpu_id
+            dataset_name, _proposal_file_ignored, output_dir, gpu_id=gpu_id
         )
     test_timer.toc()
     logger.info('Total inference time: {:.3f}s'.format(test_timer.average_time))
     return evaluate_proposal_file(dataset, rpn_file, output_dir)
 
 
-def multi_gpu_generate_rpn_on_dataset(num_images, output_dir):
+def multi_gpu_generate_rpn_on_dataset(
+    dataset_name, _proposal_file_ignored, num_images, output_dir
+):
     """Multi-gpu inference on a dataset."""
     # Retrieve the test_net binary path
     binary_dir = envu.get_runtime_dir()
@@ -81,9 +85,12 @@ def multi_gpu_generate_rpn_on_dataset(num_images, output_dir):
     binary = os.path.join(binary_dir, 'test_net' + binary_ext)
     assert os.path.exists(binary), 'Binary \'{}\' not found'.format(binary)
 
+    # Pass the target dataset via the command line
+    opts = ['TEST.DATASETS', '("{}",)'.format(dataset_name)]
+
     # Run inference in parallel in subprocesses
     outputs = subprocess_utils.process_in_parallel(
-        'rpn_proposals', num_images, binary, output_dir
+        'rpn_proposals', num_images, binary, output_dir, opts
     )
 
     # Collate the results from each subprocess
@@ -101,17 +108,19 @@ def multi_gpu_generate_rpn_on_dataset(num_images, output_dir):
     return boxes, scores, ids, rpn_file
 
 
-def generate_rpn_on_range(output_dir, ind_range=None, gpu_id=0):
+def generate_rpn_on_range(
+    dataset_name, _proposal_file_ignored, output_dir, ind_range=None, gpu_id=0
+):
     """Run inference on all images in a dataset or over an index range of images
     in a dataset using a single GPU.
     """
     assert cfg.TEST.WEIGHTS != '', \
         'TEST.WEIGHTS must be set to the model file to test'
-    assert cfg.TEST.DATASET != '', \
-        'TEST.DATASET must be set to the dataset name to test'
     assert cfg.MODEL.RPN_ONLY or cfg.MODEL.FASTER_RCNN
 
-    roidb, start_ind, end_ind, total_num_images = get_roidb(ind_range)
+    roidb, start_ind, end_ind, total_num_images = get_roidb(
+        dataset_name, ind_range
+    )
     logger.info(
         'Output will be saved to: {:s}'.format(os.path.abspath(output_dir))
     )
@@ -228,11 +237,11 @@ def im_proposals(model, im):
     return boxes, scores
 
 
-def get_roidb(ind_range):
+def get_roidb(dataset_name, ind_range):
     """Get the roidb for the dataset specified in the global cfg. Optionally
     restrict it to a range of indices if ind_range is a pair of integers.
     """
-    dataset = JsonDataset(cfg.TEST.DATASET)
+    dataset = JsonDataset(dataset_name)
     roidb = dataset.get_roidb()
 
     if ind_range is not None:
