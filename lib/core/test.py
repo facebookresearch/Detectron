@@ -60,9 +60,9 @@ def im_detect_all(model, im, box_proposals, timers=None):
 
     timers['im_detect_bbox'].tic()
     if cfg.TEST.BBOX_AUG.ENABLED:
-        scores, boxes, im_scales = im_detect_bbox_aug(model, im, box_proposals)
+        scores, boxes, im_scale = im_detect_bbox_aug(model, im, box_proposals)
     else:
-        scores, boxes, im_scales = im_detect_bbox(model, im, box_proposals)
+        scores, boxes, im_scale = im_detect_bbox(model, im, box_proposals)
     timers['im_detect_bbox'].toc()
 
     # score and boxes are from the whole image after score thresholding and nms
@@ -78,7 +78,7 @@ def im_detect_all(model, im, box_proposals, timers=None):
         if cfg.TEST.MASK_AUG.ENABLED:
             masks = im_detect_mask_aug(model, im, boxes)
         else:
-            masks = im_detect_mask(model, im_scales, boxes)
+            masks = im_detect_mask(model, im_scale, boxes)
         timers['im_detect_mask'].toc()
 
         timers['misc_mask'].tic()
@@ -94,7 +94,7 @@ def im_detect_all(model, im, box_proposals, timers=None):
         if cfg.TEST.KPS_AUG.ENABLED:
             heatmaps = im_detect_keypoints_aug(model, im, boxes)
         else:
-            heatmaps = im_detect_keypoints(model, im_scales, boxes)
+            heatmaps = im_detect_keypoints(model, im_scale, boxes)
         timers['im_detect_keypoints'].toc()
 
         timers['misc_keypoints'].tic()
@@ -108,10 +108,10 @@ def im_detect_all(model, im, box_proposals, timers=None):
 
 def im_conv_body_only(model, im):
     """Runs `model.conv_body_net` on the given image `im`."""
-    im_blob, im_scale_factors = _get_image_blob(im)
+    im_blob, im_scale, _im_info = blob_utils.get_image_blob_for_inference(im)
     workspace.FeedBlob(core.ScopedName('data'), im_blob)
     workspace.RunNet(model.conv_body_net.Proto().name)
-    return im_scale_factors
+    return im_scale
 
 
 def im_detect_bbox(model, im, boxes=None):
@@ -130,7 +130,7 @@ def im_detect_bbox(model, im, boxes=None):
         im_scales (list): list of image scales used in the input blob (as
             returned by _get_blobs and for use with im_detect_mask, etc.)
     """
-    inputs, im_scales = _get_blobs(im, boxes)
+    inputs, im_scale = _get_blobs(im, boxes)
 
     # When mapping from image ROIs to feature map ROIs, there's some aliasing
     # (some distinct image ROIs get mapped to the same feature ROI).
@@ -155,11 +155,9 @@ def im_detect_bbox(model, im, boxes=None):
 
     # Read out blobs
     if cfg.MODEL.FASTER_RCNN:
-        assert len(im_scales) == 1, \
-            'Only single-image / single-scale batch implemented'
         rois = workspace.FetchBlob(core.ScopedName('rois'))
         # unscale back to raw image space
-        boxes = rois[:, 1:5] / im_scales[0]
+        boxes = rois[:, 1:5] / im_scale
 
     # Softmax class probabilities
     scores = workspace.FetchBlob(core.ScopedName('cls_prob')).squeeze()
@@ -189,7 +187,7 @@ def im_detect_bbox(model, im, boxes=None):
         scores = scores[inv_index, :]
         pred_boxes = pred_boxes[inv_index, :]
 
-    return scores, pred_boxes, im_scales
+    return scores, pred_boxes, im_scale
 
 
 def im_detect_bbox_aug(model, im, box_proposals=None):
@@ -218,7 +216,7 @@ def im_detect_bbox_aug(model, im, box_proposals=None):
 
     # Perform detection on the horizontally flipped image
     if cfg.TEST.BBOX_AUG.H_FLIP:
-        scores_hf, boxes_hf, _im_scales_hf = im_detect_bbox_hflip(
+        scores_hf, boxes_hf, _ = im_detect_bbox_hflip(
             model, im, box_proposals
         )
         add_preds_t(scores_hf, boxes_hf)
@@ -253,7 +251,7 @@ def im_detect_bbox_aug(model, im, box_proposals=None):
     # Compute detections for the original image (identity transform) last to
     # ensure that the Caffe2 workspace is populated with blobs corresponding
     # to the original image on return (postcondition of im_detect_bbox)
-    scores_i, boxes_i, im_scales_i = im_detect_bbox(model, im, box_proposals)
+    scores_i, boxes_i, im_scale_i = im_detect_bbox(model, im, box_proposals)
     add_preds_t(scores_i, boxes_i)
 
     # Combine the predicted scores
@@ -280,7 +278,7 @@ def im_detect_bbox_aug(model, im, box_proposals=None):
             'Coord heur {} not supported'.format(cfg.TEST.BBOX_AUG.COORD_HEUR)
         )
 
-    return scores_c, boxes_c, im_scales_i
+    return scores_c, boxes_c, im_scale_i
 
 
 def im_detect_bbox_hflip(model, im, box_proposals=None):
@@ -296,14 +294,14 @@ def im_detect_bbox_hflip(model, im, box_proposals=None):
     else:
         box_proposals_hf = None
 
-    scores_hf, boxes_hf, im_scales = im_detect_bbox(
+    scores_hf, boxes_hf, im_scale = im_detect_bbox(
         model, im_hf, box_proposals_hf
     )
 
     # Invert the detections computed on the flipped image
     boxes_inv = box_utils.flip_boxes(boxes_hf, im_width)
 
-    return scores_hf, boxes_inv, im_scales
+    return scores_hf, boxes_inv, im_scale
 
 
 def im_detect_bbox_scale(
@@ -313,11 +311,11 @@ def im_detect_bbox_scale(
     Returns predictions in the original image space.
     """
     # Remember the original scale
-    orig_scales = cfg.TEST.SCALES
+    orig_scale = cfg.TEST.SCALE
     orig_max_size = cfg.TEST.MAX_SIZE
 
     # Perform detection at the given scale
-    cfg.TEST.SCALES = (scale, )
+    cfg.TEST.SCALE = scale
     cfg.TEST.MAX_SIZE = max_size
 
     if hflip:
@@ -328,7 +326,7 @@ def im_detect_bbox_scale(
         scores_scl, boxes_scl, _ = im_detect_bbox(model, im, box_proposals)
 
     # Restore the original scale
-    cfg.TEST.SCALES = orig_scales
+    cfg.TEST.SCALE = orig_scale
     cfg.TEST.MAX_SIZE = orig_max_size
 
     return scores_scl, boxes_scl
@@ -361,7 +359,7 @@ def im_detect_bbox_aspect_ratio(
     return scores_ar, boxes_inv
 
 
-def im_detect_mask(model, im_scales, boxes):
+def im_detect_mask(model, im_scale, boxes):
     """Infer instance segmentation masks. This function must be called after
     im_detect_bbox as it assumes that the Caffe2 workspace is already populated
     with the necessary blobs.
@@ -377,15 +375,12 @@ def im_detect_mask(model, im_scales, boxes):
             output by the network (must be processed by segm_results to convert
             into hard masks in the original image coordinate space)
     """
-    assert len(im_scales) == 1, \
-        'Only single-image / single-scale batch implemented'
-
     M = cfg.MRCNN.RESOLUTION
     if boxes.shape[0] == 0:
         pred_masks = np.zeros((0, M, M), np.float32)
         return pred_masks
 
-    inputs = {'mask_rois': _get_rois_blob(boxes, im_scales)}
+    inputs = {'mask_rois': _get_rois_blob(boxes, im_scale)}
     # Add multi-level rois for FPN
     if cfg.FPN.MULTILEVEL_ROIS:
         _add_multilevel_rois_for_test(inputs, 'mask_rois')
@@ -425,8 +420,8 @@ def im_detect_mask_aug(model, im, boxes):
     masks_ts = []
 
     # Compute masks for the original image (identity transform)
-    im_scales_i = im_conv_body_only(model, im)
-    masks_i = im_detect_mask(model, im_scales_i, boxes)
+    im_scale_i = im_conv_body_only(model, im)
+    masks_i = im_detect_mask(model, im_scale_i, boxes)
     masks_ts.append(masks_i)
 
     # Perform mask detection on the horizontally flipped image
@@ -486,8 +481,8 @@ def im_detect_mask_hflip(model, im, boxes):
     im_hf = im[:, ::-1, :]
     boxes_hf = box_utils.flip_boxes(boxes, im.shape[1])
 
-    im_scales = im_conv_body_only(model, im_hf)
-    masks_hf = im_detect_mask(model, im_scales, boxes_hf)
+    im_scale = im_conv_body_only(model, im_hf)
+    masks_hf = im_detect_mask(model, im_scale, boxes_hf)
 
     # Invert the predicted soft masks
     masks_inv = masks_hf[:, :, :, ::-1]
@@ -499,21 +494,21 @@ def im_detect_mask_scale(model, im, scale, max_size, boxes, hflip=False):
     """Computes masks at the given scale."""
 
     # Remember the original scale
-    orig_scales = cfg.TEST.SCALES
+    orig_scale = cfg.TEST.SCALE
     orig_max_size = cfg.TEST.MAX_SIZE
 
     # Perform mask detection at the given scale
-    cfg.TEST.SCALES = (scale, )
+    cfg.TEST.SCALE = scale
     cfg.TEST.MAX_SIZE = max_size
 
     if hflip:
         masks_scl = im_detect_mask_hflip(model, im, boxes)
     else:
-        im_scales = im_conv_body_only(model, im)
-        masks_scl = im_detect_mask(model, im_scales, boxes)
+        im_scale = im_conv_body_only(model, im)
+        masks_scl = im_detect_mask(model, im_scale, boxes)
 
     # Restore the original scale
-    cfg.TEST.SCALES = orig_scales
+    cfg.TEST.SCALE = orig_scale
     cfg.TEST.MAX_SIZE = orig_max_size
 
     return masks_scl
@@ -529,13 +524,13 @@ def im_detect_mask_aspect_ratio(model, im, aspect_ratio, boxes, hflip=False):
     if hflip:
         masks_ar = im_detect_mask_hflip(model, im_ar, boxes_ar)
     else:
-        im_scales = im_conv_body_only(model, im_ar)
-        masks_ar = im_detect_mask(model, im_scales, boxes_ar)
+        im_scale = im_conv_body_only(model, im_ar)
+        masks_ar = im_detect_mask(model, im_scale, boxes_ar)
 
     return masks_ar
 
 
-def im_detect_keypoints(model, im_scales, boxes):
+def im_detect_keypoints(model, im_scale, boxes):
     """Infer instance keypoint poses. This function must be called after
     im_detect_bbox as it assumes that the Caffe2 workspace is already populated
     with the necessary blobs.
@@ -552,15 +547,12 @@ def im_detect_keypoints(model, im_scales, boxes):
             by the network (must be processed by keypoint_results to convert
             into point predictions in the original image coordinate space)
     """
-    assert len(im_scales) == 1, \
-        'Only single-image / single-scale batch implemented'
-
     M = cfg.KRCNN.HEATMAP_SIZE
     if boxes.shape[0] == 0:
         pred_heatmaps = np.zeros((0, cfg.KRCNN.NUM_KEYPOINTS, M, M), np.float32)
         return pred_heatmaps
 
-    inputs = {'keypoint_rois': _get_rois_blob(boxes, im_scales)}
+    inputs = {'keypoint_rois': _get_rois_blob(boxes, im_scale)}
 
     # Add multi-level rois for FPN
     if cfg.FPN.MULTILEVEL_ROIS:
@@ -603,8 +595,8 @@ def im_detect_keypoints_aug(model, im, boxes):
         us_ts.append(us_t)
 
     # Compute the heatmaps for the original image (identity transform)
-    im_scales = im_conv_body_only(model, im)
-    heatmaps_i = im_detect_keypoints(model, im_scales, boxes)
+    im_scale = im_conv_body_only(model, im)
+    heatmaps_i = im_detect_keypoints(model, im_scale, boxes)
     add_heatmaps_t(heatmaps_i)
 
     # Perform keypoints detection on the horizontally flipped image
@@ -614,8 +606,8 @@ def im_detect_keypoints_aug(model, im, boxes):
 
     # Compute detections at different scales
     for scale in cfg.TEST.KPS_AUG.SCALES:
-        ds_scl = scale < cfg.TEST.SCALES[0]
-        us_scl = scale > cfg.TEST.SCALES[0]
+        ds_scl = scale < cfg.TEST.SCALE
+        us_scl = scale > cfg.TEST.SCALE
         heatmaps_scl = im_detect_keypoints_scale(
             model, im, scale, cfg.TEST.KPS_AUG.MAX_SIZE, boxes
         )
@@ -672,8 +664,8 @@ def im_detect_keypoints_hflip(model, im, boxes):
     im_hf = im[:, ::-1, :]
     boxes_hf = box_utils.flip_boxes(boxes, im.shape[1])
 
-    im_scales = im_conv_body_only(model, im_hf)
-    heatmaps_hf = im_detect_keypoints(model, im_scales, boxes_hf)
+    im_scale = im_conv_body_only(model, im_hf)
+    heatmaps_hf = im_detect_keypoints(model, im_scale, boxes_hf)
 
     # Invert the predicted keypoints
     heatmaps_inv = keypoint_utils.flip_heatmaps(heatmaps_hf)
@@ -685,21 +677,21 @@ def im_detect_keypoints_scale(model, im, scale, max_size, boxes, hflip=False):
     """Computes keypoint predictions at the given scale."""
 
     # Store the original scale
-    orig_scales = cfg.TEST.SCALES
+    orig_scale = cfg.TEST.SCALE
     orig_max_size = cfg.TEST.MAX_SIZE
 
     # Perform detection at the given scale
-    cfg.TEST.SCALES = (scale, )
+    cfg.TEST.SCALE = scale
     cfg.TEST.MAX_SIZE = max_size
 
     if hflip:
         heatmaps_scl = im_detect_keypoints_hflip(model, im, boxes)
     else:
-        im_scales = im_conv_body_only(model, im)
-        heatmaps_scl = im_detect_keypoints(model, im_scales, boxes)
+        im_scale = im_conv_body_only(model, im)
+        heatmaps_scl = im_detect_keypoints(model, im_scale, boxes)
 
     # Restore the original scale
-    cfg.TEST.SCALES = orig_scales
+    cfg.TEST.SCALE = orig_scale
     cfg.TEST.MAX_SIZE = orig_max_size
 
     return heatmaps_scl
@@ -717,8 +709,8 @@ def im_detect_keypoints_aspect_ratio(
     if hflip:
         heatmaps_ar = im_detect_keypoints_hflip(model, im_ar, boxes_ar)
     else:
-        im_scales = im_conv_body_only(model, im_ar)
-        heatmaps_ar = im_detect_keypoints(model, im_scales, boxes_ar)
+        im_scale = im_conv_body_only(model, im_ar)
+        heatmaps_ar = im_detect_keypoints(model, im_scale, boxes_ar)
 
     return heatmaps_ar
 
@@ -891,25 +883,7 @@ def keypoint_results(cls_boxes, pred_heatmaps, ref_boxes):
     return cls_keyps
 
 
-def _get_image_blob(im):
-    """Converts an image into a network input.
-
-    Arguments:
-        im (ndarray): a color image in BGR order
-
-    Returns:
-        blob (ndarray): a data blob holding an image pyramid
-        im_scale_factors (ndarray): array of image scales (relative to im) used
-            in the image pyramid
-    """
-    processed_ims, im_scale_factors = blob_utils.prep_im_for_blob(
-        im, cfg.PIXEL_MEANS, cfg.TEST.SCALES, cfg.TEST.MAX_SIZE
-    )
-    blob = blob_utils.im_list_to_blob(processed_ims)
-    return blob, np.array(im_scale_factors)
-
-
-def _get_rois_blob(im_rois, im_scale_factors):
+def _get_rois_blob(im_rois, im_scale):
     """Converts RoIs into network inputs.
 
     Arguments:
@@ -920,7 +894,7 @@ def _get_rois_blob(im_rois, im_scale_factors):
         blob (ndarray): R x 5 matrix of RoIs in the image pyramid with columns
             [level, x1, y1, x2, y2]
     """
-    rois, levels = _project_im_rois(im_rois, im_scale_factors)
+    rois, levels = _project_im_rois(im_rois, im_scale)
     rois_blob = np.hstack((levels, rois))
     return rois_blob.astype(np.float32, copy=False)
 
@@ -936,21 +910,8 @@ def _project_im_rois(im_rois, scales):
         rois (ndarray): R x 4 matrix of projected RoI coordinates
         levels (ndarray): image pyramid levels used by each projected RoI
     """
-    im_rois = im_rois.astype(np.float, copy=False)
-
-    if len(scales) > 1:
-        widths = im_rois[:, 2] - im_rois[:, 0] + 1
-        heights = im_rois[:, 3] - im_rois[:, 1] + 1
-
-        areas = widths * heights
-        scaled_areas = areas[:, np.newaxis] * (scales[np.newaxis, :]**2)
-        diff_areas = np.abs(scaled_areas - 224 * 224)
-        levels = diff_areas.argmin(axis=1)[:, np.newaxis]
-    else:
-        levels = np.zeros((im_rois.shape[0], 1), dtype=np.int)
-
-    rois = im_rois * scales[levels]
-
+    rois = im_rois.astype(np.float, copy=False) * scales
+    levels = np.zeros((im_rois.shape[0], 1), dtype=np.int)
     return rois, levels
 
 
@@ -978,11 +939,8 @@ def _add_multilevel_rois_for_test(blobs, name):
 def _get_blobs(im, rois):
     """Convert an image and RoIs within that image into network inputs."""
     blobs = {}
-    blobs['data'], im_scale_factors = _get_image_blob(im)
-    if cfg.MODEL.FASTER_RCNN and rois is None:
-        height, width = blobs['data'].shape[2], blobs['data'].shape[3]
-        scale = im_scale_factors[0]
-        blobs['im_info'] = np.array([[height, width, scale]], dtype=np.float32)
+    blobs['data'], im_scale, blobs['im_info'] = \
+        blob_utils.get_image_blob_for_inference(im)
     if rois is not None:
-        blobs['rois'] = _get_rois_blob(rois, im_scale_factors)
-    return blobs, im_scale_factors
+        blobs['rois'] = _get_rois_blob(rois, im_scale)
+    return blobs, im_scale

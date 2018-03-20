@@ -213,11 +213,8 @@ __C.TEST.WEIGHTS = b''
 # If multiple datasets are listed, testing is performed on each one sequentially
 __C.TEST.DATASETS = ()
 
-# Scales to use during testing
-# Each scale is the pixel size of an image's shortest side
-# If multiple scales are given, then all scales are used as in multiscale
-# inference
-__C.TEST.SCALES = (600, )
+# Scale to use during testing
+__C.TEST.SCALE = 600
 
 # Max pixel size of the longest side of a scaled input image
 __C.TEST.MAX_SIZE = 1000
@@ -968,7 +965,7 @@ __C.CLUSTER.ON_CLUSTER = False
 # yaml configs, you can add the full config key as a string to the set below.
 # ---------------------------------------------------------------------------- #
 _DEPCRECATED_KEYS = set(
-    (
+    {
         'FINAL_MSG',
         'MODEL.DILATION',
         'ROOT_GPU_ID',
@@ -977,7 +974,7 @@ _DEPCRECATED_KEYS = set(
         'TRAIN.DROPOUT',
         'USE_GPU_NMS',
         'TEST.NUM_TEST_IMAGES',
-    )
+    }
 )
 
 # ---------------------------------------------------------------------------- #
@@ -1005,6 +1002,11 @@ _RENAMED_KEYS = {
         "'path/to/file' -> ('path/to/file',) or " +
         "'path/to/file1:path/to/file2' -> " +
         "('path/to/file1', 'path/to/file2')"
+    ),
+    'TEST.SCALES': (
+        'TEST.SCALE',
+        "Also convert from a tuple, e.g. (600, ), " +
+        "to a integer, e.g. 600."
     ),
 }
 
