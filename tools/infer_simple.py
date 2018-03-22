@@ -38,6 +38,7 @@ from caffe2.python import workspace
 from core.config import assert_and_infer_cfg
 from core.config import cfg
 from core.config import merge_cfg_from_file
+from utils.io import cache_url
 from utils.timer import Timer
 import core.test_engine as infer_engine
 import datasets.dummy_datasets as dummy_datasets
@@ -94,6 +95,7 @@ def main(args):
     logger = logging.getLogger(__name__)
     merge_cfg_from_file(args.cfg)
     cfg.NUM_GPUS = 1
+    args.weights = cache_url(args.weights, cfg.DOWNLOAD_CACHE)
     assert_and_infer_cfg()
     model = infer_engine.initialize_model_from_cfg(args.weights)
     dummy_coco_dataset = dummy_datasets.get_coco_dataset()
