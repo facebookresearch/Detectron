@@ -182,7 +182,7 @@ def create_model():
         final_path = os.path.join(output_dir, 'model_final.pkl')
         if os.path.exists(final_path):
             logger.info('model_final.pkl exists; no need to train!')
-            return None, None, {'final': final_path}, output_dir
+            return None, None, None, {'final': final_path}, output_dir
 
         # Find the most recent checkpoint (highest iteration number)
         files = os.listdir(output_dir)
