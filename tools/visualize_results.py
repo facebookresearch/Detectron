@@ -87,16 +87,12 @@ def vis(dataset, detections_pkl, thresh, output_dir, limit=0):
     with open(detections_pkl, 'r') as f:
         dets = pickle.load(f)
 
-    all_boxes = dets['all_boxes']
-    if 'all_segms' in dets:
-        all_segms = dets['all_segms']
-    else:
-        all_segms = None
+    assert all(k in dets for k in ['all_boxes', 'all_segms', 'all_keyps']), \
+        'Expected detections pkl file in the format used by test_engine.py'
 
-    if 'all_keyps' in dets:
-        all_keyps = dets['all_keyps']
-    else:
-        all_keyps = None
+    all_boxes = dets['all_boxes']
+    all_segms = dets['all_segms']
+    all_keyps = dets['all_keyps']
 
     def id_or_index(ix, val):
         if len(val) == 0:
@@ -109,24 +105,19 @@ def vis(dataset, detections_pkl, thresh, output_dir, limit=0):
             break
         if ix % 10 == 0:
             print('{:d}/{:d}'.format(ix + 1, len(roidb)))
+
         im = cv2.imread(entry['image'])
         im_name = os.path.splitext(os.path.basename(entry['image']))[0]
-        cls_boxes_i = [
-            id_or_index(ix, all_boxes[j]) for j in range(len(all_boxes))
-        ]
-        if all_segms is not None:
-            cls_segms_i = [
-                id_or_index(ix, all_segms[j]) for j in range(len(all_segms))
-            ]
-        else:
-            cls_segms_i = None
 
-        if all_keyps is not None:
-            cls_keyps_i = [
-                id_or_index(ix, all_keyps[j]) for j in range(len(all_keyps))
-            ]
-        else:
-            cls_keyps_i = None
+        cls_boxes_i = [
+            id_or_index(ix, cls_k_boxes) for cls_k_boxes in all_boxes
+        ]
+        cls_segms_i = [
+            id_or_index(ix, cls_k_segms) for cls_k_segms in all_segms
+        ]
+        cls_keyps_i = [
+            id_or_index(ix, cls_k_keyps) for cls_k_keyps in all_keyps
+        ]
 
         vis_utils.vis_one_image(
             im[:, :, ::-1],

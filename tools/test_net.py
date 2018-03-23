@@ -91,9 +91,11 @@ def parse_args():
     return parser.parse_args()
 
 
-def main(ind_range=None, multi_gpu_testing=False):
+def main(weights_file, ind_range=None, multi_gpu_testing=False):
     all_results = run_inference(
-        ind_range=ind_range, multi_gpu_testing=multi_gpu_testing
+        weights_file,
+        ind_range=ind_range,
+        multi_gpu_testing=multi_gpu_testing,
     )
     if not ind_range:
         task_evaluation.check_expected_results(
@@ -122,4 +124,8 @@ if __name__ == '__main__':
         logger.info('Waiting for \'{}\' to exist...'.format(cfg.TEST.WEIGHTS))
         time.sleep(10)
 
-    main(ind_range=args.range, multi_gpu_testing=args.multi_gpu_testing)
+    main(
+        cfg.TEST.WEIGHTS,
+        ind_range=args.range,
+        multi_gpu_testing=args.multi_gpu_testing
+    )

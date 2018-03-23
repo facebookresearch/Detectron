@@ -210,7 +210,7 @@ def vis_one_image_opencv(
     if boxes is None or boxes.shape[0] == 0 or max(boxes[:, 4]) < thresh:
         return im
 
-    if segms is not None:
+    if segms is not None and len(segms) > 0:
         masks = mask_util.decode(segms)
         color_list = colormap()
         mask_color_id = 0
@@ -265,7 +265,7 @@ def vis_one_image(
 
     dataset_keypoints, _ = keypoint_utils.get_keypoints()
 
-    if segms is not None:
+    if segms is not None and len(segms) > 0:
         masks = mask_util.decode(segms)
 
     color_list = colormap(rgb=True) / 255

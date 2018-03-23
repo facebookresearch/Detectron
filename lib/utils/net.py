@@ -253,7 +253,12 @@ def configure_bbox_reg_weights(model, saved_cfg):
                        'MODEL.BBOX_REG_WEIGHTS was added. Forcing '
                        'MODEL.BBOX_REG_WEIGHTS = (1., 1., 1., 1.) to ensure '
                        'correct **inference** behavior.')
+        # Generally we don't allow modifying the config, but this is a one-off
+        # hack to support some very old models
+        is_immutable = cfg.is_immutable()
+        cfg.immutable(False)
         cfg.MODEL.BBOX_REG_WEIGHTS = (1., 1., 1., 1.)
+        cfg.immutable(is_immutable)
         logger.info('New config:')
         logger.info(pprint.pformat(cfg))
         assert not model.train, (

@@ -434,8 +434,6 @@ def _prepare_blobs(
 
 
 def run_model_pb(args, net, init_net, im, check_blobs):
-    assert len(cfg.TEST.SCALES) == 1
-
     workspace.ResetWorkspace()
     workspace.RunNetOnce(init_net)
     mutils.create_input_blobs_for_net(net.Proto())
@@ -445,7 +443,7 @@ def run_model_pb(args, net, init_net, im, check_blobs):
     input_blobs = _prepare_blobs(
         im,
         cfg.PIXEL_MEANS,
-        cfg.TEST.SCALES[0], cfg.TEST.MAX_SIZE
+        cfg.TEST.SCALE, cfg.TEST.MAX_SIZE
     )
     gpu_blobs = []
     if args.device == 'gpu':
