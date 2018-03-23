@@ -1513,6 +1513,11 @@ ypoints_coco_2014_minival/generalized_rcnn/keypoints_keypoints_coco_2014_minival
 <!-- END END-TO-END KEYPOINTS TABLE -->
 </tbody></table>
 
+**My models**
+| Dataset | Model | BBox Mean AP| AP | AP50 | AP75 | APs | APm | APl | 
+| --------| ----- | ----------- | --| ------| -----| ----| ----| --- |
+| VOC| R-101-FPN_1x_LR001| 0.6773| 0.4086 |0.6316 |0.4416|0.0856|0.2670|0.4902|
+
 **Notes:**
 
 - *Metrics are for the person category only.*
