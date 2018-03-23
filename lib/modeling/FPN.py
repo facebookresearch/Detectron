@@ -209,7 +209,7 @@ def add_fpn(model, fpn_level_info):
         for i in range(HIGHEST_BACKBONE_LVL + 1, max_level + 1):
             fpn_blob_in = fpn_blob
             if i > HIGHEST_BACKBONE_LVL + 1:
-                fpn_blob_in = model.Relu(fpn_blob, fpn_blob + '_relu')
+                fpn_blob_in = brew.relu(model, fpn_blob, fpn_blob + '_relu')
             fpn_blob = brew.conv(
                 model,
                 fpn_blob_in,
@@ -307,7 +307,7 @@ def add_fpn_rpn_outputs(model, blobs_in, dim_in, spatial_scales):
                 weight_init=gauss_fill(0.01),
                 bias_init=const_fill(0.0)
             )
-            model.Relu(conv_rpn_fpn, conv_rpn_fpn)
+            brew.relu(model, conv_rpn_fpn, conv_rpn_fpn)
             # Proposal classification scores
             rpn_cls_logits_fpn = brew.conv(
                 model,
@@ -349,7 +349,7 @@ def add_fpn_rpn_outputs(model, blobs_in, dim_in, spatial_scales):
                 weight='conv_rpn_fpn' + sk_min + '_w',
                 bias='conv_rpn_fpn' + sk_min + '_b'
             )
-            model.Relu(conv_rpn_fpn, conv_rpn_fpn)
+            brew.relu(model, conv_rpn_fpn, conv_rpn_fpn)
             # Proposal classification scores
             rpn_cls_logits_fpn = model.ConvShared(
                 conv_rpn_fpn,

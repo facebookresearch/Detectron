@@ -37,6 +37,8 @@ from utils.c2 import const_fill
 from utils.c2 import gauss_fill
 import utils.blob as blob_utils
 
+from caffe2.python import brew
+
 
 # ---------------------------------------------------------------------------- #
 # Fast R-CNN outputs and losses
@@ -44,7 +46,8 @@ import utils.blob as blob_utils
 
 def add_fast_rcnn_outputs(model, blob_in, dim):
     """Add RoI classification and bounding box regression output ops."""
-    model.FC(
+    brew.fc(
+        model,
         blob_in,
         'cls_score',
         dim,
@@ -56,7 +59,8 @@ def add_fast_rcnn_outputs(model, blob_in, dim):
         # Only add softmax when testing; during training the softmax is combined
         # with the label cross entropy loss for numerical stability
         model.Softmax('cls_score', 'cls_prob', engine='CUDNN')
-    model.FC(
+    brew.fc(
+        model,
         blob_in,
         'bbox_pred',
         dim,
@@ -104,8 +108,8 @@ def add_roi_2mlp_head(model, blob_in, dim_in, spatial_scale):
         sampling_ratio=cfg.FAST_RCNN.ROI_XFORM_SAMPLING_RATIO,
         spatial_scale=spatial_scale
     )
-    model.FC(roi_feat, 'fc6', dim_in * roi_size * roi_size, hidden_dim)
-    model.Relu('fc6', 'fc6')
-    model.FC('fc6', 'fc7', hidden_dim, hidden_dim)
-    model.Relu('fc7', 'fc7')
+    brew.fc(model, roi_feat, 'fc6', dim_in * roi_size * roi_size, hidden_dim)
+    brew.relu(model, 'fc6', 'fc6')
+    brew.fc(model, 'fc6', 'fc7', hidden_dim, hidden_dim)
+    brew.relu(model, 'fc7', 'fc7')
     return 'fc7', hidden_dim

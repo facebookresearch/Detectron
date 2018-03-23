@@ -44,7 +44,7 @@ def add_rfcn_outputs(model, blob_in, dim_in, dim_reduce, spatial_scale):
             weight_init=gauss_fill(0.01),
             bias_init=const_fill(0.0)
         )
-        blob_in = model.Relu(blob_in, blob_in)
+        blob_in = brew.relu(model, blob_in, blob_in)
         dim_in = dim_reduce
     # Classification conv
     brew.conv(

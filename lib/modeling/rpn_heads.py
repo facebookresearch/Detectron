@@ -76,7 +76,7 @@ def add_single_scale_rpn_outputs(model, blob_in, dim_in, spatial_scale):
         weight_init=gauss_fill(0.01),
         bias_init=const_fill(0.0)
     )
-    model.Relu('conv_rpn', 'conv_rpn')
+    brew.relu(model, 'conv_rpn', 'conv_rpn')
     # Proposal classification scores
     brew.conv(
         model,

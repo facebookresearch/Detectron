@@ -124,7 +124,7 @@ def add_fpn_retinanet_outputs(model, blobs_in, dim_in, spatial_scales):
                     weight='retnet_cls_conv_n{}_fpn{}_w'.format(nconv, k_min),
                     bias='retnet_cls_conv_n{}_fpn{}_b'.format(nconv, k_min)
                 )
-            bl_in = model.Relu(bl_out, bl_out)
+            bl_in = brew.relu(model, bl_out, bl_out)
             bl_feat = bl_in
         # cls tower stack convolution ends. Add the logits layer now
         if lvl == k_min:
@@ -211,7 +211,7 @@ def add_fpn_retinanet_outputs(model, blobs_in, dim_in, spatial_scales):
                             nconv, k_min
                         )
                     )
-                bl_in = model.Relu(bl_out, bl_out)
+                bl_in = brew.relu(model, bl_out, bl_out)
                 # Add octave scales and aspect ratio
                 # At least 1 convolution for dealing different aspect ratios
                 bl_feat = bl_in

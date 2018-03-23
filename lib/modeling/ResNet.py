@@ -95,8 +95,8 @@ def add_ResNet_convX_body(model, block_counts, freeze_at=2):
     assert freeze_at in [0, 2, 3, 4, 5]
     p = brew.conv(model, 'data', 'conv1', 3, 64, 7, pad=3, stride=2, no_bias=1)
     p = model.AffineChannel(p, 'res_conv1_bn', dim=64, inplace=True)
-    p = model.Relu(p, p)
-    p = model.MaxPool(p, 'pool1', kernel=3, pad=1, stride=2)
+    p = brew.relu(model, p, p)
+    p = brew.max_pool(model, p, 'pool1', kernel=3, pad=1, stride=2)
     dim_in = 64
     dim_bottleneck = cfg.RESNETS.NUM_GROUPS * cfg.RESNETS.WIDTH_PER_GROUP
     (n1, n2, n3) = block_counts[:3]
@@ -190,7 +190,7 @@ def add_residual_block(
     else:
         s = model.net.Sum([tr, sc], prefix + '_sum')
 
-    return model.Relu(s, s)
+    return brew.relu(model, s, s)
 
 
 def add_shortcut(model, prefix, blob_in, dim_in, dim_out, stride):
@@ -242,7 +242,7 @@ def bottleneck_transformation(
         pad=0,
         inplace=True
     )
-    cur = model.Relu(cur, cur)
+    cur = brew.relu(model, cur, cur)
 
     # conv 3x3 -> BN -> ReLU
     cur = model.ConvAffine(
@@ -257,7 +257,7 @@ def bottleneck_transformation(
         group=group,
         inplace=True
     )
-    cur = model.Relu(cur, cur)
+    cur = brew.relu(model, cur, cur)
 
     # conv 1x1 -> BN (no ReLU)
     # NB: for now this AffineChannel op cannot be in-place due to a bug in C2

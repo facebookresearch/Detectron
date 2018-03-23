@@ -82,30 +82,6 @@ class DetectionModelHelper(model_helper.ModelHelper):
                  str(p).find('gpu_{}'.format(gpu_id)) == 0)
             )]
 
-    # taken from CNNModelHelper
-    #def Conv(self, *args, **kwargs):
-    #    return brew.conv(self, *args, **kwargs)
-
-    # taken from CNNModelHelper
-    def ConvTranspose(self, *args, **kwargs):
-        return brew.conv_transpose(self, *args, **kwargs)
-
-    # taken from CNNModelHelper
-    def FC(self, *args, **kwargs):
-        return brew.fc(self, *args, **kwargs)
-
-    # taken from CNNModelHelper
-    def Relu(self, *args, **kwargs):
-        return brew.relu(self, *args, **kwargs)
-
-    # taken from CNNModelHelper
-    def MaxPool(self, *args, **kwargs):
-        return brew.max_pool(self, *args, **kwargs)
-
-    # taken from CNNModelHelper
-    def LRN(self, *args, **kwargs):
-        return brew.lrn(self, *args, **kwargs)
-
     def AffineChannel(self, blob_in, blob_out, dim, inplace=False):
         """Affine transformation to replace BN in networks where BN cannot be
         used (e.g., because the minibatch size is too small).
@@ -392,7 +368,8 @@ class DetectionModelHelper(model_helper.ModelHelper):
         )
         kernel[range(dim_out), range(dim_in), :, :] = bil_filt
 
-        blob = self.ConvTranspose(
+        blob = brew.conv_transpose(
+            self,
             blob_in,
             blob_out,
             dim_in,
