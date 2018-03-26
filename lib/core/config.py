@@ -77,6 +77,7 @@ __C.TRAIN.WEIGHTS = b''
 # Available dataset list: datasets.dataset_catalog.DATASETS.keys()
 # If multiple datasets are listed, the model is trained on their union
 __C.TRAIN.DATASETS = ()
+__C.TRAIN.SEGMENTATION_DATASET = ()
 
 # Scales to use during training
 # Each scale is the pixel size of an image's shortest side
