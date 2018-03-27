@@ -149,9 +149,12 @@ class RoIDataLoader(object):
                     np.random.permutation(vert_inds)
                 )
             )
-            inds = np.reshape(inds, (-1, 2))
-            row_perm = np.random.permutation(np.arange(inds.shape[0]))
-            inds = np.reshape(inds[row_perm, :], (-1, ))
+            num_inds = len(inds)
+            inds_div_end = num_inds - (num_inds % cfg.TRAIN.IMS_PER_BATCH)
+            inds_div = np.reshape(inds[:inds_div_end], (-1, cfg.TRAIN.IMS_PER_BATCH))
+            row_perm = np.random.permutation(np.arange(inds_div.shape[0]))
+            inds_div = np.reshape(inds_div[row_perm, :], (-1, ))
+            inds = np.hstack((inds_div, inds[inds_div_end:]))
             self._perm = inds
         else:
             self._perm = np.random.permutation(np.arange(len(self._roidb)))
