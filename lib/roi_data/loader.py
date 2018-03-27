@@ -149,7 +149,7 @@ class RoIDataLoader(object):
                     np.random.permutation(vert_inds)
                 )
             )
-            inds = np.reshape(inds, (-1, 2))
+            inds = np.reshape(inds, (-1, cfg.TRAIN.IMS_PER_BATCH))
             row_perm = np.random.permutation(np.arange(inds.shape[0]))
             inds = np.reshape(inds[row_perm, :], (-1, ))
             self._perm = inds
