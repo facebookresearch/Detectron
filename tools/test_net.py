@@ -36,7 +36,6 @@ from core.config import cfg
 from core.config import merge_cfg_from_file
 from core.config import merge_cfg_from_list
 from core.test_engine import run_inference
-from datasets import task_evaluation
 import utils.c2
 import utils.logging
 
@@ -91,21 +90,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def main(weights_file, ind_range=None, multi_gpu_testing=False):
-    all_results = run_inference(
-        weights_file,
-        ind_range=ind_range,
-        multi_gpu_testing=multi_gpu_testing,
-    )
-    if not ind_range:
-        task_evaluation.check_expected_results(
-            all_results,
-            atol=cfg.EXPECTED_RESULTS_ATOL,
-            rtol=cfg.EXPECTED_RESULTS_RTOL
-        )
-        task_evaluation.log_copy_paste_friendly_results(all_results)
-
-
 if __name__ == '__main__':
     workspace.GlobalInit(['caffe2', '--caffe2_log_level=0'])
     logger = utils.logging.setup_logging(__name__)
@@ -124,8 +108,9 @@ if __name__ == '__main__':
         logger.info('Waiting for \'{}\' to exist...'.format(cfg.TEST.WEIGHTS))
         time.sleep(10)
 
-    main(
+    run_inference(
         cfg.TEST.WEIGHTS,
         ind_range=args.range,
-        multi_gpu_testing=args.multi_gpu_testing
+        multi_gpu_testing=args.multi_gpu_testing,
+        check_expected_results=True,
     )

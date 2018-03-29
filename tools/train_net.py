@@ -28,7 +28,6 @@ import logging
 import numpy as np
 import pprint
 import sys
-import test_net
 
 from caffe2.python import workspace
 
@@ -36,6 +35,7 @@ from core.config import assert_and_infer_cfg
 from core.config import cfg
 from core.config import merge_cfg_from_file
 from core.config import merge_cfg_from_list
+from core.test_engine import run_inference
 from utils.logging import setup_logging
 import utils.c2
 import utils.train
@@ -118,7 +118,10 @@ def test_model(model_file, multi_gpu_testing, opts=None):
     # Clear memory before inference
     workspace.ResetWorkspace()
     # Run inference
-    test_net.main(model_file, multi_gpu_testing=multi_gpu_testing)
+    run_inference(
+        model_file, multi_gpu_testing=multi_gpu_testing,
+        check_expected_results=True,
+    )
 
 
 if __name__ == '__main__':
