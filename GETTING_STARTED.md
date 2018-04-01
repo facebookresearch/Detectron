@@ -28,7 +28,7 @@ Detectron should automatically download the model from the URL specified by the 
 
 **Notes:**
 
-- When running inference on your own high-resolution images, Mask R-CNN may be slow simply because substantial time is spent upsampling the predicted masks to the original image resolution (this has not been optimized). You can diagnose this issue if the `misc_mask` time reported by `tools/infer_simple.py` is high (e.g., much more than 20-90ms). The solution is to first resize your images such that the short side is around 600-800px (the exact choice does not matter) and then run inference on the resized image.
+- When running inference on your own high-resolution images, Mask R-CNN may be slow simply because substantial time is spent upsampling the predicted masks to the original image resolution (this has not been optimized). You can diagnose this issue if the `misc_mask` time reported by `tools/infer_simple.py` is high (e.g. much more than 20-90ms). The solution is to first resize your images such that the short side is around 600-800px (the exact choice does not matter) and then run inference on the resized image.
 
 
 #### 2. COCO Dataset
@@ -96,4 +96,4 @@ To understand how learning schedules are adjusted (the "linear scaling rule"), p
 
 **Notes:**
 
-- This training example uses a relatively low GPU-compute model and thus overhead from Caffe2 Python ops is relatively high. As a result, scaling as the number of GPUs is increased from 2 to 8 is relatively poor (e.g., training with 8 GPUs takes about 0.9 hours, only 4.5x faster than with 1 GPU). As larger, more GPU-compute heavy models are used, the scaling improves.
+- This training example uses a relatively low GPU-compute model and thus overhead from Caffe2 Python ops is relatively high. As a result, scaling as the number of GPUs is increased from 2 to 8 is relatively poor (e.g. training with 8 GPUs takes about 0.9 hours, only 4.5x faster than with 1 GPU). As larger, more GPU-compute heavy models are used, the scaling improves.
