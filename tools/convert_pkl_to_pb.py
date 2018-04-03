@@ -333,7 +333,7 @@ def _save_models(all_net, all_init_net, args):
 
 
 def load_model(args):
-    model = test_engine.initialize_model_from_cfg()
+    model = test_engine.initialize_model_from_cfg(cfg.TEST.WEIGHTS)
     blobs = mutils.get_ws_blobs()
 
     return model, blobs
