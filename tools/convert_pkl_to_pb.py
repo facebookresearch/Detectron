@@ -65,6 +65,9 @@ def parse_args():
         description='Convert a trained network to pb format'
     )
     parser.add_argument(
+        '--pkl', dest='pkl_file', help='pkl weight file', default=None, required=True,
+        type=str)
+    parser.add_argument(
         '--cfg', dest='cfg_file', help='optional config file', default=None,
         type=str)
     parser.add_argument(
@@ -333,7 +336,7 @@ def _save_models(all_net, all_init_net, args):
 
 
 def load_model(args):
-    model = test_engine.initialize_model_from_cfg()
+    model = test_engine.initialize_model_from_cfg(args.pkl_file)
     blobs = mutils.get_ws_blobs()
 
     return model, blobs
