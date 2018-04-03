@@ -222,7 +222,14 @@ def print_net(model, namescope='gpu_0'):
             if output_name.find('grad') >= 0 or output_name.find('__m') >= 0:
                 continue
 
-            output_shape = workspace.FetchBlob(output_name).shape
+            try:
+                # Under some conditions (e.g., dynamic memory optimization)
+                # it is possible that the network frees some blobs when they are
+                # no longer needed. Handle this case...
+                output_shape = workspace.FetchBlob(output_name).shape
+            except BaseException:
+                output_shape = '<unknown>'
+
             first_blob = True
             op_label = op_type + (op_name if op_name == '' else ':' + op_name)
             suffix = ' ------- (op: {})'.format(op_label)
