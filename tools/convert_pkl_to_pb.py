@@ -218,35 +218,33 @@ def convert_net(args, net, blobs):
         reset_names(op.output)
         return [op]
 
-    @op_filter()
+    @op_filter(type='Python')
     def convert_python(op):
-        if op.type == 'Python':
-            if op.name.startswith('GenerateProposalsOp'):
-                gen_proposals_op, ext_input = convert_gen_proposals(
-                    op, blobs,
-                    rpn_min_size=float(cfg.TEST.RPN_MIN_SIZE),
-                    rpn_post_nms_topN=cfg.TEST.RPN_POST_NMS_TOP_N,
-                    rpn_pre_nms_topN=cfg.TEST.RPN_PRE_NMS_TOP_N,
-                    rpn_nms_thresh=cfg.TEST.RPN_NMS_THRESH,
-                )
-                net.external_input.extend([ext_input])
-                return [gen_proposals_op]
-            elif op.name.startswith('CollectAndDistributeFpnRpnProposalsOp'):
-                collect_dist_op = convert_collect_and_distribute(
-                    op, blobs,
-                    roi_canonical_scale=cfg.FPN.ROI_CANONICAL_SCALE,
-                    roi_canonical_level=cfg.FPN.ROI_CANONICAL_LEVEL,
-                    roi_max_level=cfg.FPN.ROI_MAX_LEVEL,
-                    roi_min_level=cfg.FPN.ROI_MIN_LEVEL,
-                    rpn_max_level=cfg.FPN.RPN_MAX_LEVEL,
-                    rpn_min_level=cfg.FPN.RPN_MIN_LEVEL,
-                    rpn_post_nms_topN=cfg.TEST.RPN_POST_NMS_TOP_N,
-                )
-                return [collect_dist_op]
-            else:
-                raise ValueError('Failed to convert Python op {}'.format(
-                    op.name))
-        return [op]
+        if op.name.startswith('GenerateProposalsOp'):
+            gen_proposals_op, ext_input = convert_gen_proposals(
+                op, blobs,
+                rpn_min_size=float(cfg.TEST.RPN_MIN_SIZE),
+                rpn_post_nms_topN=cfg.TEST.RPN_POST_NMS_TOP_N,
+                rpn_pre_nms_topN=cfg.TEST.RPN_PRE_NMS_TOP_N,
+                rpn_nms_thresh=cfg.TEST.RPN_NMS_THRESH,
+            )
+            net.external_input.extend([ext_input])
+            return [gen_proposals_op]
+        elif op.name.startswith('CollectAndDistributeFpnRpnProposalsOp'):
+            collect_dist_op = convert_collect_and_distribute(
+                op, blobs,
+                roi_canonical_scale=cfg.FPN.ROI_CANONICAL_SCALE,
+                roi_canonical_level=cfg.FPN.ROI_CANONICAL_LEVEL,
+                roi_max_level=cfg.FPN.ROI_MAX_LEVEL,
+                roi_min_level=cfg.FPN.ROI_MIN_LEVEL,
+                rpn_max_level=cfg.FPN.RPN_MAX_LEVEL,
+                rpn_min_level=cfg.FPN.RPN_MIN_LEVEL,
+                rpn_post_nms_topN=cfg.TEST.RPN_POST_NMS_TOP_N,
+            )
+            return [collect_dist_op]
+        else:
+            raise ValueError('Failed to convert Python op {}'.format(
+                op.name))
 
     @op_filter()
     def convert_rpn_rois(op):
