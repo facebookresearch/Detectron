@@ -96,7 +96,7 @@ def main(args):
     merge_cfg_from_file(args.cfg)
     cfg.NUM_GPUS = 1
     args.weights = cache_url(args.weights, cfg.DOWNLOAD_CACHE)
-    assert_and_infer_cfg()
+    assert_and_infer_cfg(cache_urls=False)
     model = infer_engine.initialize_model_from_cfg(args.weights)
     dummy_coco_dataset = dummy_datasets.get_coco_dataset()
 
