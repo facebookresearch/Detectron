@@ -265,10 +265,12 @@ def convert_net(args, net, blobs):
         print('Removing op {}:\n{}'.format(op.type, op))
         return []
 
+    # We want to apply to all operators, including converted
+    # so run separately
+    convert_op_in_proto(net, convert_remove_op)
+    convert_op_in_proto(net, convert_python)
     convert_op_in_proto(net, convert_op_name)
-    convert_op_in_proto(net, [
-        convert_python, convert_rpn_rois, convert_remove_op
-    ])
+    convert_op_in_proto(net, convert_rpn_rois)
 
     reset_names(net.external_input)
     reset_names(net.external_output)
