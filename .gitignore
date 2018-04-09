@@ -16,6 +16,9 @@ lib/build/
 *.swo
 *.swp
 
+.idea/*
+test/.cache/*
+
 # Dataset symlinks
 lib/datasets/data/*
 !lib/datasets/data/README.md

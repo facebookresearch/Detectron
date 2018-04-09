@@ -27,7 +27,7 @@ import cv2  # NOQA (Must import before importing caffe2 due to bug in cv2)
 import os
 import pprint
 import sys
-sys.path.append('../lib/')
+sys.path.append('/Users/yunfanlu/GithubProject/12 Mask RCNN/Detectron/lib/core')
 import time
 
 from caffe2.python import workspace
