@@ -1521,11 +1521,12 @@ ypoints_coco_2014_minival/generalized_rcnn/keypoints_keypoints_coco_2014_minival
 ##My models
 
 
-| Dataset | Model | BBox Mean AP| AP | AP50 | AP75 | APs | APm | APl | 
-| --------| ----- | ----------- | --| ------| -----| ----| ----| --- |
-| VOC| R-101-FPN_1x_LR001| 0.6773| 0.4086 |0.6316 |0.4416|0.0856|0.2670|0.4902|
+| Dataset | Model |  AP | AP50 | AP75 | APs | APm | APl | 
+| --------| ----- |  --| ------| -----| ----| ----| --- |
+| VOC| R-101-FPN_1x_LR001| 0.4086 |0.6316 |0.4416|0.0856|0.2670|0.4902|
 | VOC| R-50-FPN_2x_Voc_Coco| 0.2393|0.4074|0.2543|0.0312|0.1510|0.3429|
 |COCO| R-50-FPN_2x_Voc_Coco| 0.3378|0.5585|0.3526|0.1506|0.3632|0.5049|
+|VOC| R-50-FPN_2x_Voc | 0.3566|0.5891|0.3819|0.0660|0.2400|0.4270
 
 
 
