@@ -1518,7 +1518,7 @@ ypoints_coco_2014_minival/generalized_rcnn/keypoints_keypoints_coco_2014_minival
 </tbody></table>
 
 
-##My models
+###My models
 
 
 | Dataset | Model |  AP | AP50 | AP75 | APs | APm | APl | 
@@ -1528,6 +1528,19 @@ ypoints_coco_2014_minival/generalized_rcnn/keypoints_keypoints_coco_2014_minival
 |COCO| R-50-FPN_2x_Voc_Coco| 0.3378|0.5585|0.3526|0.1506|0.3632|0.5049|
 |VOC| R-50-FPN_2x_Voc | 0.3566|0.5891|0.3819|0.0660|0.2400|0.4270
 
+
+
+**Metrics**
+
+
+Average Precision (AP):
+AP% AP at IoU=.50:.05:.95 (primary challenge metric) 
+APIoU=.50% AP at IoU=.50 (PASCAL VOC metric) 
+APIoU=.75% AP at IoU=.75 (strict metric)
+AP Across Scales:
+APsmall% AP for small objects: area < 322 A
+Pmedium% AP for medium objects: 322 < area < 962 
+APlarge% AP for large objects: area > 962
 
 
 **Notes:**
