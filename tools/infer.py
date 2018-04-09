@@ -29,6 +29,7 @@ from __future__ import unicode_literals
 
 import argparse
 import cv2  # NOQA (Must import before importing caffe2 due to bug in cv2)
+import logging
 import os
 import sys
 import yaml
@@ -39,6 +40,7 @@ from core.config import assert_and_infer_cfg
 from core.config import cfg
 from core.config import merge_cfg_from_cfg
 from core.config import merge_cfg_from_file
+from utils.io import cache_url
 import core.rpn_generator as rpn_engine
 import core.test_engine as model_engine
 import datasets.dummy_datasets as dummy_datasets
@@ -97,21 +99,22 @@ def parse_args():
 
 
 def get_rpn_box_proposals(im, args):
+    cfg.immutable(False)
     merge_cfg_from_file(args.rpn_cfg)
-    cfg.TEST.WEIGHTS = args.rpn_pkl
     cfg.NUM_GPUS = 1
     cfg.MODEL.RPN_ONLY = True
     cfg.TEST.RPN_PRE_NMS_TOP_N = 10000
     cfg.TEST.RPN_POST_NMS_TOP_N = 2000
     assert_and_infer_cfg()
 
-    model = model_engine.initialize_model_from_cfg()
+    model = model_engine.initialize_model_from_cfg(args.rpn_pkl)
     with c2_utils.NamedCudaScope(0):
         boxes, scores = rpn_engine.im_proposals(model, im)
     return boxes, scores
 
 
 def main(args):
+    logger = logging.getLogger(__name__)
     dummy_coco_dataset = dummy_datasets.get_coco_dataset()
     cfg_orig = yaml.load(yaml.dump(cfg))
     im = cv2.imread(args.im_file)
@@ -126,13 +129,16 @@ def main(args):
     for i in range(0, len(args.models_to_run), 2):
         pkl = args.models_to_run[i]
         yml = args.models_to_run[i + 1]
+        cfg.immutable(False)
         merge_cfg_from_cfg(cfg_orig)
         merge_cfg_from_file(yml)
         if len(pkl) > 0:
-            cfg.TEST.WEIGHTS = pkl
+            weights_file = pkl
+        else:
+            weights_file = cfg.TEST.WEIGHTS
         cfg.NUM_GPUS = 1
         assert_and_infer_cfg()
-        model = model_engine.initialize_model_from_cfg()
+        model = model_engine.initialize_model_from_cfg(weights_file)
         with c2_utils.NamedCudaScope(0):
             cls_boxes_, cls_segms_, cls_keyps_ = \
                 model_engine.im_detect_all(model, im, proposal_boxes)
@@ -140,6 +146,11 @@ def main(args):
         cls_segms = cls_segms_ if cls_segms_ is not None else cls_segms
         cls_keyps = cls_keyps_ if cls_keyps_ is not None else cls_keyps
         workspace.ResetWorkspace()
+
+    out_name = os.path.join(
+        args.output_dir, '{}'.format(os.path.basename(args.im_file) + '.pdf')
+    )
+    logger.info('Processing {} -> {}'.format(args.im_file, out_name))
 
     vis_utils.vis_one_image(
         im[:, :, ::-1],
@@ -162,13 +173,18 @@ def check_args(args):
         (args.rpn_pkl is None and args.rpn_cfg is None)
     )
     if args.rpn_pkl is not None:
+        args.rpn_pkl = cache_url(args.rpn_pkl, cfg.DOWNLOAD_CACHE)
         assert os.path.exists(args.rpn_pkl)
         assert os.path.exists(args.rpn_cfg)
     if args.models_to_run is not None:
         assert len(args.models_to_run) % 2 == 0
-        for model_file in args.models_to_run:
+        for i, model_file in enumerate(args.models_to_run):
             if len(model_file) > 0:
-                assert os.path.exists(model_file)
+                if i % 2 == 0:
+                    model_file = cache_url(model_file, cfg.DOWNLOAD_CACHE)
+                    args.models_to_run[i] = model_file
+                assert os.path.exists(model_file), \
+                    '\'{}\' does not exist'.format(model_file)
 
 
 if __name__ == '__main__':

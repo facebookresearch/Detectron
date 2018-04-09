@@ -27,10 +27,10 @@ from collections import defaultdict
 from caffe2.python import core, workspace
 
 from core.config import cfg
-from core.rpn_generator import _get_image_blob
 from modeling.generate_anchors import generate_anchors
 from utils.timer import Timer
 
+import utils.blob as blob_utils
 import utils.boxes as box_utils
 
 logger = logging.getLogger(__name__)
@@ -76,7 +76,8 @@ def im_detect_bbox(model, im, timers=None):
     k_max, k_min = cfg.FPN.RPN_MAX_LEVEL, cfg.FPN.RPN_MIN_LEVEL
     A = cfg.RETINANET.SCALES_PER_OCTAVE * len(cfg.RETINANET.ASPECT_RATIOS)
     inputs = {}
-    inputs['data'], inputs['im_info'] = _get_image_blob(im)
+    inputs['data'], im_scale, inputs['im_info'] = \
+        blob_utils.get_image_blob(im, cfg.TEST.SCALE, cfg.TEST.MAX_SIZE)
     cls_probs, box_preds = [], []
     for lvl in range(k_min, k_max + 1):
         suffix = 'fpn{}'.format(lvl)
@@ -86,7 +87,6 @@ def im_detect_bbox(model, im, timers=None):
         workspace.FeedBlob(core.ScopedName(k), v.astype(np.float32, copy=False))
 
     workspace.RunNet(model.net.Proto().name)
-    scale = inputs['im_info'][0, 2]
     cls_probs = workspace.FetchBlobs(cls_probs)
     box_preds = workspace.FetchBlobs(box_preds)
 
@@ -147,7 +147,7 @@ def im_detect_bbox(model, im, timers=None):
         pred_boxes = (
             box_utils.bbox_transform(boxes, box_deltas)
             if cfg.TEST.BBOX_REG else boxes)
-        pred_boxes /= scale
+        pred_boxes /= im_scale
         pred_boxes = box_utils.clip_tiled_boxes(pred_boxes, im.shape)
         box_scores = np.zeros((pred_boxes.shape[0], 5))
         box_scores[:, 0:4] = pred_boxes

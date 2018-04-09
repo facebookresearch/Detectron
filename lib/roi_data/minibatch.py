@@ -105,10 +105,10 @@ def _get_image_blob(roidb):
             im = im[:, ::-1, :]
         target_size = cfg.TRAIN.SCALES[scale_inds[i]]
         im, im_scale = blob_utils.prep_im_for_blob(
-            im, cfg.PIXEL_MEANS, [target_size], cfg.TRAIN.MAX_SIZE
+            im, cfg.PIXEL_MEANS, target_size, cfg.TRAIN.MAX_SIZE
         )
-        im_scales.append(im_scale[0])
-        processed_ims.append(im[0])
+        im_scales.append(im_scale)
+        processed_ims.append(im)
 
     # Create a blob to hold the input images
     blob = blob_utils.im_list_to_blob(processed_ims)

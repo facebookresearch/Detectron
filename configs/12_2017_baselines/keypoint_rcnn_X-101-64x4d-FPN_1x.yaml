@@ -50,7 +50,7 @@ TEST:
   DATASETS: ('keypoints_coco_2014_minival',)
   PROPOSAL_FILES: ('https://s3-us-west-2.amazonaws.com/detectron/35999553/12_2017_baselines/rpn_person_only_X-101-64x4d-FPN_1x.yaml.08_21_33.ghFzzArr/output/test/keypoints_coco_2014_minival/generalized_rcnn/rpn_proposals.pkl',)
   PROPOSAL_LIMIT: 1000
-  SCALES: (800,)
+  SCALE: 800
   MAX_SIZE: 1333
   NMS: 0.5
 OUTPUT_DIR: .

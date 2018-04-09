@@ -222,7 +222,14 @@ def print_net(model, namescope='gpu_0'):
             if output_name.find('grad') >= 0 or output_name.find('__m') >= 0:
                 continue
 
-            output_shape = workspace.FetchBlob(output_name).shape
+            try:
+                # Under some conditions (e.g., dynamic memory optimization)
+                # it is possible that the network frees some blobs when they are
+                # no longer needed. Handle this case...
+                output_shape = workspace.FetchBlob(output_name).shape
+            except BaseException:
+                output_shape = '<unknown>'
+
             first_blob = True
             op_label = op_type + (op_name if op_name == '' else ':' + op_name)
             suffix = ' ------- (op: {})'.format(op_label)
@@ -253,7 +260,12 @@ def configure_bbox_reg_weights(model, saved_cfg):
                        'MODEL.BBOX_REG_WEIGHTS was added. Forcing '
                        'MODEL.BBOX_REG_WEIGHTS = (1., 1., 1., 1.) to ensure '
                        'correct **inference** behavior.')
+        # Generally we don't allow modifying the config, but this is a one-off
+        # hack to support some very old models
+        is_immutable = cfg.is_immutable()
+        cfg.immutable(False)
         cfg.MODEL.BBOX_REG_WEIGHTS = (1., 1., 1., 1.)
+        cfg.immutable(is_immutable)
         logger.info('New config:')
         logger.info(pprint.pformat(cfg))
         assert not model.train, (
