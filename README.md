@@ -138,7 +138,6 @@ If bugs are found, **we appreciate pull requests** (including adding Q&A's to `F
   - 刘琪：
     * [Detecting and Recognizing Human-Object Interactions](https://arxiv.org/abs/1704.07333).
   - 云帆：
-    * [Fast R-CNN](http://arxiv.org/abs/1504.08083).
     * [Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks](http://arxiv.org/abs/1506.01497)
     * [Mask R-CNN](https://arxiv.org/abs/1703.06870).
   - 夏鹏：
@@ -147,3 +146,5 @@ If bugs are found, **we appreciate pull requests** (including adding Q&A's to `F
     * [Aggregated Residual Transformations for Deep Neural Networks](https://arxiv.org/abs/1611.05431).
   - 平川：
     * [Data Distillation: Towards Omni-Supervised Learning](https://arxiv.org/abs/1712.04440).
+  - 智敏：
+    * [Fast R-CNN](http://arxiv.org/abs/1504.08083).
