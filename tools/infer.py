@@ -105,7 +105,7 @@ def get_rpn_box_proposals(im, args):
     cfg.MODEL.RPN_ONLY = True
     cfg.TEST.RPN_PRE_NMS_TOP_N = 10000
     cfg.TEST.RPN_POST_NMS_TOP_N = 2000
-    assert_and_infer_cfg()
+    assert_and_infer_cfg(cache_urls=False)
 
     model = model_engine.initialize_model_from_cfg(args.rpn_pkl)
     with c2_utils.NamedCudaScope(0):
@@ -137,7 +137,7 @@ def main(args):
         else:
             weights_file = cfg.TEST.WEIGHTS
         cfg.NUM_GPUS = 1
-        assert_and_infer_cfg()
+        assert_and_infer_cfg(cache_urls=False)
         model = model_engine.initialize_model_from_cfg(weights_file)
         with c2_utils.NamedCudaScope(0):
             cls_boxes_, cls_segms_, cls_keyps_ = \
