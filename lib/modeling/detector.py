@@ -23,11 +23,13 @@ from __future__ import unicode_literals
 import numpy as np
 import logging
 
-from caffe2.python import cnn
 from caffe2.python import core
 from caffe2.python import workspace
 from caffe2.python.modeling import initializers
 from caffe2.python.modeling.parameter_info import ParameterTags
+# model_helper and brew imports
+from caffe2.python import brew, model_helper
+
 
 from core.config import cfg
 from ops.collect_and_distribute_fpn_rpn_proposals \
@@ -39,30 +41,33 @@ import utils.c2 as c2_utils
 
 logger = logging.getLogger(__name__)
 
-
-class DetectionModelHelper(cnn.CNNModelHelper):
-    def __init__(self, **kwargs):
+class DetectionModelHelper(model_helper.ModelHelper):
+    def __init__(self, init_params=True, **kwargs):
         # Handle args specific to the DetectionModelHelper, others pass through
         # to CNNModelHelper
-        self.train = kwargs.get('train', False)
-        self.num_classes = kwargs.get('num_classes', -1)
+        self.train = kwargs.pop('train', False)
+        self.num_classes = kwargs.pop('num_classes', -1)
         assert self.num_classes > 0, 'num_classes must be > 0'
-        for k in ('train', 'num_classes'):
-            if k in kwargs:
-                del kwargs[k]
-        kwargs['order'] = 'NCHW'
         # Defensively set cudnn_exhaustive_search to False in case the default
         # changes in CNNModelHelper. The detection code uses variable size
         # inputs that might not play nicely with cudnn_exhaustive_search.
         kwargs['cudnn_exhaustive_search'] = False
-        super(DetectionModelHelper, self).__init__(**kwargs)
+        arg_scope = {
+            'use_cudnn': kwargs.pop('use_cudnn', True),
+            'cudnn_exhaustive_search': kwargs.pop('cudnn_exhaustive_search', False),
+            'order': kwargs.pop('order', 'NCHW'),
+        }
+        super(DetectionModelHelper, self).__init__(
+            init_params=init_params,
+            arg_scope=arg_scope,
+            **kwargs
+        )
         self.roi_data_loader = None
         self.losses = []
         self.metrics = []
         self.do_not_update_params = []  # Param on this list are not updated
         self.net.Proto().type = cfg.MODEL.EXECUTION_TYPE
         self.net.Proto().num_workers = cfg.NUM_GPUS * 4
-        self.prev_use_cudnn = self.use_cudnn
 
     def TrainableParams(self, gpu_id=-1):
         """Get the blob names for all trainable parameters, possibly filtered by
@@ -312,15 +317,13 @@ class DetectionModelHelper(cnn.CNNModelHelper):
     ):
         """Add conv op that shares weights and/or biases with another conv op.
         """
-        use_bias = (
-            False if ('no_bias' in kwargs and kwargs['no_bias']) else True
-        )
+        use_bias = not kwargs.get("no_bias", False)
 
-        if self.use_cudnn:
-            kwargs['engine'] = 'CUDNN'
-            kwargs['exhaustive_search'] = self.cudnn_exhaustive_search
-            if self.ws_nbytes_limit:
-                kwargs['ws_nbytes_limit'] = self.ws_nbytes_limit
+        #if self.use_cudnn:
+        #    kwargs['engine'] = 'CUDNN'
+        #    kwargs['exhaustive_search'] = self.cudnn_exhaustive_search
+        #    if self.ws_nbytes_limit:
+        #        kwargs['ws_nbytes_limit'] = self.ws_nbytes_limit
 
         if use_bias:
             blobs_in = [blob_in, weight, bias]
@@ -331,7 +334,7 @@ class DetectionModelHelper(cnn.CNNModelHelper):
             del kwargs['no_bias']
 
         return self.net.Conv(
-            blobs_in, blob_out, kernel=kernel, order=self.order, **kwargs
+            blobs_in, blob_out, kernel=kernel, **kwargs
         )
 
     def BilinearInterpolation(
@@ -365,7 +368,8 @@ class DetectionModelHelper(cnn.CNNModelHelper):
         )
         kernel[range(dim_out), range(dim_in), :, :] = bil_filt
 
-        blob = self.ConvTranspose(
+        blob = brew.conv_transpose(
+            self,
             blob_in,
             blob_out,
             dim_in,
@@ -391,7 +395,8 @@ class DetectionModelHelper(cnn.CNNModelHelper):
         """ConvAffine adds a Conv op followed by a AffineChannel op (which
         replaces BN during fine tuning).
         """
-        conv_blob = self.Conv(
+        conv_blob = brew.conv(
+            self,
             blob_in,
             prefix,
             dim_in,
@@ -409,15 +414,6 @@ class DetectionModelHelper(cnn.CNNModelHelper):
             conv_blob, prefix + suffix, dim=dim_out, inplace=inplace
         )
         return blob_out
-
-    def DisableCudnn(self):
-        self.prev_use_cudnn = self.use_cudnn
-        self.use_cudnn = False
-
-    def RestorePreviousUseCudnn(self):
-        prev_use_cudnn = self.use_cudnn
-        self.use_cudnn = self.prev_use_cudnn
-        self.prev_use_cudnn = prev_use_cudnn
 
     def UpdateWorkspaceLr(self, cur_iter, new_lr):
         """Updates the model's current learning rate and the workspace (learning

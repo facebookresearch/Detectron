@@ -38,6 +38,8 @@ from utils.c2 import gauss_fill
 import modeling.ResNet as ResNet
 import utils.blob as blob_utils
 
+from caffe2.python import brew
+
 
 # ---------------------------------------------------------------------------- #
 # Mask R-CNN outputs and losses
@@ -50,7 +52,8 @@ def add_mask_rcnn_outputs(model, blob_in, dim):
     if cfg.MRCNN.USE_FC_OUTPUT:
         # Predict masks with a fully connected layer (ignore 'fcn' in the blob
         # name)
-        blob_out = model.FC(
+        blob_out = brew.fc(
+            model, 
             blob_in,
             'mask_fcn_logits',
             dim,
@@ -67,7 +70,8 @@ def add_mask_rcnn_outputs(model, blob_in, dim):
             cfg.MRCNN.CONV_INIT
             if cfg.MRCNN.CLS_SPECIFIC_MASK else 'GaussianFill'
         )
-        blob_out = model.Conv(
+        blob_out = brew.conv(
+            model,
             blob_in,
             'mask_fcn_logits',
             dim,
@@ -139,7 +143,8 @@ def mask_rcnn_fcn_head_v1upXconvs(
     dim_inner = cfg.MRCNN.DIM_REDUCED
 
     for i in range(num_convs):
-        current = model.Conv(
+        current = brew.conv(
+            model,
             current,
             '_[mask]_fcn' + str(i + 1),
             dim_in,
@@ -150,11 +155,12 @@ def mask_rcnn_fcn_head_v1upXconvs(
             weight_init=(cfg.MRCNN.CONV_INIT, {'std': 0.001}),
             bias_init=('ConstantFill', {'value': 0.})
         )
-        current = model.Relu(current, current)
+        current = brew.relu(model, current, current)
         dim_in = dim_inner
 
     # upsample layer
-    model.ConvTranspose(
+    brew.conv_transpose(
+        model,
         current,
         'conv5_mask',
         dim_inner,
@@ -165,7 +171,7 @@ def mask_rcnn_fcn_head_v1upXconvs(
         weight_init=(cfg.MRCNN.CONV_INIT, {'std': 0.001}),
         bias_init=const_fill(0.0)
     )
-    blob_mask = model.Relu('conv5_mask', 'conv5_mask')
+    blob_mask = brew.relu(model, 'conv5_mask', 'conv5_mask')
 
     return blob_mask, dim_inner
 
@@ -196,7 +202,8 @@ def mask_rcnn_fcn_head_v0upshare(model, blob_in, dim_in, spatial_scale):
 
     dim_reduced = cfg.MRCNN.DIM_REDUCED
 
-    blob_mask = model.ConvTranspose(
+    blob_mask = brew.conv_transpose(
+        model,
         blob_conv5,
         'conv5_mask',
         dim_conv5,
@@ -207,7 +214,7 @@ def mask_rcnn_fcn_head_v0upshare(model, blob_in, dim_in, spatial_scale):
         weight_init=(cfg.MRCNN.CONV_INIT, {'std': 0.001}),  # std only for gauss
         bias_init=const_fill(0.0)
     )
-    model.Relu('conv5_mask', 'conv5_mask')
+    brew.relu(model, 'conv5_mask', 'conv5_mask')
 
     return blob_mask, dim_reduced
 
@@ -223,7 +230,8 @@ def mask_rcnn_fcn_head_v0up(model, blob_in, dim_in, spatial_scale):
 
     dim_reduced = cfg.MRCNN.DIM_REDUCED
 
-    model.ConvTranspose(
+    brew.conv_transpose(
+        model,
         blob_conv5,
         'conv5_mask',
         dim_conv5,
@@ -234,7 +242,7 @@ def mask_rcnn_fcn_head_v0up(model, blob_in, dim_in, spatial_scale):
         weight_init=('GaussianFill', {'std': 0.001}),
         bias_init=const_fill(0.0)
     )
-    blob_mask = model.Relu('conv5_mask', 'conv5_mask')
+    blob_mask = brew.relu(model, 'conv5_mask', 'conv5_mask')
 
     return blob_mask, dim_reduced
 

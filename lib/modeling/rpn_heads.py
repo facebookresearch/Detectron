@@ -25,6 +25,8 @@ from utils.c2 import gauss_fill
 import modeling.FPN as FPN
 import utils.blob as blob_utils
 
+from caffe2.python import brew
+
 
 # ---------------------------------------------------------------------------- #
 # RPN and Faster R-CNN outputs and losses
@@ -62,7 +64,8 @@ def add_single_scale_rpn_outputs(model, blob_in, dim_in, spatial_scale):
     num_anchors = anchors.shape[0]
     dim_out = dim_in
     # RPN hidden representation
-    model.Conv(
+    brew.conv(
+        model,
         blob_in,
         'conv_rpn',
         dim_in,
@@ -73,9 +76,10 @@ def add_single_scale_rpn_outputs(model, blob_in, dim_in, spatial_scale):
         weight_init=gauss_fill(0.01),
         bias_init=const_fill(0.0)
     )
-    model.Relu('conv_rpn', 'conv_rpn')
+    brew.relu(model, 'conv_rpn', 'conv_rpn')
     # Proposal classification scores
-    model.Conv(
+    brew.conv(
+        model,
         'conv_rpn',
         'rpn_cls_logits',
         dim_in,
@@ -87,7 +91,8 @@ def add_single_scale_rpn_outputs(model, blob_in, dim_in, spatial_scale):
         bias_init=const_fill(0.0)
     )
     # Proposal bbox regression deltas
-    model.Conv(
+    brew.conv(
+        model,
         'conv_rpn',
         'rpn_bbox_pred',
         dim_in,

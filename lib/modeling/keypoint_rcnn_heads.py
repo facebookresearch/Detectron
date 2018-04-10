@@ -38,6 +38,8 @@ from utils.c2 import gauss_fill
 import modeling.ResNet as ResNet
 import utils.blob as blob_utils
 
+from caffe2.python import brew
+
 
 # ---------------------------------------------------------------------------- #
 # Keypoint R-CNN outputs and losses
@@ -49,9 +51,10 @@ def add_keypoint_outputs(model, blob_in, dim):
     upsample_heatmap = (cfg.KRCNN.UP_SCALE > 1)
 
     if cfg.KRCNN.USE_DECONV:
-        # Apply ConvTranspose to the feature representation; results in 2x
+        # Apply conv_transpose to the feature representation; results in 2x
         # upsampling
-        blob_in = model.ConvTranspose(
+        blob_in = brew.conv_transpose(
+            model,
             blob_in,
             'kps_deconv',
             dim,
@@ -62,7 +65,7 @@ def add_keypoint_outputs(model, blob_in, dim):
             weight_init=gauss_fill(0.01),
             bias_init=const_fill(0.0)
         )
-        model.Relu('kps_deconv', 'kps_deconv')
+        brew.relu(model, 'kps_deconv', 'kps_deconv')
         dim = cfg.KRCNN.DECONV_DIM
 
     if upsample_heatmap:
@@ -71,8 +74,9 @@ def add_keypoint_outputs(model, blob_in, dim):
         blob_name = 'kps_score'
 
     if cfg.KRCNN.USE_DECONV_OUTPUT:
-        # Use ConvTranspose to predict heatmaps; results in 2x upsampling
-        blob_out = model.ConvTranspose(
+        # Use conv_transpose to predict heatmaps; results in 2x upsampling
+        blob_out = brew.conv_transpose(
+            model,
             blob_in,
             blob_name,
             dim,
@@ -85,7 +89,8 @@ def add_keypoint_outputs(model, blob_in, dim):
         )
     else:
         # Use Conv to predict heatmaps; does no upsampling
-        blob_out = model.Conv(
+        blob_out = brew.conv(
+            model,
             blob_in,
             blob_name,
             dim,
@@ -200,7 +205,8 @@ def add_roi_pose_head_v1convX(model, blob_in, dim_in, spatial_scale):
     )
 
     for i in range(cfg.KRCNN.NUM_STACKED_CONVS):
-        current = model.Conv(
+        current = brew.conv(
+            model,
             current,
             'conv_fcn' + str(i + 1),
             dim_in,
@@ -211,7 +217,7 @@ def add_roi_pose_head_v1convX(model, blob_in, dim_in, spatial_scale):
             weight_init=(cfg.KRCNN.CONV_INIT, {'std': 0.01}),
             bias_init=('ConstantFill', {'value': 0.})
         )
-        current = model.Relu(current, current)
+        current = brew.relu(model, current, current)
         dim_in = hidden_dim
 
     return current, hidden_dim
