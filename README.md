@@ -16,12 +16,12 @@ codebase for object detection *research*. It is designed to be flexible in order
 to support rapid implementation and evaluation of novel research. Detectron
 includes implementations of the following object detection algorithms:
 
-- [Mask R-CNN](https://arxiv.org/abs/1703.06870) -- *Marr Prize at ICCV 2017*
-- [RetinaNet](https://arxiv.org/abs/1708.02002) -- *Best Student Paper Award at ICCV 2017*
-- [Faster R-CNN](https://arxiv.org/abs/1506.01497)
-- [RPN](https://arxiv.org/abs/1506.01497)
-- [Fast R-CNN](https://arxiv.org/abs/1504.08083)
-- [R-FCN](https://arxiv.org/abs/1605.06409)
+- 云帆 [Mask R-CNN](https://arxiv.org/abs/1703.06870) -- *Marr Prize at ICCV 2017*
+- 铭潮 [RetinaNet](https://arxiv.org/abs/1708.02002) -- *Best Student Paper Award at ICCV 2017*
+- 云帆 [Faster R-CNN](https://arxiv.org/abs/1506.01497)
+- 云帆 [RPN](https://arxiv.org/abs/1506.01497)
+- 云帆 [Fast R-CNN](https://arxiv.org/abs/1504.08083)
+- 海伦 [R-FCN](https://arxiv.org/abs/1605.06409)
 
 using the following backbone network architectures:
 
@@ -70,42 +70,80 @@ If bugs are found, **we appreciate pull requests** (including adding Q&A's to `F
 
 ## References
 
-- [Data Distillation: Towards Omni-Supervised Learning](https://arxiv.org/abs/1712.04440).
+- 平川 [Data Distillation: Towards Omni-Supervised Learning](https://arxiv.org/abs/1712.04440).
   Ilija Radosavovic, Piotr Dollár, Ross Girshick, Georgia Gkioxari, and Kaiming He.
   Tech report, arXiv, Dec. 2017.
-- [Learning to Segment Every Thing](https://arxiv.org/abs/1711.10370).
+
+- 张琪 [Learning to Segment Every Thing](https://arxiv.org/abs/1711.10370).
   Ronghang Hu, Piotr Dollár, Kaiming He, Trevor Darrell, and Ross Girshick.
   Tech report, arXiv, Nov. 2017.
-- [Non-Local Neural Networks](https://arxiv.org/abs/1711.07971).
+
+- 鸿儒 [Non-Local Neural Networks](https://arxiv.org/abs/1711.07971).
   Xiaolong Wang, Ross Girshick, Abhinav Gupta, and Kaiming He.
   Tech report, arXiv, Nov. 2017.
-- [Mask R-CNN](https://arxiv.org/abs/1703.06870).
+
+- 云帆 [Mask R-CNN](https://arxiv.org/abs/1703.06870).
   Kaiming He, Georgia Gkioxari, Piotr Dollár, and Ross Girshick.
   IEEE International Conference on Computer Vision (ICCV), 2017.
-- [Focal Loss for Dense Object Detection](https://arxiv.org/abs/1708.02002).
+
+- 铭潮 [Focal Loss for Dense Object Detection](https://arxiv.org/abs/1708.02002).
   Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, and Piotr Dollár.
   IEEE International Conference on Computer Vision (ICCV), 2017.
-- [Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour](https://arxiv.org/abs/1706.02677).
+
+- 铭潮 [Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour](https://arxiv.org/abs/1706.02677).
   Priya Goyal, Piotr Dollár, Ross Girshick, Pieter Noordhuis, Lukasz Wesolowski, Aapo Kyrola, Andrew Tulloch, Yangqing Jia, and Kaiming He.
   Tech report, arXiv, June 2017.
-- [Detecting and Recognizing Human-Object Interactions](https://arxiv.org/abs/1704.07333).
+
+- 刘琪 [Detecting and Recognizing Human-Object Interactions](https://arxiv.org/abs/1704.07333).
   Georgia Gkioxari, Ross Girshick, Piotr Dollár, and Kaiming He.
   Tech report, arXiv, Apr. 2017.
-- [Feature Pyramid Networks for Object Detection](https://arxiv.org/abs/1612.03144).
+
+- 夏鹏 [Feature Pyramid Networks for Object Detection](https://arxiv.org/abs/1612.03144).
   Tsung-Yi Lin, Piotr Dollár, Ross Girshick, Kaiming He, Bharath Hariharan, and Serge Belongie.
   IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2017.
-- [Aggregated Residual Transformations for Deep Neural Networks](https://arxiv.org/abs/1611.05431).
+
+- 韬哥 [Aggregated Residual Transformations for Deep Neural Networks](https://arxiv.org/abs/1611.05431).
   Saining Xie, Ross Girshick, Piotr Dollár, Zhuowen Tu, and Kaiming He.
   IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2017.
-- [R-FCN: Object Detection via Region-based Fully Convolutional Networks](http://arxiv.org/abs/1605.06409).
+
+- 海伦 [R-FCN: Object Detection via Region-based Fully Convolutional Networks](http://arxiv.org/abs/1605.06409).
   Jifeng Dai, Yi Li, Kaiming He, and Jian Sun.
   Conference on Neural Information Processing Systems (NIPS), 2016.
-- [Deep Residual Learning for Image Recognition](http://arxiv.org/abs/1512.03385).
+
+- 海伦 [Deep Residual Learning for Image Recognition](http://arxiv.org/abs/1512.03385).
   Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.
   IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.
-- [Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks](http://arxiv.org/abs/1506.01497)
+
+- 云帆 [Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks](http://arxiv.org/abs/1506.01497)
   Shaoqing Ren, Kaiming He, Ross Girshick, and Jian Sun.
   Conference on Neural Information Processing Systems (NIPS), 2015.
-- [Fast R-CNN](http://arxiv.org/abs/1504.08083).
+
+- 云帆 [Fast R-CNN](http://arxiv.org/abs/1504.08083).
   Ross Girshick.
   IEEE International Conference on Computer Vision (ICCV), 2015.
+
+##  工作日志：
+  * 4 月 10 号，第六周提交小组名单。
+  * 自选论文阅读。
+  - 铭潮：
+    * [Focal Loss for Dense Object Detection](https://arxiv.org/abs/1708.02002).
+    * [Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour](https://arxiv.org/abs/1706.02677).
+  - 鸿儒：
+    * [Non-Local Neural Networks](https://arxiv.org/abs/1711.07971).
+  - 海伦：
+    * [R-FCN: Object Detection via Region-based Fully Convolutional Networks](http://arxiv.org/abs/1605.06409).
+    * [Deep Residual Learning for Image Recognition](http://arxiv.org/abs/1512.03385).
+  - 张琪：
+    * [Learning to Segment Every Thing](https://arxiv.org/abs/1711.10370).
+  - 刘琪：
+    * [Detecting and Recognizing Human-Object Interactions](https://arxiv.org/abs/1704.07333).
+  - 云帆：
+    * [Fast R-CNN](http://arxiv.org/abs/1504.08083).
+    * [Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks](http://arxiv.org/abs/1506.01497)
+    * [Mask R-CNN](https://arxiv.org/abs/1703.06870).
+  - 夏鹏：
+    * [Feature Pyramid Networks for Object Detection](https://arxiv.org/abs/1612.03144).
+  - 韬哥：
+    * [Aggregated Residual Transformations for Deep Neural Networks](https://arxiv.org/abs/1611.05431).
+  - 平川：
+    * [Data Distillation: Towards Omni-Supervised Learning](https://arxiv.org/abs/1712.04440).
