@@ -36,7 +36,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def process_in_parallel(tag, total_range_size, binary, output_dir):
+def process_in_parallel(
+    tag, total_range_size, binary, output_dir, opts=''
+):
     """Run the specified binary cfg.NUM_GPUS times in parallel, each time as a
     subprocess that uses one GPU. The binary must accept the command line
     arguments `--range {start} {end}` that specify a data processing range.
@@ -62,12 +64,13 @@ def process_in_parallel(tag, total_range_size, binary, output_dir):
         start = subinds[i][0]
         end = subinds[i][-1] + 1
         subprocess_env['CUDA_VISIBLE_DEVICES'] = str(gpu_ind)
-        cmd = '{binary} --range {start} {end} --cfg {cfg_file} NUM_GPUS 1'
+        cmd = '{binary} --range {start} {end} --cfg {cfg_file} NUM_GPUS 1 {opts}'
         cmd = cmd.format(
             binary=shlex_quote(binary),
             start=int(start),
             end=int(end),
-            cfg_file=shlex_quote(cfg_file)
+            cfg_file=shlex_quote(cfg_file),
+            opts=' '.join([shlex_quote(opt) for opt in opts])
         )
         logger.info('{} range command {}: {}'.format(tag, i, cmd))
         if i == 0:

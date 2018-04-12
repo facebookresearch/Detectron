@@ -29,6 +29,41 @@ import core.config
 import utils.logging
 
 
+class TestAttrDict(unittest.TestCase):
+    def test_immutability(self):
+        # Top level immutable
+        a = AttrDict()
+        a.foo = 0
+        a.immutable(True)
+        with self.assertRaises(AttributeError):
+            a.foo = 1
+            a.bar = 1
+        assert a.is_immutable()
+        assert a.foo == 0
+        a.immutable(False)
+        assert not a.is_immutable()
+        a.foo = 1
+        assert a.foo == 1
+
+        # Recursively immutable
+        a.level1 = AttrDict()
+        a.level1.foo = 0
+        a.level1.level2 = AttrDict()
+        a.level1.level2.foo = 0
+        a.immutable(True)
+        assert a.is_immutable()
+        with self.assertRaises(AttributeError):
+            a.level1.level2.foo = 1
+            a.level1.bar = 1
+        assert a.level1.level2.foo == 0
+
+        # Serialize immutability state
+        a.immutable(True)
+        a2 = yaml.load(yaml.dump(a))
+        assert a.is_immutable()
+        assert a2.is_immutable()
+
+
 class TestCfg(unittest.TestCase):
     def test_copy_cfg(self):
         cfg2 = copy.deepcopy(cfg)

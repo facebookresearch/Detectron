@@ -63,7 +63,7 @@ def parse_args():
     parser.add_argument(
         '--num-batches', dest='num_batches',
         help='Number of minibatches to run',
-        default=500, type=int)
+        default=200, type=int)
     parser.add_argument(
         '--sleep', dest='sleep_time',
         help='Seconds sleep to emulate a network running',
@@ -150,7 +150,7 @@ def main(opts):
         # To inspect:
         # blobs = workspace.FetchBlobs(all_blobs)
         # from IPython import embed; embed()
-    logger.info('Shutting down data loader (EnqueueBlob errors are ok)...')
+    logger.info('Shutting down data loader...')
     roi_data_loader.shutdown()
 
 
