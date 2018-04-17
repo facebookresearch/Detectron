@@ -172,10 +172,17 @@ def convert_gen_proposals(
     spatial_scale = mutils.get_op_arg_valf(op, 'spatial_scale', None)
     assert spatial_scale is not None
 
+    lvl = int(op.input[0][-1]) if op.input[0][-1].isdigit() else None
+
     inputs = [x for x in op.input]
-    anchor_name = 'anchor'
+    anchor_name = 'anchor{}'.format(lvl) if lvl else 'anchor'
     inputs.append(anchor_name)
-    blobs[anchor_name] = get_anchors(spatial_scale)
+    blobs[anchor_name] = \
+        get_anchors(
+            spatial_scale,
+            (cfg.FPN.RPN_ANCHOR_START_SIZE * 2.**(lvl - cfg.FPN.RPN_MIN_LEVEL),)
+        ) \
+            if lvl else get_anchors(spatial_scale, cfg.RPN.SIZES)
     print('anchors {}'.format(blobs[anchor_name]))
 
     ret = core.CreateOperator(
@@ -192,10 +199,10 @@ def convert_gen_proposals(
     return ret, anchor_name
 
 
-def get_anchors(spatial_scale):
+def get_anchors(spatial_scale, anchor_sizes):
     anchors = generate_anchors.generate_anchors(
         stride=1. / spatial_scale,
-        sizes=cfg.RPN.SIZES,
+        sizes=anchor_sizes,
         aspect_ratios=cfg.RPN.ASPECT_RATIOS).astype(np.float32)
     return anchors
 

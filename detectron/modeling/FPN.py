@@ -293,7 +293,7 @@ def add_topdown_lateral_module(
             bias_init=const_fill(0.0)
         )
     # Top-down 2x upsampling
-    td = model.net.UpsampleNearest(fpn_top, fpn_bottom + '_topdown', scale=2)
+    td = model.net.ResizeNearest(fpn_top, fpn_bottom + '_topdown', width_scale=2., height_scale=2.)
     # Sum lateral and top-down
     model.net.Sum([lat, td], fpn_bottom)
 
