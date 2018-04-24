@@ -34,7 +34,7 @@ Additional backbone architectures may be easily implemented. For more details ab
 
 ## Update
 
-- 4/2018: Support Group Normalization - see [`gn/README.md`](./projects/gn/README.md)
+- 4/2018: Support Group Normalization - see [`GN/README.md`](./projects/GN/README.md)
 
 ## License
 
