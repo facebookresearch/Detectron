@@ -24,6 +24,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from core.config import cfg
+from utils.net import get_group_gn
 
 # ---------------------------------------------------------------------------- #
 # Bits for specific architectures (ResNet50, ResNet101, ...)
@@ -91,11 +92,10 @@ def add_ResNet_convX_body(model, block_counts, freeze_at=2):
     The final res5/conv5 stage may be optionally excluded (hence convX, where
     X = 4 or 5)."""
     assert freeze_at in [0, 2, 3, 4, 5]
-    p = model.Conv('data', 'conv1', 3, 64, 7, pad=3, stride=2, no_bias=1)
-    p = model.AffineChannel(p, 'res_conv1_bn', dim=64, inplace=True)
-    p = model.Relu(p, p)
-    p = model.MaxPool(p, 'pool1', kernel=3, pad=1, stride=2)
-    dim_in = 64
+
+    # add the stem (by default, conv1 and pool1 with bn; can support gn)
+    p, dim_in = globals()[cfg.RESNETS.STEM_FUNC](model, 'data')
+
     dim_bottleneck = cfg.RESNETS.NUM_GROUPS * cfg.RESNETS.WIDTH_PER_GROUP
     (n1, n2, n3) = block_counts[:3]
     s, dim_in = add_stage(model, 'res2', p, n1, dim_in, 256, dim_bottleneck, 1)
@@ -182,6 +182,8 @@ def add_residual_block(
     )
 
     # sum -> ReLU
+    # shortcut function: by default using bn; support gn
+    add_shortcut = globals()[cfg.RESNETS.SHORTCUT_FUNC]
     sc = add_shortcut(model, prefix, blob_in, dim_in, dim_out, stride)
     if inplace_sum:
         s = model.net.Sum([tr, sc], tr)
@@ -191,7 +193,16 @@ def add_residual_block(
     return model.Relu(s, s)
 
 
-def add_shortcut(model, prefix, blob_in, dim_in, dim_out, stride):
+# ------------------------------------------------------------------------------
+# various shortcuts (may expand and may consider a new helper)
+# ------------------------------------------------------------------------------
+
+
+def basic_bn_shortcut(model, prefix, blob_in, dim_in, dim_out, stride):
+    """ For a pre-trained network that used BN. An AffineChannel op replaces BN
+    during fine-tuning.
+    """
+
     if dim_in == dim_out:
         return blob_in
 
@@ -205,6 +216,54 @@ def add_shortcut(model, prefix, blob_in, dim_in, dim_out, stride):
         no_bias=1
     )
     return model.AffineChannel(c, prefix + '_branch1_bn', dim=dim_out)
+
+
+def basic_gn_shortcut(model, prefix, blob_in, dim_in, dim_out, stride):
+    if dim_in == dim_out:
+        return blob_in
+
+    # output name is prefix + '_branch1_gn'
+    return model.ConvGN(
+        blob_in,
+        prefix + '_branch1',
+        dim_in,
+        dim_out,
+        kernel=1,
+        group_gn=get_group_gn(dim_out),
+        stride=stride,
+        pad=0,
+        group=1,
+    )
+
+
+# ------------------------------------------------------------------------------
+# various stems (may expand and may consider a new helper)
+# ------------------------------------------------------------------------------
+
+
+def basic_bn_stem(model, data, **kwargs):
+    """Add a basic ResNet stem. For a pre-trained network that used BN.
+    An AffineChannel op replaces BN during fine-tuning.
+    """
+
+    dim = 64
+    p = model.Conv(data, 'conv1', 3, dim, 7, pad=3, stride=2, no_bias=1)
+    p = model.AffineChannel(p, 'res_conv1_bn', dim=dim, inplace=True)
+    p = model.Relu(p, p)
+    p = model.MaxPool(p, 'pool1', kernel=3, pad=1, stride=2)
+    return p, dim
+
+
+def basic_gn_stem(model, data, **kwargs):
+    """Add a basic ResNet stem (using GN)"""
+
+    dim = 64
+    p = model.ConvGN(
+        data, 'conv1', 3, dim, 7, group_gn=get_group_gn(dim), pad=3, stride=2
+    )
+    p = model.Relu(p, p)
+    p = model.MaxPool(p, 'pool1', kernel=3, pad=1, stride=2)
+    return p, dim
 
 
 # ------------------------------------------------------------------------------
@@ -268,5 +327,63 @@ def bottleneck_transformation(
         stride=1,
         pad=0,
         inplace=False
+    )
+    return cur
+
+
+def bottleneck_gn_transformation(
+    model,
+    blob_in,
+    dim_in,
+    dim_out,
+    stride,
+    prefix,
+    dim_inner,
+    dilation=1,
+    group=1
+):
+    """Add a bottleneck transformation with GroupNorm to the model."""
+    # In original resnet, stride=2 is on 1x1.
+    # In fb.torch resnet, stride=2 is on 3x3.
+    (str1x1, str3x3) = (stride, 1) if cfg.RESNETS.STRIDE_1X1 else (1, stride)
+
+    # conv 1x1 -> GN -> ReLU
+    cur = model.ConvGN(
+        blob_in,
+        prefix + '_branch2a',
+        dim_in,
+        dim_inner,
+        kernel=1,
+        group_gn=get_group_gn(dim_inner),
+        stride=str1x1,
+        pad=0,
+    )
+    cur = model.Relu(cur, cur)
+
+    # conv 3x3 -> GN -> ReLU
+    cur = model.ConvGN(
+        cur,
+        prefix + '_branch2b',
+        dim_inner,
+        dim_inner,
+        kernel=3,
+        group_gn=get_group_gn(dim_inner),
+        stride=str3x3,
+        pad=1 * dilation,
+        dilation=dilation,
+        group=group,
+    )
+    cur = model.Relu(cur, cur)
+
+    # conv 1x1 -> GN (no ReLU)
+    cur = model.ConvGN(
+        cur,
+        prefix + '_branch2c',
+        dim_inner,
+        dim_out,
+        kernel=1,
+        group_gn=get_group_gn(dim_out),
+        stride=1,
+        pad=0,
     )
     return cur

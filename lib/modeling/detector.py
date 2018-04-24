@@ -63,6 +63,7 @@ class DetectionModelHelper(cnn.CNNModelHelper):
         self.net.Proto().type = cfg.MODEL.EXECUTION_TYPE
         self.net.Proto().num_workers = cfg.NUM_GPUS * 4
         self.prev_use_cudnn = self.use_cudnn
+        self.gn_params = []  # Param on this list are GroupNorm parameters
 
     def TrainableParams(self, gpu_id=-1):
         """Get the blob names for all trainable parameters, possibly filtered by
@@ -408,6 +409,48 @@ class DetectionModelHelper(cnn.CNNModelHelper):
         blob_out = self.AffineChannel(
             conv_blob, prefix + suffix, dim=dim_out, inplace=inplace
         )
+        return blob_out
+
+    def ConvGN(  # args in the same order of Conv()
+        self, blob_in, prefix, dim_in, dim_out, kernel, stride, pad,
+        group_gn,  # num of groups in gn
+        group=1, dilation=1,
+        weight_init=None,
+        bias_init=None,
+        suffix='_gn',
+        no_conv_bias=1,
+    ):
+        """ConvGN adds a Conv op followed by a GroupNorm op,
+        including learnable scale/bias (gamma/beta)
+        """
+        conv_blob = self.Conv(
+            blob_in,
+            prefix,
+            dim_in,
+            dim_out,
+            kernel,
+            stride=stride,
+            pad=pad,
+            group=group,
+            dilation=dilation,
+            weight_init=weight_init,
+            bias_init=bias_init,
+            no_bias=no_conv_bias)
+
+        if group_gn < 1:
+            logger.warning(
+                'Layer: {} (dim {}): '
+                'group_gn < 1; reset to 1.'.format(prefix, dim_in)
+            )
+            group_gn = 1
+
+        blob_out = self.SpatialGN(
+            conv_blob, prefix + suffix,
+            dim_out, num_groups=group_gn,
+            epsilon=cfg.GROUP_NORM.EPSILON,)
+
+        self.gn_params.append(self.params[-1])  # add gn's bias to list
+        self.gn_params.append(self.params[-2])  # add gn's scale to list
         return blob_out
 
     def DisableCudnn(self):
