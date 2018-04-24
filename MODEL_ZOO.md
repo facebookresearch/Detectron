@@ -1528,7 +1528,6 @@ ypoints_coco_2014_minival/generalized_rcnn/keypoints_keypoints_coco_2014_minival
 |COCO|True|R-50-FPN_2x_Voc_Coco| 0.3378|0.5585|0.3526|0.1506|0.3632|0.5049|
 | VOC|False| R-50-FPN_2x_Voc_Coco| 0.1828|0.3580|0.1691|0.0177|0.0915|0.2702|
 |COCO|False|R-50-FPN_2x_Voc_Coco| 0.3326|0.5509|0.3491|0.1466|0.3619|0.4926|
-
 |VOC|True|R-50-FPN_2x_Voc | 0.3566|0.5891|0.3819|0.0660|0.2400|0.4270|
 
 
