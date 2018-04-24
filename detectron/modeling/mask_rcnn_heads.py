@@ -153,6 +153,7 @@ def mask_rcnn_fcn_head_v1upXconvs(
             dim_in,
             dim_inner,
             kernel=3,
+            dilation=dilation,
             pad=1 * dilation,
             stride=1,
             weight_init=(cfg.MRCNN.CONV_INIT, {'std': 0.001}),
