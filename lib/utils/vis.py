@@ -251,7 +251,7 @@ def vis_one_image_opencv(
 def vis_one_image(
         im, im_name, output_dir, boxes, segms=None, keypoints=None, thresh=0.9,
         kp_thresh=2, dpi=200, box_alpha=0.0, dataset=None, show_class=False,
-        ext='pdf'):
+        ext='pdf', out_when_no_box=False):
     """Visual debugging of detections."""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -260,7 +260,7 @@ def vis_one_image(
         boxes, segms, keypoints, classes = convert_from_cls_format(
             boxes, segms, keypoints)
 
-    if boxes is None or boxes.shape[0] == 0 or max(boxes[:, 4]) < thresh:
+    if (boxes is None or boxes.shape[0] == 0 or max(boxes[:, 4]) < thresh) and not out_when_no_box:
         return
 
     dataset_keypoints, _ = keypoint_utils.get_keypoints()
@@ -281,9 +281,12 @@ def vis_one_image(
     fig.add_axes(ax)
     ax.imshow(im)
 
-    # Display in largest to smallest order to reduce occlusion
-    areas = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
-    sorted_inds = np.argsort(-areas)
+    if boxes is None:
+        sorted_inds = [] # avoid crash when 'boxes' is None
+    else:
+        # Display in largest to smallest order to reduce occlusion
+        areas = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
+        sorted_inds = np.argsort(-areas)
 
     mask_color_id = 0
     for i in sorted_inds:
