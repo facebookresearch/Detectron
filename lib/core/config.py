@@ -190,7 +190,7 @@ __C.TRAIN.AUTO_RESUME = True
 
 
 # ---------------------------------------------------------------------------- #
-# Data loader options
+# Data loader options (see lib/roi_data/loader.py for more info)
 # ---------------------------------------------------------------------------- #
 __C.DATA_LOADER = AttrDict()
 
@@ -198,6 +198,12 @@ __C.DATA_LOADER = AttrDict()
 # threads can cause GIL-based interference with Python Ops leading to *slower*
 # training; 4 seems to be the sweet spot in our experience)
 __C.DATA_LOADER.NUM_THREADS = 4
+
+# Size of the shared minibatch queue
+__C.DATA_LOADER.MINIBATCH_QUEUE_SIZE = 64
+
+# Capacity of the per GPU blobs queue
+__C.DATA_LOADER.BLOBS_QUEUE_CAPACITY = 8
 
 
 # ---------------------------------------------------------------------------- #
@@ -213,11 +219,8 @@ __C.TEST.WEIGHTS = b''
 # If multiple datasets are listed, testing is performed on each one sequentially
 __C.TEST.DATASETS = ()
 
-# Scales to use during testing
-# Each scale is the pixel size of an image's shortest side
-# If multiple scales are given, then all scales are used as in multiscale
-# inference
-__C.TEST.SCALES = (600, )
+# Scale to use during testing
+__C.TEST.SCALE = 600
 
 # Max pixel size of the longest side of a scaled input image
 __C.TEST.MAX_SIZE = 1000
@@ -274,14 +277,6 @@ __C.TEST.FORCE_JSON_DATASET_EVAL = False
 # Indicates if precomputed proposals are used at test time
 # Not set for 1-stage models and 2-stage models with RPN subnetwork enabled
 __C.TEST.PRECOMPUTED_PROPOSALS = True
-
-# [Inferred value; do not set directly in a config]
-# Active dataset to test on
-__C.TEST.DATASET = b''
-
-# [Inferred value; do not set directly in a config]
-# Active proposal file to use
-__C.TEST.PROPOSAL_FILE = b''
 
 
 # ---------------------------------------------------------------------------- #
@@ -603,6 +598,8 @@ __C.SOLVER.MOMENTUM = 0.9
 
 # L2 regularization hyperparameter
 __C.SOLVER.WEIGHT_DECAY = 0.0005
+# L2 regularization hyperparameter for GroupNorm's parameters
+__C.SOLVER.WEIGHT_DECAY_GN = 0.0
 
 # Warm up to SOLVER.BASE_LR over this number of SGD iterations
 __C.SOLVER.WARM_UP_ITERS = 500
@@ -638,6 +635,11 @@ __C.FAST_RCNN.ROI_BOX_HEAD = b''
 
 # Hidden layer dimension when using an MLP for the RoI box head
 __C.FAST_RCNN.MLP_HEAD_DIM = 1024
+
+# Hidden Conv layer dimension when using Convs for the RoI box head
+__C.FAST_RCNN.CONV_HEAD_DIM = 256
+# Number of stacked Conv layers in the RoI box head
+__C.FAST_RCNN.NUM_STACKED_CONVS = 4
 
 # RoI transformation function (e.g., RoIPool or RoIAlign)
 # (RoIPoolF is the same as RoIPool; ignore the trailing 'F')
@@ -719,6 +721,8 @@ __C.FPN.RPN_ASPECT_RATIOS = (0.5, 1, 2)
 __C.FPN.RPN_ANCHOR_START_SIZE = 32
 # Use extra FPN levels, as done in the RetinaNet paper
 __C.FPN.EXTRA_CONV_LEVELS = False
+# Use GroupNorm in the FPN-specific layers (lateral, etc.)
+__C.FPN.USE_GN = False
 
 
 # ---------------------------------------------------------------------------- #
@@ -874,9 +878,25 @@ __C.RESNETS.STRIDE_1X1 = True
 
 # Residual transformation function
 __C.RESNETS.TRANS_FUNC = b'bottleneck_transformation'
+# ResNet's stem function (conv1 and pool1)
+__C.RESNETS.STEM_FUNC = b'basic_bn_stem'
+# ResNet's shortcut function
+__C.RESNETS.SHORTCUT_FUNC = b'basic_bn_shortcut'
 
 # Apply dilation in stage "res5"
 __C.RESNETS.RES5_DILATION = 1
+
+
+# ---------------------------------------------------------------------------- #
+# GroupNorm options
+# ---------------------------------------------------------------------------- #
+__C.GROUP_NORM = AttrDict()
+# Number of dimensions per group in GroupNorm (-1 if using NUM_GROUPS)
+__C.GROUP_NORM.DIM_PER_GP = -1
+# Number of groups in GroupNorm (-1 if using DIM_PER_GP)
+__C.GROUP_NORM.NUM_GROUPS = 32
+# GroupNorm's small constant in the denominator
+__C.GROUP_NORM.EPSILON = 1e-5
 
 
 # ---------------------------------------------------------------------------- #
@@ -968,7 +988,7 @@ __C.CLUSTER.ON_CLUSTER = False
 # yaml configs, you can add the full config key as a string to the set below.
 # ---------------------------------------------------------------------------- #
 _DEPCRECATED_KEYS = set(
-    (
+    {
         'FINAL_MSG',
         'MODEL.DILATION',
         'ROOT_GPU_ID',
@@ -977,7 +997,7 @@ _DEPCRECATED_KEYS = set(
         'TRAIN.DROPOUT',
         'USE_GPU_NMS',
         'TEST.NUM_TEST_IMAGES',
-    )
+    }
 )
 
 # ---------------------------------------------------------------------------- #
@@ -1006,16 +1026,40 @@ _RENAMED_KEYS = {
         "'path/to/file1:path/to/file2' -> " +
         "('path/to/file1', 'path/to/file2')"
     ),
+    'TEST.SCALES': (
+        'TEST.SCALE',
+        "Also convert from a tuple, e.g. (600, ), " +
+        "to a integer, e.g. 600."
+    ),
+    'TEST.DATASET': (
+        'TEST.DATASETS',
+        "Also convert from a string, e.g 'coco_2014_minival', " +
+        "to a tuple, e.g. ('coco_2014_minival', )."
+    ),
+    'TEST.PROPOSAL_FILE': (
+        'TEST.PROPOSAL_FILES',
+        "Also convert from a string, e.g. '/path/to/props.pkl', " +
+        "to a tuple, e.g. ('/path/to/props.pkl', )."
+    ),
 }
 
 
-def assert_and_infer_cfg(cache_urls=True):
+def assert_and_infer_cfg(cache_urls=True, make_immutable=True):
+    """Call this function in your script after you have finished setting all cfg
+    values that are necessary (e.g., merging a config from a file, merging
+    command line config options, etc.). By default, this function will also
+    mark the global cfg as immutable to prevent changing the global cfg settings
+    during script execution (which can lead to hard to debug errors or code
+    that's harder to understand than is necessary).
+    """
     if __C.MODEL.RPN_ONLY or __C.MODEL.FASTER_RCNN:
         __C.RPN.RPN_ON = True
     if __C.RPN.RPN_ON or __C.RETINANET.RETINANET_ON:
         __C.TEST.PRECOMPUTED_PROPOSALS = False
     if cache_urls:
         cache_cfg_urls()
+    if make_immutable:
+        cfg.immutable(True)
 
 
 def cache_cfg_urls():
@@ -1025,10 +1069,10 @@ def cache_cfg_urls():
     __C.TRAIN.WEIGHTS = cache_url(__C.TRAIN.WEIGHTS, __C.DOWNLOAD_CACHE)
     __C.TEST.WEIGHTS = cache_url(__C.TEST.WEIGHTS, __C.DOWNLOAD_CACHE)
     __C.TRAIN.PROPOSAL_FILES = tuple(
-        [cache_url(f, __C.DOWNLOAD_CACHE) for f in __C.TRAIN.PROPOSAL_FILES]
+        cache_url(f, __C.DOWNLOAD_CACHE) for f in __C.TRAIN.PROPOSAL_FILES
     )
     __C.TEST.PROPOSAL_FILES = tuple(
-        [cache_url(f, __C.DOWNLOAD_CACHE) for f in __C.TEST.PROPOSAL_FILES]
+        cache_url(f, __C.DOWNLOAD_CACHE) for f in __C.TEST.PROPOSAL_FILES
     )
 
 

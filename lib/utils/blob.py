@@ -37,6 +37,33 @@ from caffe2.proto import caffe2_pb2
 from core.config import cfg
 
 
+def get_image_blob(im, target_scale, target_max_size):
+    """Convert an image into a network input.
+
+    Arguments:
+        im (ndarray): a color image in BGR order
+
+    Returns:
+        blob (ndarray): a data blob holding an image pyramid
+        im_scale (float): image scale (target size) / (original size)
+        im_info (ndarray)
+    """
+    processed_im, im_scale = prep_im_for_blob(
+        im, cfg.PIXEL_MEANS, target_scale, target_max_size
+    )
+    blob = im_list_to_blob(processed_im)
+    # NOTE: this height and width may be larger than actual scaled input image
+    # due to the FPN.COARSEST_STRIDE related padding in im_list_to_blob. We are
+    # maintaining this behavior for now to make existing results exactly
+    # reproducible (in practice using the true input image height and width
+    # yields nearly the same results, but they are sometimes slightly different
+    # because predictions near the edge of the image will be pruned more
+    # aggressively).
+    height, width = blob.shape[2], blob.shape[3]
+    im_info = np.hstack((height, width, im_scale))[np.newaxis, :]
+    return blob, im_scale, im_info.astype(np.float32)
+
+
 def im_list_to_blob(ims):
     """Convert a list of images into a network input. Assumes images were
     prepared using prep_im_for_blob or equivalent: i.e.
@@ -47,6 +74,8 @@ def im_list_to_blob(ims):
     Output is a 4D HCHW tensor of the images concatenated along axis 0 with
     shape.
     """
+    if not isinstance(ims, list):
+        ims = [ims]
     max_shape = np.array([im.shape for im in ims]).max(axis=0)
     # Pad the image so they can be divisible by a stride
     if cfg.FPN.FPN_ON:
@@ -55,8 +84,9 @@ def im_list_to_blob(ims):
         max_shape[1] = int(np.ceil(max_shape[1] / stride) * stride)
 
     num_images = len(ims)
-    blob = np.zeros((num_images, max_shape[0], max_shape[1], 3),
-                    dtype=np.float32)
+    blob = np.zeros(
+        (num_images, max_shape[0], max_shape[1], 3), dtype=np.float32
+    )
     for i in range(num_images):
         im = ims[i]
         blob[i, 0:im.shape[0], 0:im.shape[1], :] = im
@@ -67,7 +97,7 @@ def im_list_to_blob(ims):
     return blob
 
 
-def prep_im_for_blob(im, pixel_means, target_sizes, max_size):
+def prep_im_for_blob(im, pixel_means, target_size, max_size):
     """Prepare an image for use as a network input blob. Specially:
       - Subtract per-channel pixel mean
       - Convert to float32
@@ -80,19 +110,19 @@ def prep_im_for_blob(im, pixel_means, target_sizes, max_size):
     im_shape = im.shape
     im_size_min = np.min(im_shape[0:2])
     im_size_max = np.max(im_shape[0:2])
-
-    ims = []
-    im_scales = []
-    for target_size in target_sizes:
-        im_scale = float(target_size) / float(im_size_min)
-        # Prevent the biggest axis from being more than max_size
-        if np.round(im_scale * im_size_max) > max_size:
-            im_scale = float(max_size) / float(im_size_max)
-        im = cv2.resize(im, None, None, fx=im_scale, fy=im_scale,
-                        interpolation=cv2.INTER_LINEAR)
-        ims.append(im)
-        im_scales.append(im_scale)
-    return ims, im_scales
+    im_scale = float(target_size) / float(im_size_min)
+    # Prevent the biggest axis from being more than max_size
+    if np.round(im_scale * im_size_max) > max_size:
+        im_scale = float(max_size) / float(im_size_max)
+    im = cv2.resize(
+        im,
+        None,
+        None,
+        fx=im_scale,
+        fy=im_scale,
+        interpolation=cv2.INTER_LINEAR
+    )
+    return im, im_scale
 
 
 def zeros(shape, int32=False):

@@ -35,6 +35,7 @@ from __future__ import unicode_literals
 from core.config import cfg
 from utils.c2 import const_fill
 from utils.c2 import gauss_fill
+from utils.net import get_group_gn
 import utils.blob as blob_utils
 
 
@@ -109,3 +110,64 @@ def add_roi_2mlp_head(model, blob_in, dim_in, spatial_scale):
     model.FC('fc6', 'fc7', hidden_dim, hidden_dim)
     model.Relu('fc7', 'fc7')
     return 'fc7', hidden_dim
+
+
+def add_roi_Xconv1fc_head(model, blob_in, dim_in, spatial_scale):
+    """Add a X conv + 1fc head, as a reference if not using GroupNorm"""
+    hidden_dim = cfg.FAST_RCNN.CONV_HEAD_DIM
+    roi_size = cfg.FAST_RCNN.ROI_XFORM_RESOLUTION
+    roi_feat = model.RoIFeatureTransform(
+        blob_in,
+        'roi_feat',
+        blob_rois='rois',
+        method=cfg.FAST_RCNN.ROI_XFORM_METHOD,
+        resolution=roi_size,
+        sampling_ratio=cfg.FAST_RCNN.ROI_XFORM_SAMPLING_RATIO,
+        spatial_scale=spatial_scale
+    )
+
+    current = roi_feat
+    for i in range(cfg.FAST_RCNN.NUM_STACKED_CONVS):
+        current = model.Conv(
+            current, 'head_conv' + str(i + 1), dim_in, hidden_dim, 3,
+            stride=1, pad=1,
+            weight_init=('MSRAFill', {}),
+            bias_init=('ConstantFill', {'value': 0.}),
+            no_bias=0)
+        current = model.Relu(current, current)
+        dim_in = hidden_dim
+
+    fc_dim = cfg.FAST_RCNN.MLP_HEAD_DIM
+    model.FC(current, 'fc6', dim_in * roi_size * roi_size, fc_dim)
+    model.Relu('fc6', 'fc6')
+    return 'fc6', fc_dim
+
+
+def add_roi_Xconv1fc_gn_head(model, blob_in, dim_in, spatial_scale):
+    """Add a X conv + 1fc head, with GroupNorm"""
+    hidden_dim = cfg.FAST_RCNN.CONV_HEAD_DIM
+    roi_size = cfg.FAST_RCNN.ROI_XFORM_RESOLUTION
+    roi_feat = model.RoIFeatureTransform(
+        blob_in, 'roi_feat',
+        blob_rois='rois',
+        method=cfg.FAST_RCNN.ROI_XFORM_METHOD,
+        resolution=roi_size,
+        sampling_ratio=cfg.FAST_RCNN.ROI_XFORM_SAMPLING_RATIO,
+        spatial_scale=spatial_scale
+    )
+
+    current = roi_feat
+    for i in range(cfg.FAST_RCNN.NUM_STACKED_CONVS):
+        current = model.ConvGN(
+            current, 'head_conv' + str(i + 1), dim_in, hidden_dim, 3,
+            group_gn=get_group_gn(hidden_dim),
+            stride=1, pad=1,
+            weight_init=('MSRAFill', {}),
+            bias_init=('ConstantFill', {'value': 0.}))
+        current = model.Relu(current, current)
+        dim_in = hidden_dim
+
+    fc_dim = cfg.FAST_RCNN.MLP_HEAD_DIM
+    model.FC(current, 'fc6', dim_in * roi_size * roi_size, fc_dim)
+    model.Relu('fc6', 'fc6')
+    return 'fc6', fc_dim

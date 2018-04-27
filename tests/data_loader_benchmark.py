@@ -15,9 +15,12 @@
 
 # Example usage:
 # data_loader_benchmark.par \
-#   TRAIN.DATASETS voc_2007_trainval \
 #   NUM_GPUS 2 \
-#   TRAIN.PROPOSAL_FILES /path/to/voc_2007_trainval/proposals.pkl
+#   TRAIN.DATASETS "('voc_2007_trainval',)" \
+#   TRAIN.PROPOSAL_FILES /path/to/voc_2007_trainval/proposals.pkl \
+#   DATA_LOADER.NUM_THREADS 4 \
+#   DATA_LOADER.MINIBATCH_QUEUE_SIZE 64 \
+#   DATA_LOADER.BLOBS_QUEUE_CAPACITY 8
 
 from __future__ import absolute_import
 from __future__ import division
@@ -46,24 +49,9 @@ import utils.logging
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--loaders', dest='num_loaders',
-        help='Number of data loading threads',
-        default=4, type=int)
-    parser.add_argument(
-        '--dequeuers', dest='num_dequeuers',
-        help='Number of dequeuers',
-        default=1, type=int)
-    parser.add_argument(
-        '--minibatch-queue-size', dest='minibatch_queue_size',
-        help='Size of minibatch queue',
-        default=64, type=int)
-    parser.add_argument(
-        '--blobs-queue-capacity', dest='blobs_queue_capacity',
-        default=8, type=int)
-    parser.add_argument(
         '--num-batches', dest='num_batches',
         help='Number of minibatches to run',
-        default=500, type=int)
+        default=200, type=int)
     parser.add_argument(
         '--sleep', dest='sleep_time',
         help='Seconds sleep to emulate a network running',
@@ -105,9 +93,10 @@ def main(opts):
     logger.info('{:d} roidb entries'.format(len(roidb)))
     roi_data_loader = RoIDataLoader(
         roidb,
-        num_loaders=opts.num_loaders,
-        minibatch_queue_size=opts.minibatch_queue_size,
-        blobs_queue_capacity=opts.blobs_queue_capacity)
+        num_loaders=cfg.DATA_LOADER.NUM_THREADS,
+        minibatch_queue_size=cfg.DATA_LOADER.MINIBATCH_QUEUE_SIZE,
+        blobs_queue_capacity=cfg.DATA_LOADER.BLOBS_QUEUE_CAPACITY
+    )
     blob_names = roi_data_loader.get_output_names()
 
     net = core.Net('dequeue_net')
@@ -141,16 +130,19 @@ def main(opts):
         for _ in range(opts.x_factor):
             workspace.RunNetOnce(net)
         total_time += (time.time() - start_t) / opts.x_factor
-        logger.info('{:d}/{:d}: Averge dequeue time: {:.3f}s  [{:d}/{:d}]'.
-                    format(i + 1, opts.num_batches, total_time / (i + 1),
-                           roi_data_loader._minibatch_queue.qsize(),
-                           opts.minibatch_queue_size))
+        logger.info(
+            '{:d}/{:d}: Averge dequeue time: {:.3f}s  [{:d}/{:d}]'.format(
+                i + 1, opts.num_batches, total_time / (i + 1),
+                roi_data_loader._minibatch_queue.qsize(),
+                cfg.DATA_LOADER.MINIBATCH_QUEUE_SIZE
+            )
+        )
         # Sleep to simulate the time taken by running a little network
         time.sleep(opts.sleep_time)
         # To inspect:
         # blobs = workspace.FetchBlobs(all_blobs)
         # from IPython import embed; embed()
-    logger.info('Shutting down data loader (EnqueueBlob errors are ok)...')
+    logger.info('Shutting down data loader...')
     roi_data_loader.shutdown()
 
 

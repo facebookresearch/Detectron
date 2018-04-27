@@ -99,6 +99,10 @@ def add_single_gpu_param_update_ops(model, gpu_id):
     wd = model.param_init_net.ConstantFill(
         [], 'wd', shape=[1], value=cfg.SOLVER.WEIGHT_DECAY
     )
+    # weight decay of GroupNorm's parameters
+    wd_gn = model.param_init_net.ConstantFill(
+        [], 'wd_gn', shape=[1], value=cfg.SOLVER.WEIGHT_DECAY_GN
+    )
     for param in model.TrainableParams(gpu_id=gpu_id):
         logger.debug('param ' + str(param) + ' will be updated')
         param_grad = model.param_to_grad[param]
@@ -112,6 +116,9 @@ def add_single_gpu_param_update_ops(model, gpu_id):
             # (1) Do not apply weight decay
             # (2) Use a 2x higher learning rate
             model.Scale(param_grad, param_grad, scale=2.0)
+        elif param in model.gn_params:
+            # Special treatment for GroupNorm's parameters
+            model.WeightedSum([param_grad, one, param, wd_gn], param_grad)
         elif cfg.SOLVER.WEIGHT_DECAY > 0:
             # Apply weight decay to non-bias weights
             model.WeightedSum([param_grad, one, param, wd], param_grad)

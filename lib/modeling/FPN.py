@@ -27,6 +27,7 @@ from core.config import cfg
 from modeling.generate_anchors import generate_anchors
 from utils.c2 import const_fill
 from utils.c2 import gauss_fill
+from utils.net import get_group_gn
 import modeling.ResNet as ResNet
 import utils.blob as blob_utils
 import utils.boxes as box_utils
@@ -138,18 +139,34 @@ def add_fpn(model, fpn_level_info):
     fpn_dim_lateral = fpn_level_info.dims
     xavier_fill = ('XavierFill', {})
 
-    # For the coarest backbone level: 1x1 conv only seeds recursion
-    model.Conv(
-        lateral_input_blobs[0],
-        output_blobs[0],
-        dim_in=fpn_dim_lateral[0],
-        dim_out=fpn_dim,
-        kernel=1,
-        pad=0,
-        stride=1,
-        weight_init=xavier_fill,
-        bias_init=const_fill(0.0)
-    )
+    # For the coarsest backbone level: 1x1 conv only seeds recursion
+    if cfg.FPN.USE_GN:
+        # use GroupNorm
+        c = model.ConvGN(
+            lateral_input_blobs[0],
+            output_blobs[0],  # note: this is a prefix
+            dim_in=fpn_dim_lateral[0],
+            dim_out=fpn_dim,
+            group_gn=get_group_gn(fpn_dim),
+            kernel=1,
+            pad=0,
+            stride=1,
+            weight_init=xavier_fill,
+            bias_init=const_fill(0.0)
+        )
+        output_blobs[0] = c  # rename it
+    else:
+        model.Conv(
+            lateral_input_blobs[0],
+            output_blobs[0],
+            dim_in=fpn_dim_lateral[0],
+            dim_out=fpn_dim,
+            kernel=1,
+            pad=0,
+            stride=1,
+            weight_init=xavier_fill,
+            bias_init=const_fill(0.0)
+        )
 
     #
     # Step 1: recursively build down starting from the coarsest backbone level
@@ -170,17 +187,32 @@ def add_fpn(model, fpn_level_info):
     blobs_fpn = []
     spatial_scales = []
     for i in range(num_backbone_stages):
-        fpn_blob = model.Conv(
-            output_blobs[i],
-            'fpn_{}'.format(fpn_level_info.blobs[i]),
-            dim_in=fpn_dim,
-            dim_out=fpn_dim,
-            kernel=3,
-            pad=1,
-            stride=1,
-            weight_init=xavier_fill,
-            bias_init=const_fill(0.0)
-        )
+        if cfg.FPN.USE_GN:
+            # use GroupNorm
+            fpn_blob = model.ConvGN(
+                output_blobs[i],
+                'fpn_{}'.format(fpn_level_info.blobs[i]),
+                dim_in=fpn_dim,
+                dim_out=fpn_dim,
+                group_gn=get_group_gn(fpn_dim),
+                kernel=3,
+                pad=1,
+                stride=1,
+                weight_init=xavier_fill,
+                bias_init=const_fill(0.0)
+            )
+        else:
+            fpn_blob = model.Conv(
+                output_blobs[i],
+                'fpn_{}'.format(fpn_level_info.blobs[i]),
+                dim_in=fpn_dim,
+                dim_out=fpn_dim,
+                kernel=3,
+                pad=1,
+                stride=1,
+                weight_init=xavier_fill,
+                bias_init=const_fill(0.0)
+            )
         blobs_fpn += [fpn_blob]
         spatial_scales += [fpn_level_info.spatial_scales[i]]
 
@@ -229,20 +261,37 @@ def add_topdown_lateral_module(
 ):
     """Add a top-down lateral module."""
     # Lateral 1x1 conv
-    lat = model.Conv(
-        fpn_lateral,
-        fpn_bottom + '_lateral',
-        dim_in=dim_lateral,
-        dim_out=dim_top,
-        kernel=1,
-        pad=0,
-        stride=1,
-        weight_init=(
-            const_fill(0.0) if cfg.FPN.ZERO_INIT_LATERAL
-            else ('XavierFill', {})
-        ),
-        bias_init=const_fill(0.0)
-    )
+    if cfg.FPN.USE_GN:
+        # use GroupNorm
+        lat = model.ConvGN(
+            fpn_lateral,
+            fpn_bottom + '_lateral',
+            dim_in=dim_lateral,
+            dim_out=dim_top,
+            group_gn=get_group_gn(dim_top),
+            kernel=1,
+            pad=0,
+            stride=1,
+            weight_init=(
+                const_fill(0.0) if cfg.FPN.ZERO_INIT_LATERAL
+                else ('XavierFill', {})),
+            bias_init=const_fill(0.0)
+        )
+    else:
+        lat = model.Conv(
+            fpn_lateral,
+            fpn_bottom + '_lateral',
+            dim_in=dim_lateral,
+            dim_out=dim_top,
+            kernel=1,
+            pad=0,
+            stride=1,
+            weight_init=(
+                const_fill(0.0)
+                if cfg.FPN.ZERO_INIT_LATERAL else ('XavierFill', {})
+            ),
+            bias_init=const_fill(0.0)
+        )
     # Top-down 2x upsampling
     td = model.net.UpsampleNearest(fpn_top, fpn_bottom + '_topdown', scale=2)
     # Sum lateral and top-down

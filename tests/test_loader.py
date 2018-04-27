@@ -106,7 +106,7 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     logging.getLogger('roi_data.loader').setLevel(logging.INFO)
     np.random.seed(cfg.RNG_SEED)
-    assert_and_infer_cfg()
     cfg.TRAIN.ASPECT_GROUPING = False
     cfg.NUM_GPUS = 2
+    assert_and_infer_cfg()
     unittest.main()
