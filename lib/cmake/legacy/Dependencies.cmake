@@ -1,7 +1,7 @@
 # Adapted from https://github.com/caffe2/caffe2/blob/master/cmake/Dependencies.cmake
 
 # Find CUDA.
-include(cmake/Cuda.cmake)
+include(cmake/legacy/Cuda.cmake)
 if (HAVE_CUDA)
   # CUDA 9.x requires GCC version <= 6
   if ((CUDA_VERSION VERSION_EQUAL   9.0) OR
