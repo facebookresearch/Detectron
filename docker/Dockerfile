@@ -16,7 +16,7 @@ WORKDIR /cocoapi/PythonAPI
 RUN make install
 
 # Clone the Detectron repository
-RUN git clone https://github.com/facebookresearch/detectron /detectron
+RUN git clone https://github.com/Juggernaut93/Detectron /detectron
 
 # Set up Python modules
 WORKDIR /detectron/lib

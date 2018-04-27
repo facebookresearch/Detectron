@@ -190,7 +190,7 @@ __C.TRAIN.AUTO_RESUME = True
 
 
 # ---------------------------------------------------------------------------- #
-# Data loader options
+# Data loader options (see lib/roi_data/loader.py for more info)
 # ---------------------------------------------------------------------------- #
 __C.DATA_LOADER = AttrDict()
 
@@ -198,6 +198,12 @@ __C.DATA_LOADER = AttrDict()
 # threads can cause GIL-based interference with Python Ops leading to *slower*
 # training; 4 seems to be the sweet spot in our experience)
 __C.DATA_LOADER.NUM_THREADS = 4
+
+# Size of the shared minibatch queue
+__C.DATA_LOADER.MINIBATCH_QUEUE_SIZE = 64
+
+# Capacity of the per GPU blobs queue
+__C.DATA_LOADER.BLOBS_QUEUE_CAPACITY = 8
 
 
 # ---------------------------------------------------------------------------- #
