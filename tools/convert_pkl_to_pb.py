@@ -50,6 +50,7 @@ from detectron.modeling import generate_anchors
 from detectron.utils.logging import setup_logging
 from detectron.utils.model_convert_utils import convert_op_in_proto
 from detectron.utils.model_convert_utils import op_filter
+import detectron.utils.blob as blob_utils
 import detectron.core.test_engine as test_engine
 import detectron.utils.c2 as c2_utils
 import detectron.utils.model_convert_utils as mutils
@@ -485,10 +486,8 @@ def _prepare_blobs(
     im = cv2.resize(im, None, None, fx=im_scale, fy=im_scale,
                     interpolation=cv2.INTER_LINEAR)
 
-    blob = np.zeros([1, im.shape[0], im.shape[1], 3], dtype=np.float32)
-    blob[0, :, :, :] = im
-    channel_swap = (0, 3, 1, 2)  # swap channel to (k, c, h, w)
-    blob = blob.transpose(channel_swap)
+    # Reuse code in blob_utils and fit FPN
+    blob = blob_utils.im_list_to_blob([im])
 
     blobs = {}
     blobs['data'] = blob
