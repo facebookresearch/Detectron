@@ -81,7 +81,7 @@ class TestCfg(unittest.TestCase):
 
         # Test: merge from yaml
         s = 'dummy1'
-        cfg2 = yaml.load(yaml.dump(cfg))
+        cfg2 = yaml.safe_load(yaml.dump(cfg))
         cfg2.MODEL.TYPE = s
         core.config.merge_cfg_from_cfg(cfg2)
         assert cfg.MODEL.TYPE == s
