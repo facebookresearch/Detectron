@@ -15,7 +15,7 @@ include(cmake/legacy/Utils.cmake)
 include(cmake/legacy/Dependencies.cmake)
 
 # Print configuration summary.
-include(cmake/Summary.cmake)
+include(cmake/legacy/Summary.cmake)
 detectron_print_config_summary()
 
 # Collect custom ops sources.
@@ -34,7 +34,7 @@ target_link_libraries(caffe2_detectron_custom_ops caffe2)
 install(TARGETS caffe2_detectron_custom_ops DESTINATION lib)
 
 # Install custom GPU ops lib.
-if (HAVE_CUDA)
+if (${HAVE_CUDA})
   # Additional -I prefix is required for CMake versions before commit (< 3.7):
   # https://github.com/Kitware/CMake/commit/7ded655f7ba82ea72a82d0555449f2df5ef38594
   list(APPEND CUDA_INCLUDE_DIRS -I${CAFFE2_INCLUDE_DIRS})
