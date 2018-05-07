@@ -66,13 +66,13 @@ git clone https://github.com/facebookresearch/detectron $DETECTRON
 Set up Python modules:
 
 ```
-cd $DETECTRON/lib && make
+cd $DETECTRON && make
 ```
 
 Check that Detectron tests pass (e.g. for [`SpatialNarrowAsOp test`](tests/test_spatial_narrow_as_op.py)):
 
 ```
-python2 $DETECTRON/tests/test_spatial_narrow_as_op.py
+python2 $DETECTRON/detectron/tests/test_spatial_narrow_as_op.py
 ```
 
 ## That's All You Need for Inference
@@ -81,7 +81,7 @@ At this point, you can run inference using pretrained Detectron models. Take a l
 
 ## Datasets
 
-Detectron finds datasets via symlinks from `lib/datasets/data` to the actual locations where the dataset images and annotations are stored. For instructions on how to create symlinks for COCO and other datasets, please see [`lib/datasets/data/README.md`](lib/datasets/data/README.md).
+Detectron finds datasets via symlinks from `detectron/datasets/data` to the actual locations where the dataset images and annotations are stored. For instructions on how to create symlinks for COCO and other datasets, please see [`detectron/datasets/data/README.md`](detectron/datasets/data/README.md).
 
 After symlinks have been created, that's all you need to start training models.
 
@@ -90,18 +90,18 @@ After symlinks have been created, that's all you need to start training models.
 Please read the custom operators section of the [`FAQ`](FAQ.md) first.
 
 For convenience, we provide CMake support for building custom operators. All custom operators are built into a single library that can be loaded dynamically from Python.
-Place your custom operator implementation under [`lib/ops/`](lib/ops/) and see [`tests/test_zero_even_op.py`](tests/test_zero_even_op.py) for an example of how to load custom operators from Python.
+Place your custom operator implementation under [`detectron/ops/`](detectron/ops/) and see [`detectron/tests/test_zero_even_op.py`](detectron/tests/test_zero_even_op.py) for an example of how to load custom operators from Python.
 
 Build the custom operators library:
 
 ```
-cd $DETECTRON/lib && make ops
+cd $DETECTRON && make ops
 ```
 
 Check that the custom operator tests pass:
 
 ```
-python2 $DETECTRON/tests/test_zero_even_op.py
+python2 $DETECTRON/detectron/tests/test_zero_even_op.py
 ```
 
 ## Docker Image
@@ -118,7 +118,7 @@ docker build -t detectron:c2-cuda9-cudnn7 .
 Run the image (e.g. for [`BatchPermutationOp test`](tests/test_batch_permutation_op.py)):
 
 ```
-nvidia-docker run --rm -it detectron:c2-cuda9-cudnn7 python2 tests/test_batch_permutation_op.py
+nvidia-docker run --rm -it detectron:c2-cuda9-cudnn7 python2 detectron/tests/test_batch_permutation_op.py
 ```
 
 ## Troubleshooting
@@ -149,7 +149,7 @@ cmake .. \
 Similarly, when building custom Detectron operators you can use:
 
 ```
-cd $DETECTRON/lib
+cd $DETECTRON
 mkdir -p build && cd build
 cmake .. \
   -DCUDA_TOOLKIT_ROOT_DIR=/path/to/cuda/toolkit/dir \

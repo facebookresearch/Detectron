@@ -31,17 +31,17 @@ import sys
 
 from caffe2.python import workspace
 
-from core.config import assert_and_infer_cfg
-from core.config import cfg
-from core.config import merge_cfg_from_file
-from core.config import merge_cfg_from_list
-from core.test_engine import run_inference
-from utils.logging import setup_logging
-import utils.c2
-import utils.train
+from detectron.core.config import assert_and_infer_cfg
+from detectron.core.config import cfg
+from detectron.core.config import merge_cfg_from_file
+from detectron.core.config import merge_cfg_from_list
+from detectron.core.test_engine import run_inference
+from detectron.utils.logging import setup_logging
+import detectron.utils.c2 as c2_utils
+import detectron.utils.train
 
-utils.c2.import_contrib_ops()
-utils.c2.import_detectron_ops()
+c2_utils.import_contrib_ops()
+c2_utils.import_detectron_ops()
 
 # OpenCL may be enabled by default in OpenCV3; disable it because it's not
 # thread safe and causes unwanted GPU memory allocations.
@@ -90,7 +90,7 @@ def main():
     )
     # Set up logging and load config options
     logger = setup_logging(__name__)
-    logging.getLogger('roi_data.loader').setLevel(logging.INFO)
+    logging.getLogger('detectron.roi_data.loader').setLevel(logging.INFO)
     args = parse_args()
     logger.info('Called with args:')
     logger.info(args)
@@ -107,7 +107,7 @@ def main():
     # non-deterministic cudnn functions).
     np.random.seed(cfg.RNG_SEED)
     # Execute the training run
-    checkpoints = utils.train.train_model()
+    checkpoints = detectron.utils.train.train_model()
     # Test the trained model
     if not args.skip_test:
         test_model(checkpoints['final'], args.multi_gpu_testing, args.opts)

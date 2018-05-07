@@ -29,35 +29,40 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-import cv2  # NOQA (Must import before importing caffe2 due to bug in cv2)
 
 import argparse
 import copy
-import pprint
+import cv2  # NOQA (Must import before importing caffe2 due to bug in cv2)
 import numpy as np
 import os
+import pprint
 import sys
 
 import caffe2.python.utils as putils
 from caffe2.python import core, workspace
 from caffe2.proto import caffe2_pb2
 
-from core.config import assert_and_infer_cfg
-from core.config import cfg
-from core.config import merge_cfg_from_file
-from core.config import merge_cfg_from_list
-from modeling import generate_anchors
-import core.test_engine as test_engine
-import utils.c2 as c2_utils
-import utils.vis as vis_utils
-import utils.logging
-import utils.model_convert_utils as mutils
-from utils.model_convert_utils import op_filter, convert_op_in_proto
+from detectron.core.config import assert_and_infer_cfg
+from detectron.core.config import cfg
+from detectron.core.config import merge_cfg_from_file
+from detectron.core.config import merge_cfg_from_list
+from detectron.modeling import generate_anchors
+from detectron.utils.logging import setup_logging
+from detectron.utils.model_convert_utils import convert_op_in_proto
+from detectron.utils.model_convert_utils import op_filter
+import detectron.core.test_engine as test_engine
+import detectron.utils.c2 as c2_utils
+import detectron.utils.model_convert_utils as mutils
+import detectron.utils.vis as vis_utils
 
 c2_utils.import_contrib_ops()
 c2_utils.import_detectron_ops()
 
-logger = utils.logging.setup_logging(__name__)
+# OpenCL may be enabled by default in OpenCV3; disable it because it's not
+# thread safe and causes unwanted GPU memory allocations.
+cv2.ocl.setUseOpenCL(False)
+
+logger = setup_logging(__name__)
 
 
 def parse_args():

@@ -18,12 +18,11 @@ RUN make install
 # Clone the Detectron repository
 RUN git clone https://github.com/facebookresearch/detectron /detectron
 
-# Set up Python modules
-WORKDIR /detectron/lib
-RUN make
-
-# Build custom ops
-RUN make ops
-
 # Go to Detectron root
 WORKDIR /detectron
+
+# Set up Python modules
+RUN make
+
+# [Optional] Build custom ops
+RUN make ops

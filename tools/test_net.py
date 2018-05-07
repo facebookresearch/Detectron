@@ -31,15 +31,16 @@ import time
 
 from caffe2.python import workspace
 
-from core.config import assert_and_infer_cfg
-from core.config import cfg
-from core.config import merge_cfg_from_file
-from core.config import merge_cfg_from_list
-from core.test_engine import run_inference
-import utils.c2
-import utils.logging
+from detectron.core.config import assert_and_infer_cfg
+from detectron.core.config import cfg
+from detectron.core.config import merge_cfg_from_file
+from detectron.core.config import merge_cfg_from_list
+from detectron.core.test_engine import run_inference
+from detectron.utils.logging import setup_logging
+import detectron.utils.c2 as c2_utils
 
-utils.c2.import_detectron_ops()
+c2_utils.import_detectron_ops()
+
 # OpenCL may be enabled by default in OpenCV3; disable it because it's not
 # thread safe and causes unwanted GPU memory allocations.
 cv2.ocl.setUseOpenCL(False)
@@ -92,7 +93,7 @@ def parse_args():
 
 if __name__ == '__main__':
     workspace.GlobalInit(['caffe2', '--caffe2_log_level=0'])
-    logger = utils.logging.setup_logging(__name__)
+    logger = setup_logging(__name__)
     args = parse_args()
     logger.info('Called with args:')
     logger.info(args)
