@@ -298,7 +298,7 @@ class DetectionModelHelper(cnn.CNNModelHelper):
                 sampling_ratio=sampling_ratio
             )
         # Only return the first blob (the transformed features)
-        return xform_out
+        return xform_out[0] if isinstance(xform_out, tuple) else xform_out
 
     def ConvShared(
         self,
