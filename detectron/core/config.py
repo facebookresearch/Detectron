@@ -191,7 +191,7 @@ __C.TRAIN.AUTO_RESUME = True
 
 
 # ---------------------------------------------------------------------------- #
-# Data loader options (see lib/roi_data/loader.py for more info)
+# Data loader options (see detectron/roi_data/loader.py for more info)
 # ---------------------------------------------------------------------------- #
 __C.DATA_LOADER = AttrDict()
 

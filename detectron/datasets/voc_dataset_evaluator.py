@@ -150,7 +150,7 @@ def _do_matlab_eval(json_dataset, salt, output_dir='output'):
     logger.info('-----------------------------------------------------')
     info = voc_info(json_dataset)
     path = os.path.join(
-        cfg.ROOT_DIR, 'lib', 'datasets', 'VOCdevkit-matlab-wrapper')
+        cfg.ROOT_DIR, 'detectron', 'datasets', 'VOCdevkit-matlab-wrapper')
     cmd = 'cd {} && '.format(path)
     cmd += '{:s} -nodisplay -nodesktop '.format(cfg.MATLAB)
     cmd += '-r "dbstop if error; '
