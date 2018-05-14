@@ -73,7 +73,7 @@ def parse_args():
     )
     parser.add_argument(
         'opts',
-        help='See lib/core/config.py for all options',
+        help='See detectron/core/config.py for all options',
         default=None,
         nargs=argparse.REMAINDER
     )
