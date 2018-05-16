@@ -268,7 +268,7 @@ def evaluate_box_proposals(
         gt_inds = np.where(
             (entry['gt_classes'] > 0) & (entry['is_crowd'] == 0))[0]
         gt_boxes = entry['boxes'][gt_inds, :]
-        gt_areas = entry['seg_areas'][gt_inds]
+        gt_areas = (gt_boxes[:, 2] - gt_boxes[:, 0]) * (gt_boxes[:, 3] - gt_boxes[:, 1])
         valid_gt_inds = np.where(
             (gt_areas >= area_range[0]) & (gt_areas <= area_range[1]))[0]
         gt_boxes = gt_boxes[valid_gt_inds, :]
