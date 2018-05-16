@@ -29,7 +29,7 @@ import numpy as np
 import scipy.io as sio
 import sys
 
-from datasets.json_dataset import JsonDataset
+from detectron.datasets.json_dataset import JsonDataset
 
 if __name__ == '__main__':
     dataset_name = sys.argv[1]

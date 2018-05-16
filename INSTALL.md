@@ -36,7 +36,7 @@ If the `caffe2` Python package is not found, you likely need to adjust your `PYT
 Install Python dependencies:
 
 ```
-pip install numpy pyyaml matplotlib opencv-python>=3.0 setuptools Cython mock
+pip install numpy>=1.13 pyyaml>=3.12 matplotlib opencv-python>=3.2 setuptools Cython mock scipy
 ```
 
 Install the [COCO API](https://github.com/cocodataset/cocoapi):
@@ -66,13 +66,13 @@ git clone https://github.com/facebookresearch/detectron $DETECTRON
 Set up Python modules:
 
 ```
-cd $DETECTRON/lib && make
+cd $DETECTRON && make
 ```
 
 Check that Detectron tests pass (e.g. for [`SpatialNarrowAsOp test`](tests/test_spatial_narrow_as_op.py)):
 
 ```
-python2 $DETECTRON/tests/test_spatial_narrow_as_op.py
+python2 $DETECTRON/detectron/tests/test_spatial_narrow_as_op.py
 ```
 
 ## That's All You Need for Inference
@@ -81,7 +81,7 @@ At this point, you can run inference using pretrained Detectron models. Take a l
 
 ## Datasets
 
-Detectron finds datasets via symlinks from `lib/datasets/data` to the actual locations where the dataset images and annotations are stored. For instructions on how to create symlinks for COCO and other datasets, please see [`lib/datasets/data/README.md`](lib/datasets/data/README.md).
+Detectron finds datasets via symlinks from `detectron/datasets/data` to the actual locations where the dataset images and annotations are stored. For instructions on how to create symlinks for COCO and other datasets, please see [`detectron/datasets/data/README.md`](detectron/datasets/data/README.md).
 
 After symlinks have been created, that's all you need to start training models.
 
@@ -90,44 +90,35 @@ After symlinks have been created, that's all you need to start training models.
 Please read the custom operators section of the [`FAQ`](FAQ.md) first.
 
 For convenience, we provide CMake support for building custom operators. All custom operators are built into a single library that can be loaded dynamically from Python.
-Place your custom operator implementation under [`lib/ops/`](lib/ops/) and see [`tests/test_zero_even_op.py`](tests/test_zero_even_op.py) for an example of how to load custom operators from Python.
+Place your custom operator implementation under [`detectron/ops/`](detectron/ops/) and see [`detectron/tests/test_zero_even_op.py`](detectron/tests/test_zero_even_op.py) for an example of how to load custom operators from Python.
 
 Build the custom operators library:
 
 ```
-cd $DETECTRON/lib && make ops
+cd $DETECTRON && make ops
 ```
 
 Check that the custom operator tests pass:
 
 ```
-python2 $DETECTRON/tests/test_zero_even_op.py
+python2 $DETECTRON/detectron/tests/test_zero_even_op.py
 ```
 
 ## Docker Image
 
-We provide a [`Dockerfile`](docker/Dockerfile) that you can use to build a Detectron image on top of a Caffe2 image that satisfies the requirements outlined at the top. If you're using a prebuilt Caffe2 image (e.g. from the [docker repo](https://hub.docker.com/r/caffe2ai/caffe2/)), please make sure that it includes the [Detectron module](https://github.com/caffe2/caffe2/tree/master/modules/detectron). We also provide an example of how to build an up-to-date Caffe2 image.
+We provide a [`Dockerfile`](docker/Dockerfile) that you can use to build a Detectron image on top of a Caffe2 image that satisfies the requirements outlined at the top. If you would like to use a Caffe2 image different from the one we use by default, please make sure that it includes the [Detectron module](https://github.com/caffe2/caffe2/tree/master/modules/detectron).
 
-Build a Caffe2 image:
-
-```
-cd /path/to/caffe2/docker/ubuntu-16.04-cuda8-cudnn6-all-options
-# Use the latest Caffe2 master
-sed -i -e 's/ --branch v0.8.1//g' Dockerfile
-docker build -t caffe2:cuda8-cudnn6-all-options .
-```
-
-Build a Detectron image:
+Build the image:
 
 ```
 cd $DETECTRON/docker
-docker build -t detectron:c2-cuda8-cudnn6 .
+docker build -t detectron:c2-cuda9-cudnn7 .
 ```
 
-Run the Detectron image (e.g. for [`BatchPermutationOp test`](tests/test_batch_permutation_op.py)):
+Run the image (e.g. for [`BatchPermutationOp test`](tests/test_batch_permutation_op.py)):
 
 ```
-nvidia-docker run --rm -it detectron:c2-cuda8-cudnn6 python2 tests/test_batch_permutation_op.py
+nvidia-docker run --rm -it detectron:c2-cuda9-cudnn7 python2 detectron/tests/test_batch_permutation_op.py
 ```
 
 ## Troubleshooting
@@ -158,7 +149,7 @@ cmake .. \
 Similarly, when building custom Detectron operators you can use:
 
 ```
-cd $DETECTRON/lib
+cd $DETECTRON
 mkdir -p build && cd build
 cmake .. \
   -DCUDA_TOOLKIT_ROOT_DIR=/path/to/cuda/toolkit/dir \
@@ -231,3 +222,11 @@ make sure that your python versions are not getting mixed. For instance, this is
 
 In case you experience issues with CMake being unable to find the Caffe2 package when building custom operators,
 make sure you have run `make install` as part of your Caffe2 installation process.
+
+### Conflicting Imports
+
+Python modules with common names could result in import conflicts.
+For instance, a `datasets` module is also found in [tensorflow](https://github.com/tensorflow/tensorflow)
+and could cause an error (e.g. `ImportError: cannot import name task_evaluation`)
+as discussed [here](https://github.com/facebookresearch/Detectron/issues/20).
+If you encounter an import error, please make sure that you are not trying to import the module from another project.

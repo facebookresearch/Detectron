@@ -31,9 +31,9 @@ import json
 import os
 import sys
 
-from datasets.dataset_catalog import ANN_FN
-from datasets.dataset_catalog import DATASETS
-from utils.timer import Timer
+from detectron.datasets.dataset_catalog import ANN_FN
+from detectron.datasets.dataset_catalog import DATASETS
+from detectron.utils.timer import Timer
 
 
 def parse_args():
