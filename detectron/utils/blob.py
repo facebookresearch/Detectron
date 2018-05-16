@@ -106,7 +106,6 @@ def prep_im_for_blob(im, pixel_means, target_size, max_size):
     the scale factors that were used to compute each returned image.
     """
     im = im.astype(np.float32, copy=False)
-    #im -= pixel_means
     im = cv2.subtract(im, pixel_means.reshape((1,) + im.shape[-1:]))
     im_shape = im.shape
     im_size_min = np.min(im_shape[0:2])
