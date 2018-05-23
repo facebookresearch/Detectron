@@ -170,19 +170,9 @@ def _sample_rois(roidb, im_scale, batch_idx):
     sampled_labels[fg_rois_per_this_image:] = 0  # Label bg RoIs with class 0
     sampled_boxes = roidb['boxes'][keep_inds]
 
-    if 'bbox_targets' not in roidb:
-        gt_inds = np.where(roidb['gt_classes'] > 0)[0]
-        gt_boxes = roidb['boxes'][gt_inds, :]
-        gt_assignments = gt_inds[roidb['box_to_gt_ind_map'][keep_inds]]
-        bbox_targets = _compute_targets(
-            sampled_boxes, gt_boxes[gt_assignments, :], sampled_labels
-        )
-        bbox_targets, bbox_inside_weights = _expand_bbox_targets(bbox_targets)
-    else:
-        bbox_targets, bbox_inside_weights = _expand_bbox_targets(
-            roidb['bbox_targets'][keep_inds, :]
-        )
-
+    bbox_targets, bbox_inside_weights = _expand_bbox_targets(
+        roidb['bbox_targets'][keep_inds, :]
+    )
     bbox_outside_weights = np.array(
         bbox_inside_weights > 0, dtype=bbox_inside_weights.dtype
     )
@@ -214,21 +204,6 @@ def _sample_rois(roidb, im_scale, batch_idx):
         )
 
     return blob_dict
-
-
-def _compute_targets(ex_rois, gt_rois, labels):
-    """Compute bounding-box regression targets for an image."""
-
-    assert ex_rois.shape[0] == gt_rois.shape[0]
-    assert ex_rois.shape[1] == 4
-    assert gt_rois.shape[1] == 4
-
-    targets = box_utils.bbox_transform_inv(
-        ex_rois, gt_rois, cfg.MODEL.BBOX_REG_WEIGHTS
-    )
-    return np.hstack((labels[:, np.newaxis], targets)).astype(
-        np.float32, copy=False
-    )
 
 
 def _expand_bbox_targets(bbox_target_data):

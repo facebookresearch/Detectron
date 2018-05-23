@@ -139,10 +139,10 @@ def filter_for_training(roidb):
 def add_bbox_regression_targets(roidb):
     """Add information needed to train bounding-box regressors."""
     for entry in roidb:
-        entry['bbox_targets'] = _compute_targets(entry)
+        entry['bbox_targets'] = compute_bbox_regression_targets(entry)
 
 
-def _compute_targets(entry):
+def compute_bbox_regression_targets(entry):
     """Compute bounding-box regression targets for an image."""
     # Indices of ground-truth ROIs
     rois = entry['boxes']

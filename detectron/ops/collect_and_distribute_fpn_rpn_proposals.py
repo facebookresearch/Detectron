@@ -22,6 +22,7 @@ import numpy as np
 
 from detectron.core.config import cfg
 from detectron.datasets import json_dataset
+from detectron.datasets import roidb as roidb_utils
 import detectron.modeling.FPN as fpn
 import detectron.roi_data.fast_rcnn as fast_rcnn_roi_data
 import detectron.utils.blob as blob_utils
@@ -53,6 +54,7 @@ class CollectAndDistributeFpnRpnProposalsOp(object):
             # This choice should be investigated in the future (it likely does
             # not matter).
             json_dataset.add_proposals(roidb, rois, im_scales, crowd_thresh=0)
+            roidb_utils.add_bbox_regression_targets(roidb)
             # Compute training labels for the RPN proposals; also handles
             # distributing the proposals over FPN levels
             output_blob_names = fast_rcnn_roi_data.get_fast_rcnn_blob_names()

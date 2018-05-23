@@ -55,7 +55,7 @@ def add_rfcn_outputs(model, blob_in, dim_in, dim_reduce, spatial_scale):
         weight_init=gauss_fill(0.01),
         bias_init=const_fill(0.0)
     )
-    # # Bounding-box regression conv
+    # Bounding-box regression conv
     num_bbox_reg_classes = (
         2 if cfg.MODEL.CLS_AGNOSTIC_BBOX_REG else model.num_classes
     )

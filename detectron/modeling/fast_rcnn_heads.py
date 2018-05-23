@@ -45,6 +45,7 @@ import detectron.utils.blob as blob_utils
 
 def add_fast_rcnn_outputs(model, blob_in, dim):
     """Add RoI classification and bounding box regression output ops."""
+    # Box classification layer
     model.FC(
         blob_in,
         'cls_score',
@@ -57,11 +58,15 @@ def add_fast_rcnn_outputs(model, blob_in, dim):
         # Only add softmax when testing; during training the softmax is combined
         # with the label cross entropy loss for numerical stability
         model.Softmax('cls_score', 'cls_prob', engine='CUDNN')
+    # Box regression layer
+    num_bbox_reg_classes = (
+        2 if cfg.MODEL.CLS_AGNOSTIC_BBOX_REG else model.num_classes
+    )
     model.FC(
         blob_in,
         'bbox_pred',
         dim,
-        model.num_classes * 4,
+        num_bbox_reg_classes * 4,
         weight_init=gauss_fill(0.001),
         bias_init=const_fill(0.0)
     )
