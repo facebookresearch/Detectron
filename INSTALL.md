@@ -33,12 +33,6 @@ If the `caffe2` Python package is not found, you likely need to adjust your `PYT
 
 ## Other Dependencies
 
-Install Python dependencies:
-
-```
-pip install numpy>=1.13 pyyaml>=3.12 matplotlib opencv-python>=3.2 setuptools Cython mock scipy
-```
-
 Install the [COCO API](https://github.com/cocodataset/cocoapi):
 
 ```
@@ -61,6 +55,12 @@ Clone the Detectron repository:
 ```
 # DETECTRON=/path/to/clone/detectron
 git clone https://github.com/facebookresearch/detectron $DETECTRON
+```
+
+Install Python dependencies:
+
+```
+pip install -r $DETECTRON/requirements.txt
 ```
 
 Set up Python modules:
