@@ -84,7 +84,7 @@ def vis(dataset, detections_pkl, thresh, output_dir, limit=0):
     ds = JsonDataset(dataset)
     roidb = ds.get_roidb()
 
-    with open(detections_pkl, 'r') as f:
+    with open(detections_pkl) as f:
         dets = pickle.load(f)
 
     assert all(k in dets for k in ['all_boxes', 'all_segms', 'all_keyps']), \
@@ -93,31 +93,37 @@ def vis(dataset, detections_pkl, thresh, output_dir, limit=0):
     all_boxes = dets['all_boxes']
     all_segms = dets['all_segms']
     all_keyps = dets['all_keyps']
-
+    
     def id_or_index(ix, val):
-        if len(val) == 0:
+        if not val:
             return val
-        else:
-            return val[ix]
+        return val[ix]
 
     for ix, entry in enumerate(roidb):
         if limit > 0 and ix >= limit:
             break
-        if ix % 10 == 0:
+        if not ix % 10:
             print('{:d}/{:d}'.format(ix + 1, len(roidb)))
 
         im = cv2.imread(entry['image'])
         im_name = os.path.splitext(os.path.basename(entry['image']))[0]
 
         cls_boxes_i = [
-            id_or_index(ix, cls_k_boxes) for cls_k_boxes in all_boxes
+            id_or_index(ix, j) for j in all_boxes)
         ]
-        cls_segms_i = [
-            id_or_index(ix, cls_k_segms) for cls_k_segms in all_segms
-        ]
-        cls_keyps_i = [
-            id_or_index(ix, cls_k_keyps) for cls_k_keyps in all_keyps
-        ]
+        if all_segms is not None:
+            cls_segms_i = [
+                id_or_index(ix, j) for j in all_segms)
+            ]
+        else:
+            cls_segms_i = None
+
+        if all_keyps is not None:
+            cls_keyps_i = [
+                id_or_index(ix, j) for j in all_keyps)
+            ]
+        else:
+            cls_keyps_i = None
 
         vis_utils.vis_one_image(
             im[:, :, ::-1],
