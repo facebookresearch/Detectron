@@ -14,7 +14,7 @@ import numpy as np
 import os
 import sys
 
-import detectron.datasets.cityscapes.coco_to_cityscapes_id as cs
+import detectron.datasets.coco_to_cityscapes_id as cs
 
 NUM_CS_CLS = 9
 NUM_COCO_CLS = 81
