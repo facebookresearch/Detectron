@@ -40,11 +40,8 @@ from pycocotools import mask as COCOmask
 from pycocotools.coco import COCO
 
 from detectron.core.config import cfg
-from detectron.datasets.dataset_catalog import ANN_FN
-from detectron.datasets.dataset_catalog import DATASETS
-from detectron.datasets.dataset_catalog import IM_DIR
-from detectron.datasets.dataset_catalog import IM_PREFIX
 from detectron.utils.timer import Timer
+import detectron.datasets.dataset_catalog as dataset_catalog
 import detectron.utils.boxes as box_utils
 
 logger = logging.getLogger(__name__)
@@ -54,19 +51,17 @@ class JsonDataset(object):
     """A class representing a COCO json dataset."""
 
     def __init__(self, name):
-        assert name in DATASETS.keys(), \
+        assert dataset_catalog.contains(name), \
             'Unknown dataset name: {}'.format(name)
-        assert os.path.exists(DATASETS[name][IM_DIR]), \
-            'Image directory \'{}\' not found'.format(DATASETS[name][IM_DIR])
-        assert os.path.exists(DATASETS[name][ANN_FN]), \
-            'Annotation file \'{}\' not found'.format(DATASETS[name][ANN_FN])
+        assert os.path.exists(dataset_catalog.get_im_dir(name)), \
+            'Im dir \'{}\' not found'.format(dataset_catalog.get_im_dir(name))
+        assert os.path.exists(dataset_catalog.get_ann_fn(name)), \
+            'Ann fn \'{}\' not found'.format(dataset_catalog.get_ann_fn(name))
         logger.debug('Creating: {}'.format(name))
         self.name = name
-        self.image_directory = DATASETS[name][IM_DIR]
-        self.image_prefix = (
-            '' if IM_PREFIX not in DATASETS[name] else DATASETS[name][IM_PREFIX]
-        )
-        self.COCO = COCO(DATASETS[name][ANN_FN])
+        self.image_directory = dataset_catalog.get_im_dir(name)
+        self.image_prefix = dataset_catalog.get_im_prefix(name)
+        self.COCO = COCO(dataset_catalog.get_ann_fn(name))
         self.debug_timer = Timer()
         # Set up dataset classes
         category_ids = self.COCO.getCatIds()

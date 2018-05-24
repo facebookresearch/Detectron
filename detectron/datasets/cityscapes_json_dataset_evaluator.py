@@ -28,8 +28,7 @@ import uuid
 import pycocotools.mask as mask_util
 
 from detectron.core.config import cfg
-from detectron.datasets.dataset_catalog import DATASETS
-from detectron.datasets.dataset_catalog import RAW_DIR
+from detectron.datasets.dataset_catalog import get_raw_dir
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +54,7 @@ def evaluate_masks(
     if not os.path.exists(results_dir):
         os.mkdir(results_dir)
 
-    os.environ['CITYSCAPES_DATASET'] = DATASETS[json_dataset.name][RAW_DIR]
+    os.environ['CITYSCAPES_DATASET'] = get_raw_dir(json_dataset.name)
     os.environ['CITYSCAPES_RESULTS'] = output_dir
 
     # Load the Cityscapes eval script *after* setting the required env vars,

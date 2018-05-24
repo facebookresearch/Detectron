@@ -75,7 +75,7 @@ __C.TRAIN = AttrDict()
 __C.TRAIN.WEIGHTS = b''
 
 # Datasets to train on
-# Available dataset list: datasets.dataset_catalog.DATASETS.keys()
+# Available dataset list: detectron.datasets.dataset_catalog.datasets()
 # If multiple datasets are listed, the model is trained on their union
 __C.TRAIN.DATASETS = ()
 
@@ -216,7 +216,7 @@ __C.TEST = AttrDict()
 __C.TEST.WEIGHTS = b''
 
 # Datasets to test on
-# Available dataset list: datasets.dataset_catalog.DATASETS.keys()
+# Available dataset list: detectron.datasets.dataset_catalog.datasets()
 # If multiple datasets are listed, testing is performed on each one sequentially
 __C.TEST.DATASETS = ()
 
