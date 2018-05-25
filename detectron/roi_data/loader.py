@@ -143,13 +143,15 @@ class RoIDataLoader(object):
             vert = np.logical_not(horz)
             horz_inds = np.where(horz)[0]
             vert_inds = np.where(vert)[0]
-            inds = np.hstack(
-                (
-                    np.random.permutation(horz_inds),
-                    np.random.permutation(vert_inds)
-                )
-            )
-            inds = np.reshape(inds, (-1, 2))
+
+            horz_inds = np.random.permutation(horz_inds)
+            vert_inds = np.random.permutation(vert_inds)
+            mb = cfg.TRAIN.IMS_PER_BATCH
+            horz_inds = horz_inds[:(len(horz_inds) // mb) * mb]
+            vert_inds = vert_inds[:(len(vert_inds) // mb) * mb]
+            inds = np.hstack((horz_inds, vert_inds))
+
+            inds = np.reshape(inds, (-1, mb))
             row_perm = np.random.permutation(np.arange(inds.shape[0]))
             inds = np.reshape(inds[row_perm, :], (-1, ))
             self._perm = inds
