@@ -28,6 +28,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import numpy as np
+import cv2
 
 import pycocotools.mask as mask_util
 
@@ -45,7 +46,7 @@ def flip_segms(segms, height, width):
             # COCO API showAnns function.
             rle = mask_util.frPyObjects([rle], height, width)
         mask = mask_util.decode(rle)
-        mask = mask[:, ::-1, :]
+        mask = mask[:, ::-1]
         rle = mask_util.encode(np.array(mask, order='F', dtype=np.uint8))
         return rle
 
@@ -266,3 +267,19 @@ def rle_masks_to_boxes(masks):
         boxes[i, :] = (x0, y0, x1, y1)
 
     return boxes, np.where(keep)[0]
+
+
+def rle_mask_wrt_box(rle, box, M):
+    """Convert from the RLE segmentation format to a binary mask
+    encoded as a 2D array of data type numpy.float32. The RLE segmentation
+    is understood to be enclosed in the given box and rasterized to an M x M
+    mask. The resulting mask is therefore of shape (M, M).
+    """
+    mask = np.array(mask_util.decode(rle), dtype=np.float32)
+    sx = max(0, (box[2] - box[0]) / M)
+    sy = max(0, (box[3] - box[1]) / M)
+    matrix = np.array([[sx, 0, box[0]], [0, sy, box[1]]], dtype=np.float)
+    mask = cv2.warpAffine(mask, matrix, (M, M),
+                          flags=cv2.WARP_INVERSE_MAP + cv2.INTER_NEAREST,
+                          borderMode=cv2.BORDER_REFLECT)
+    return mask
