@@ -27,7 +27,7 @@ import os
 import re
 import sys
 import urllib2
-from utils.py3compat import bytes2string
+from detectron.utils.py3compat import bytes2string
 
 logger = logging.getLogger(__name__)
 
