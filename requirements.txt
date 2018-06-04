@@ -1,8 +1,8 @@
-numpy
-scipy
-protobuf
-cython
-pyyaml
+numpy>=1.13
+pyyaml>=3.12
 matplotlib
+opencv-python>=3.2
+setuptools
+Cython
 mock
-git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI
+scipy

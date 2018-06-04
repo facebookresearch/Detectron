@@ -36,19 +36,21 @@ import yaml
 
 from caffe2.python import workspace
 
-from core.config import assert_and_infer_cfg
-from core.config import cfg
-from core.config import merge_cfg_from_cfg
-from core.config import merge_cfg_from_file
-from utils.io import cache_url
-import core.rpn_generator as rpn_engine
-import core.test_engine as model_engine
-import datasets.dummy_datasets as dummy_datasets
-import utils.c2 as c2_utils
-import utils.logging
-import utils.vis as vis_utils
+from detectron.core.config import assert_and_infer_cfg
+from detectron.core.config import cfg
+from detectron.core.config import load_cfg
+from detectron.core.config import merge_cfg_from_cfg
+from detectron.core.config import merge_cfg_from_file
+from detectron.utils.io import cache_url
+from detectron.utils.logging import setup_logging
+import detectron.core.rpn_generator as rpn_engine
+import detectron.core.test_engine as model_engine
+import detectron.datasets.dummy_datasets as dummy_datasets
+import detectron.utils.c2 as c2_utils
+import detectron.utils.vis as vis_utils
 
 c2_utils.import_detectron_ops()
+
 # OpenCL may be enabled by default in OpenCV3; disable it because it's not
 # thread safe and causes unwanted GPU memory allocations.
 cv2.ocl.setUseOpenCL(False)
@@ -116,7 +118,7 @@ def get_rpn_box_proposals(im, args):
 def main(args):
     logger = logging.getLogger(__name__)
     dummy_coco_dataset = dummy_datasets.get_coco_dataset()
-    cfg_orig = yaml.load(yaml.dump(cfg))
+    cfg_orig = load_cfg(yaml.dump(cfg))
     im = cv2.imread(args.im_file)
 
     if args.rpn_pkl is not None:
@@ -189,7 +191,7 @@ def check_args(args):
 
 if __name__ == '__main__':
     workspace.GlobalInit(['caffe2', '--caffe2_log_level=0'])
-    utils.logging.setup_logging(__name__)
+    setup_logging(__name__)
     args = parse_args()
     check_args(args)
     main(args)
