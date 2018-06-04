@@ -21,13 +21,15 @@
   2to3 will change ``unicode`` to ``str``, which will leave an error if using ``unicode_str.decode()``,
   so that has to be checked too.
 
+* ``file`` is no longer a keyword in python3; opened text files appear as ``io.TextIOWrapper`` type.
+
 # Git notes
 
 ``2to3`` makes too many changes, and the git changelog would be overwhelming.
 
 Instead this repo remains Python2 code, and fixes issues that ``2to3`` won't fix by itself.
 
-This is tested on Ubuntu 16.04 with Python 2.7 and 3.5; it should work with ``tools/infer_simple.py`` and the tests in ``tests/``.
+This is tested on Ubuntu 16.04 with Python 2.7 and 3.5; it should work with ``tools/infer_simple.py`` and the tests in ``tests_to_pass.sh``.
 
 # How to use with Python 3
 
