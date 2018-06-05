@@ -446,7 +446,7 @@ class DetectionModelHelper(cnn.CNNModelHelper):
 
         blob_out = self.SpatialGN(
             conv_blob, prefix + suffix,
-            dim_out, num_groups=group_gn,
+            dim_out, group=group_gn,  # op's arg name is "group"
             epsilon=cfg.GROUP_NORM.EPSILON,)
 
         self.gn_params.append(self.params[-1])  # add gn's bias to list
