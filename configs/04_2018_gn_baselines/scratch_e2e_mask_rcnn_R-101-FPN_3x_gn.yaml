@@ -37,6 +37,7 @@ MRCNN:
   CONV_INIT: MSRAFill  # default GaussianFill
 TRAIN:
   # WEIGHTS: N/A
+  FREEZE_AT: 0
   DATASETS: ('coco_2014_train', 'coco_2014_valminusminival')
   SCALES: (800,)
   MAX_SIZE: 1333

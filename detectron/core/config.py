@@ -189,6 +189,9 @@ __C.TRAIN.FREEZE_CONV_BODY = False
 # output directory
 __C.TRAIN.AUTO_RESUME = True
 
+# Add StopGrad at a specified stage so the bottom layers are frozen
+__C.TRAIN.FREEZE_AT = 2
+
 
 # ---------------------------------------------------------------------------- #
 # Data loader options (see detectron/roi_data/loader.py for more info)
