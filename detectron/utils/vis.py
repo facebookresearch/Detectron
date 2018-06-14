@@ -200,13 +200,13 @@ def vis_keypoints(img, kps, kp_thresh=2, alpha=0.7):
 
 def vis_one_image_opencv(
         im, boxes, segms=None, keypoints=None, thresh=0.9, kp_thresh=2,
-        show_box=False, dataset=None, show_class=False):
+        show_box=True, dataset=None, show_class=False):
     """Constructs a numpy array with the detections visualized."""
 
     if isinstance(boxes, list):
         boxes, segms, keypoints, classes = convert_from_cls_format(
             boxes, segms, keypoints)
-
+    print ("boxes.shape:" + str(boxes.shape))
     if boxes is None or boxes.shape[0] == 0 or max(boxes[:, 4]) < thresh:
         return im
 
@@ -218,6 +218,8 @@ def vis_one_image_opencv(
     # Display in largest to smallest order to reduce occlusion
     areas = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
     sorted_inds = np.argsort(-areas)
+
+    im = np.array(im)
 
     for i in sorted_inds:
         bbox = boxes[i, :4]
@@ -247,7 +249,6 @@ def vis_one_image_opencv(
 
     return im
 
-
 def vis_one_image(
         im, im_name, output_dir, boxes, segms=None, keypoints=None, thresh=0.9,
         kp_thresh=2, dpi=200, box_alpha=0.0, dataset=None, show_class=False,
@@ -261,6 +262,7 @@ def vis_one_image(
             boxes, segms, keypoints)
 
     if boxes is None or boxes.shape[0] == 0 or max(boxes[:, 4]) < thresh:
+        print (im_name + "probability is too low, return.")
         return
 
     dataset_keypoints, _ = keypoint_utils.get_keypoints()
@@ -297,8 +299,8 @@ def vis_one_image(
             plt.Rectangle((bbox[0], bbox[1]),
                           bbox[2] - bbox[0],
                           bbox[3] - bbox[1],
-                          fill=False, edgecolor='g',
-                          linewidth=0.5, alpha=box_alpha))
+                          fill=False, edgecolor='r',
+                          linewidth=0.8, alpha=box_alpha))
 
         if show_class:
             ax.text(
@@ -331,7 +333,7 @@ def vis_one_image(
                     c.reshape((-1, 2)),
                     fill=True, facecolor=color_mask,
                     edgecolor='w', linewidth=1.2,
-                    alpha=0.5)
+                    alpha=0.3)
                 ax.add_patch(polygon)
 
         # show keypoints

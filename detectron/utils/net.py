@@ -97,9 +97,44 @@ def initialize_gpu_from_weights_file(model, weights_file, gpu_id=0):
                 )
             )
             if dst_name in ws_blobs:
+                print ("dst_name:" + dst_name)
                 # If the blob is already in the workspace, make sure that it
                 # matches the shape of the loaded blob
                 ws_blob = workspace.FetchBlob(dst_name)
+                print("xhpan:ws_blob.shape:" + str(ws_blob.shape))
+                print("xhpan:src_blobs[src_name].shape:" + str(src_blobs[src_name].shape))
+                classes_layers_list_w = ['gpu_0/cls_score_w', 'gpu_0/bbox_pred_w', 'gpu_0/mask_fcn_logits_w']
+                classes_layers_list_b = ['gpu_0/cls_score_b', 'gpu_0/bbox_pred_b', 'gpu_0/mask_fcn_logits_b']
+
+                # -----------------(11, 1024) - --------------(10, 1024)
+                # -----------------(11,) - --------------(10,)
+                # -----------------(44, 1024) - --------------(40, 1024)
+                # -----------------(44,) - --------------(40,)
+                # -----------------(11, 256, 1, 1) - --------------(10, 256, 1, 1)
+                # -----------------(11,) - --------------(10,)
+                # if ws_blob.shape != src_blobs[src_name].shape:
+                #     if dst_name is 'gpu_0/cls_score_w':
+                #         if ws_blob.shape[0] > src_blobs[src_name].shape[0]:#(10, 1024)
+                #             src_blobs[src_name].extend(0.0001 * np.random.randn(*(ws_blob.shape[0] - src_blobs[src_name].shape[0], ws_blob.shape[1])))
+                #         else:
+                #             num = src_blobs[src_name].shape[0] - ws_blob.shape[0]
+                #             src_blobs[src_name] = src_blobs[src_name][-num]
+                #     elif dst_name is
+
+                if ws_blob.shape != src_blobs[src_name].shape:
+                    print ("ws_blob.shape != src_blobs[src_name].shape")
+                    print ("-----------------" + str(ws_blob.shape) + "---------------" + str(src_blobs[src_name].shape))
+                    if dst_name in classes_layers_list_w or dst_name in classes_layers_list_b:
+                        if dst_name in classes_layers_list_w :
+                            src_blobs[src_name] = 0.0001 * np.random.randn(*(ws_blob.shape))
+                        else:
+                            src_blobs[src_name] = -np.log((1 - 0.00001) / 0.00001) * np.ones(*(ws_blob.shape))
+
+                        src_blobs[src_name + '_momentum'] = np.zeros(ws_blob.shape)
+
+
+
+
                 assert ws_blob.shape == src_blobs[src_name].shape, \
                     ('Workspace blob {} with shape {} does not match '
                      'weights file shape {}').format(

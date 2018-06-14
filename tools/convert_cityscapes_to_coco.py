@@ -10,7 +10,7 @@ import os
 import scipy.misc
 import sys
 
-import cityscapesscripts.evaluation.instances2dict_with_polygons as cs
+import cityscapesscripts.evaluation.instances2dict as cs
 
 import detectron.utils.segms as segms_util
 import detectron.utils.boxes as bboxs_util
@@ -25,9 +25,9 @@ def parse_args():
     parser.add_argument(
         '--datadir', help="data dir for annotations to be converted",
         default=None, type=str)
-    if len(sys.argv) == 1:
-        parser.print_help()
-        sys.exit(1)
+    # if len(sys.argv) == 1:
+    #     parser.print_help()
+    #     sys.exit(1)
     return parser.parse_args()
 
 
@@ -83,17 +83,17 @@ def convert_cityscapes_instance_only(
         data_dir, out_dir):
     """Convert from cityscapes format to COCO instance seg format - polygons"""
     sets = [
-        'gtFine_val',
-        # 'gtFine_train',
-        # 'gtFine_test',
+        'image_train',
+        'image_val',
 
+        # 'gtFine_test',
         # 'gtCoarse_train',
         # 'gtCoarse_val',
         # 'gtCoarse_train_extra'
     ]
     ann_dirs = [
-        'gtFine_trainvaltest/gtFine/val',
-        # 'gtFine_trainvaltest/gtFine/train',
+        'gtFine/train',
+        'gtFine/val',
         # 'gtFine_trainvaltest/gtFine/test',
 
         # 'gtCoarse/train',
@@ -101,22 +101,68 @@ def convert_cityscapes_instance_only(
         # 'gtCoarse/val'
     ]
     json_name = 'instancesonly_filtered_%s.json'
-    ends_in = '%s_polygons.json'
+    ends_in = '_polygons.json'
     img_id = 0
     ann_id = 0
     cat_id = 1
     category_dict = {}
 
-    category_instancesonly = [
-        'person',
-        'rider',
+    add_instancesonly = ['__background__',
+                              'person',
+                              'car'
+                              ]
+    category_instancesonly = ['__background__',
+        'guard rail',
         'car',
-        'truck',
-        'bus',
-        'train',
-        'motorcycle',
-        'bicycle',
+        'dashed',
+        'solid',
+        'solid solid',
+        'dashed dashed',
+        'dashed-solid',
+        'solid-dashed',
+        'yellow dashed',
+        'yellow solid',
+        'yellow solid solid',
+        'yellow dashed dashed',
+        'yellow dashed-solid',
+        'yellow solid-dashed',
+        'boundary'
     ]
+    # category_instancesonly = ['__background__',
+    #                           'ego vehicle',
+    #                           'rectification border',
+    #                           'out of roi',
+    #                           'static',
+    #                           'dynamic',
+    #                           'ground',
+    #                           'road',
+    #                           'sidewalk',
+    #                           'parking',
+    #                           'rail track',
+    #                           'building',
+    #                           'wall',
+    #                           'fence',
+    #                           'guard rail',
+    #                           'bridge',
+    #                           'tunnel',
+    #                           'pole',
+    #                           'polegroup',
+    #                           'traffic light',
+    #                           'traffic sign',
+    #                           'vegetation',
+    #                           'terrain',
+    #                           'sky',
+    #                           'person',
+    #                           'rider',
+    #                           'car',
+    #                           'truck',
+    #                           'bus',
+    #                           'caravan',
+    #                           'trailer',
+    #                           'train',
+    #                           'motorcycle',
+    #                           'bicycle',
+    # ]
 
     for data_set, ann_dir in zip(sets, ann_dirs):
         print('Starting %s' % data_set)
@@ -124,9 +170,9 @@ def convert_cityscapes_instance_only(
         images = []
         annotations = []
         ann_dir = os.path.join(data_dir, ann_dir)
-        for root, _, files in os.walk(ann_dir):
+        for root, sub_dirs, files in os.walk(ann_dir):
             for filename in files:
-                if filename.endswith(ends_in % data_set.split('_')[0]):
+                if filename.endswith(ends_in):
                     if len(images) % 50 == 0:
                         print("Processed %s images, %s annotations" % (
                             len(images), len(annotations)))
@@ -137,18 +183,20 @@ def convert_cityscapes_instance_only(
 
                     image['width'] = json_ann['imgWidth']
                     image['height'] = json_ann['imgHeight']
-                    image['file_name'] = filename[:-len(
-                        ends_in % data_set.split('_')[0])] + 'leftImg8bit.png'
-                    image['seg_file_name'] = filename[:-len(
-                        ends_in % data_set.split('_')[0])] + \
-                        '%s_instanceIds.png' % data_set.split('_')[0]
+                    sub_file_name = filename.split('_')
+                    image['file_name'] = os.path.join(sub_file_name[0], '_'.join(sub_file_name[:-2]) + '_leftImg8bit.png')
+                    image['seg_file_name'] = '_'.join(filename.split('_')[:-1]) + '_instanceIds.png'
                     images.append(image)
 
                     fullname = os.path.join(root, image['seg_file_name'])
+                    print ("fullname:" + fullname)
                     objects = cs.instances2dict_with_polygons(
                         [fullname], verbose=False)[fullname]
 
                     for object_cls in objects:
+                        # if object_cls not in add_instancesonly:
+                        #     continue
+
                         if object_cls not in category_instancesonly:
                             continue  # skip non-instance categories
 
@@ -157,8 +205,10 @@ def convert_cityscapes_instance_only(
                                 print('Warning: empty contours.')
                                 continue  # skip non-instance categories
 
-                            len_p = [len(p) for p in obj['contours']]
-                            if min(len_p) <= 4:
+                            index = category_instancesonly.index(object_cls)  # + 184
+                            good_area = [p for p in obj['contours'] if len(p) > 4]
+
+                            if len(good_area) == 0:
                                 print('Warning: invalid contours.')
                                 continue  # skip non-instance categories
 
@@ -166,12 +216,9 @@ def convert_cityscapes_instance_only(
                             ann['id'] = ann_id
                             ann_id += 1
                             ann['image_id'] = image['id']
-                            ann['segmentation'] = obj['contours']
+                            ann['segmentation'] = good_area
 
-                            if object_cls not in category_dict:
-                                category_dict[object_cls] = cat_id
-                                cat_id += 1
-                            ann['category_id'] = category_dict[object_cls]
+                            ann['category_id'] = index
                             ann['iscrowd'] = 0
                             ann['area'] = obj['pixelCount']
                             ann['bbox'] = bboxs_util.xyxy_to_xywh(
@@ -181,8 +228,11 @@ def convert_cityscapes_instance_only(
                             annotations.append(ann)
 
         ann_dict['images'] = images
-        categories = [{"id": category_dict[name], "name": name} for name in
-                      category_dict]
+
+        categories = []
+        for index, value in enumerate(category_instancesonly):
+            categories.append({"id": index, "name": value})
+        categories = categories[1:]
         ann_dict['categories'] = categories
         ann_dict['annotations'] = annotations
         print("Num categories: %s" % len(categories))
@@ -194,9 +244,10 @@ def convert_cityscapes_instance_only(
 
 if __name__ == '__main__':
     args = parse_args()
-    if args.dataset == "cityscapes_instance_only":
-        convert_cityscapes_instance_only(args.datadir, args.outdir)
-    elif args.dataset == "cocostuff":
-        convert_coco_stuff_mat(args.datadir, args.outdir)
-    else:
-        print("Dataset not supported: %s" % args.dataset)
+    # args.datadir = "/media/administrator/deeplearning/dataset/cityscape"
+    # args.outdir = "/media/administrator/deeplearning/dataset/cityscape/output"
+    args.datadir = "/media/administrator/deeplearning/self-labels"
+    args.outdir = "/media/administrator/deeplearning/self-labels/output"
+    # args.datadir = "/media/administrator/deeplearning/dataset/test_cityscape"
+    # args.outdir = "/media/administrator/deeplearning/dataset/test_cityscape/output"
+    convert_cityscapes_instance_only(args.datadir, args.outdir)

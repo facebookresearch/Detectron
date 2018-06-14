@@ -1,17 +1,17 @@
 MODEL:
   TYPE: generalized_rcnn
   CONV_BODY: FPN.add_fpn_ResNet50_conv5_body
-  NUM_CLASSES: 81
+  NUM_CLASSES: 16
   FASTER_RCNN: True
   MASK_ON: True
-NUM_GPUS: 8
+NUM_GPUS: 1
 SOLVER:
   WEIGHT_DECAY: 0.0001
   LR_POLICY: steps_with_decay
-  BASE_LR: 0.02
+  BASE_LR: 0.0025
   GAMMA: 0.1
   MAX_ITER: 90000
-  STEPS: [0, 60000, 80000]
+  STEPS: [0, 60000,80000]
 FPN:
   FPN_ON: True
   MULTILEVEL_ROIS: True
@@ -30,14 +30,19 @@ MRCNN:
   DILATION: 1  # default 2
   CONV_INIT: MSRAFill  # default GaussianFill
 TRAIN:
-  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/MSRA/R-50.pkl
-  DATASETS: ('coco_2014_train', 'coco_2014_valminusminival')
+#  WEIGHTS: ./train_output/train/coco_2014_train:coco_2014_valminusminival/generalized_rcnn/model_final.pkl
+#  DATASETS: ('coco_2014_train', 'coco_2014_valminusminival')
+
+  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/35858933/12_2017_baselines/e2e_mask_rcnn_R-50-FPN_1x.yaml.01_48_14.DzEQe4wC/output/train/coco_2014_train%3Acoco_2014_valminusminival/generalized_rcnn/model_final.pkl
+#  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/MSRA/R-50.pkl
+#  WEIGHTS: /media/administrator/deeplearning/project/detectron/output/cs_output_fpn/train_nocar/cs_2017_train:cs_2017_val/generalized_rcnn/model_final.pkl
+  DATASETS: ('cs_2017_train', 'cs_2017_val')
   SCALES: (800,)
   MAX_SIZE: 1333
   BATCH_SIZE_PER_IM: 512
   RPN_PRE_NMS_TOP_N: 2000  # Per FPN level
 TEST:
-  DATASETS: ('coco_2014_minival',)
+  DATASETS: ('cs_2017_val',)
   SCALE: 800
   MAX_SIZE: 1333
   NMS: 0.5
