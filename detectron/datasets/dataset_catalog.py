@@ -62,6 +62,42 @@ _DATASETS = {
         _RAW_DIR:
             _DATA_DIR + '/cityscapes/raw'
     },
+    'cs_2017_train': {
+        _IM_DIR:
+            _DATA_DIR + '/cs/train',
+        _ANN_FN:
+            _DATA_DIR + '/cs/annotations/instancesonly_filtered_image_train.json'
+    },
+    'cs_2017_val': {
+        _IM_DIR:
+            _DATA_DIR + '/cs/val',
+        _ANN_FN:
+            _DATA_DIR + '/cs/annotations/instancesonly_filtered_image_val.json'
+    },
+    'cs_2017_minival': {
+        _IM_DIR:
+            _DATA_DIR + '/cs/val',
+        _ANN_FN:
+            _DATA_DIR + '/cs/annotations/instancesonly_filtered_image_val.json'
+    },
+    'bdd_2017_train': {
+        _IM_DIR:
+            _DATA_DIR + '/bdd/train',
+        _ANN_FN:
+            _DATA_DIR + '/bdd/annotations/instancesonly_filtered_train.json'
+    },
+    'bdd_2017_val': {
+        _IM_DIR:
+            _DATA_DIR + '/bdd/val',
+        _ANN_FN:
+            _DATA_DIR + '/bdd/annotations/instancesonly_filtered_val.json'
+    },
+    'bdd_2017_minival': {
+        _IM_DIR:
+            _DATA_DIR + '/bdd/val',
+        _ANN_FN:
+            _DATA_DIR + '/bdd/annotations/instancesonly_filtered_val.json'
+    },
     'coco_2014_train': {
         _IM_DIR:
             _DATA_DIR + '/coco/coco_train2014',
