@@ -991,7 +991,7 @@ __C.CLUSTER.ON_CLUSTER = False
 # If an option is removed from the code and you don't want to break existing
 # yaml configs, you can add the full config key as a string to the set below.
 # ---------------------------------------------------------------------------- #
-_DEPCRECATED_KEYS = set(
+_DEPRECATED_KEYS = set(
     {
         'FINAL_MSG',
         'MODEL.DILATION',
@@ -1192,7 +1192,7 @@ def _merge_a_into_b(a, b, stack=None):
 
 
 def _key_is_deprecated(full_key):
-    if full_key in _DEPCRECATED_KEYS:
+    if full_key in _DEPRECATED_KEYS:
         logger.warn(
             'Deprecated config key (ignoring): {}'.format(full_key)
         )
