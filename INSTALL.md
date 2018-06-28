@@ -69,7 +69,7 @@ Set up Python modules:
 cd $DETECTRON && make
 ```
 
-Check that Detectron tests pass (e.g. for [`SpatialNarrowAsOp test`](tests/test_spatial_narrow_as_op.py)):
+Check that Detectron tests pass (e.g. for [`SpatialNarrowAsOp test`](detectron/tests/test_spatial_narrow_as_op.py)):
 
 ```
 python2 $DETECTRON/detectron/tests/test_spatial_narrow_as_op.py
@@ -115,7 +115,7 @@ cd $DETECTRON/docker
 docker build -t detectron:c2-cuda9-cudnn7 .
 ```
 
-Run the image (e.g. for [`BatchPermutationOp test`](tests/test_batch_permutation_op.py)):
+Run the image (e.g. for [`BatchPermutationOp test`](detectron/tests/test_batch_permutation_op.py)):
 
 ```
 nvidia-docker run --rm -it detectron:c2-cuda9-cudnn7 python2 detectron/tests/test_batch_permutation_op.py
@@ -129,7 +129,7 @@ In case of Caffe2 installation problems, please read the troubleshooting section
 
 Caffe2 comes with performance [`profiling`](https://github.com/caffe2/caffe2/tree/master/caffe2/contrib/prof)
 support which you may find useful for benchmarking or debugging your operators
-(see [`BatchPermutationOp test`](tests/test_batch_permutation_op.py) for example usage).
+(see [`BatchPermutationOp test`](detectron/tests/test_batch_permutation_op.py) for example usage).
 Profiling support is not built by default and you can enable it by setting
 the `-DUSE_PROF=ON` flag when running Caffe2 CMake.
 
