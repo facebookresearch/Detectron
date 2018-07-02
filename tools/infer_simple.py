@@ -52,6 +52,23 @@ c2_utils.import_detectron_ops()
 # thread safe and causes unwanted GPU memory allocations.
 cv2.ocl.setUseOpenCL(False)
 
+# Usage:
+
+# Perform inference on a single image
+# infer_simple.py \
+#   --cfg [path/to/rpn/config.yaml] \
+#   --wts [path/to/model/weights.pkl] \
+#   --output-dir [path/to/output/infer] \
+#   --im_or_folder [path/to/image.jpg]
+
+# Perform inference on all .jpg images in a folder
+# infer_simple.py \
+#   --cfg [path/to/rpn/config.yaml] \
+#   --wts [path/to/model/weights.pkl] \
+#   --output-dir [path/to/output/infer] \
+#   --image-ext "jpg" \
+#   --im_or_folder [path/to/image/folder]
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='End-to-end inference')
@@ -84,7 +101,7 @@ def parse_args():
         type=str
     )
     parser.add_argument(
-        'im_or_folder', help='image or folder of images', default=None
+        '--im_or_folder', help='image or folder of images', default=None
     )
     if len(sys.argv) == 1:
         parser.print_help()
