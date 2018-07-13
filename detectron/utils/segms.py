@@ -31,6 +31,18 @@ import numpy as np
 
 import pycocotools.mask as mask_util
 
+# Type used for storing masks in polygon format
+_POLY_TYPE = list
+# Type used for storing masks in RLE format
+_RLE_TYPE = dict
+
+
+def is_poly(segm):
+    """Determine if segm is a polygon. Valid segm expected (polygon or RLE)."""
+    assert isinstance(segm, (_POLY_TYPE, _RLE_TYPE)), \
+        'Invalid segm type: {}'.format(type(segm))
+    return isinstance(segm, _POLY_TYPE)
+
 
 def flip_segms(segms, height, width):
     """Left/right flip each mask in a list of masks."""
@@ -51,12 +63,11 @@ def flip_segms(segms, height, width):
 
     flipped_segms = []
     for segm in segms:
-        if type(segm) == list:
+        if is_poly(segm):
             # Polygon format
             flipped_segms.append([_flip_poly(poly, width) for poly in segm])
         else:
             # RLE format
-            assert type(segm) == dict
             flipped_segms.append(_flip_rle(segm, height, width))
     return flipped_segms
 
