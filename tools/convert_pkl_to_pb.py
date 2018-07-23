@@ -178,12 +178,8 @@ def convert_gen_proposals(
     inputs = [x for x in op.input]
     anchor_name = 'anchor{}'.format(lvl) if lvl else 'anchor'
     inputs.append(anchor_name)
-    blobs[anchor_name] = \
-        get_anchors(
-            spatial_scale,
-            (cfg.FPN.RPN_ANCHOR_START_SIZE * 2.**(lvl - cfg.FPN.RPN_MIN_LEVEL),)
-        ) \
-            if lvl else get_anchors(spatial_scale, cfg.RPN.SIZES)
+    anchor_sizes = (cfg.FPN.RPN_ANCHOR_START_SIZE * 2.**(lvl - cfg.FPN.RPN_MIN_LEVEL),) if lvl else cfg.RPN.SIZES
+    blobs[anchor_name] = get_anchors(spatial_scale, anchor_sizes)
     print('anchors {}'.format(blobs[anchor_name]))
 
     ret = core.CreateOperator(
