@@ -44,10 +44,10 @@ TEST:
   DATASETS: ('keypoints_coco_2014_minival',)
   PROPOSAL_FILES: ('https://s3-us-west-2.amazonaws.com/detectron/35998996/12_2017_baselines/rpn_person_only_R-50-FPN_1x.yaml.08_10_08.0ZWmJm6F/output/test/keypoints_coco_2014_minival/generalized_rcnn/rpn_proposals.pkl',)
   PROPOSAL_LIMIT: 1000
-  SCALES: (800,)
+  SCALE: 800
   MAX_SIZE: 1333
   NMS: 0.5
-  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/37651887/12_2017_baselines/keypoint_rcnn_R-50-FPN_s1x.yaml.20_01_40.FDjUQ7VX/output/train/keypoints_coco_2014_train%3Akeypoints_coco_2014_valminusminival/generalized_rcnn/model_final.pkl
+  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/37651887/12_2017_baselines/keypoint_rcnn_R-50-FPN_s1x.yaml.20_01_40.FDjUQ7VX/output/train/keypoints_coco_2014_train:keypoints_coco_2014_valminusminival/generalized_rcnn/model_final.pkl
 
   # -- Test time augmentation example -- #
   BBOX_AUG:

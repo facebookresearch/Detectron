@@ -29,35 +29,40 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-import cv2  # NOQA (Must import before importing caffe2 due to bug in cv2)
 
 import argparse
 import copy
-import pprint
+import cv2  # NOQA (Must import before importing caffe2 due to bug in cv2)
 import numpy as np
 import os
+import pprint
 import sys
 
 import caffe2.python.utils as putils
 from caffe2.python import core, workspace
 from caffe2.proto import caffe2_pb2
 
-from core.config import assert_and_infer_cfg
-from core.config import cfg
-from core.config import merge_cfg_from_file
-from core.config import merge_cfg_from_list
-from modeling import generate_anchors
-import core.test_engine as test_engine
-import utils.c2 as c2_utils
-import utils.vis as vis_utils
-import utils.logging
-import utils.model_convert_utils as mutils
-from utils.model_convert_utils import op_filter, convert_op_in_proto
+from detectron.core.config import assert_and_infer_cfg
+from detectron.core.config import cfg
+from detectron.core.config import merge_cfg_from_file
+from detectron.core.config import merge_cfg_from_list
+from detectron.modeling import generate_anchors
+from detectron.utils.logging import setup_logging
+from detectron.utils.model_convert_utils import convert_op_in_proto
+from detectron.utils.model_convert_utils import op_filter
+import detectron.core.test_engine as test_engine
+import detectron.utils.c2 as c2_utils
+import detectron.utils.model_convert_utils as mutils
+import detectron.utils.vis as vis_utils
 
 c2_utils.import_contrib_ops()
 c2_utils.import_detectron_ops()
 
-logger = utils.logging.setup_logging(__name__)
+# OpenCL may be enabled by default in OpenCV3; disable it because it's not
+# thread safe and causes unwanted GPU memory allocations.
+cv2.ocl.setUseOpenCL(False)
+
+logger = setup_logging(__name__)
 
 
 def parse_args():
@@ -100,7 +105,7 @@ def parse_args():
         default=1,
         type=int)
     parser.add_argument(
-        'opts', help='See lib/core/config.py for all options', default=None,
+        'opts', help='See detectron/core/config.py for all options', default=None,
         nargs=argparse.REMAINDER)
     if len(sys.argv) == 1:
         parser.print_help()
@@ -333,7 +338,7 @@ def _save_models(all_net, all_init_net, args):
 
 
 def load_model(args):
-    model = test_engine.initialize_model_from_cfg()
+    model = test_engine.initialize_model_from_cfg(cfg.TEST.WEIGHTS)
     blobs = mutils.get_ws_blobs()
 
     return model, blobs
@@ -434,8 +439,6 @@ def _prepare_blobs(
 
 
 def run_model_pb(args, net, init_net, im, check_blobs):
-    assert len(cfg.TEST.SCALES) == 1
-
     workspace.ResetWorkspace()
     workspace.RunNetOnce(init_net)
     mutils.create_input_blobs_for_net(net.Proto())
@@ -445,7 +448,7 @@ def run_model_pb(args, net, init_net, im, check_blobs):
     input_blobs = _prepare_blobs(
         im,
         cfg.PIXEL_MEANS,
-        cfg.TEST.SCALES[0], cfg.TEST.MAX_SIZE
+        cfg.TEST.SCALE, cfg.TEST.MAX_SIZE
     )
     gpu_blobs = []
     if args.device == 'gpu':
