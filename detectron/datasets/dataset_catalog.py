@@ -113,7 +113,7 @@ _DATASETS = {
     'coco_2017_test': {  # 2017 test uses 2015 test images
         _IM_DIR:
             _DATA_DIR + '/coco/coco_test2015',
-        ANN_FN:
+        _ANN_FN:
             _DATA_DIR + '/coco/annotations/image_info_test2017.json',
         _IM_PREFIX:
             'COCO_test2015_'
@@ -239,7 +239,7 @@ def get_ann_fn(name):
 
 def get_im_prefix(name):
     """Retrieve the image prefix for the dataset."""
-    return _DATASETS[name][_IM_PRsEFIX] if _IM_PREFIX in _DATASETS[name] else ''
+    return _DATASETS[name][_IM_PREFIX] if _IM_PREFIX in _DATASETS[name] else ''
 
 
 def get_devkit_dir(name):

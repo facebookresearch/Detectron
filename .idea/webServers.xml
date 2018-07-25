@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="55a0ba7a-57f5-4a17-8401-900c8686ca0d" name="boruvka" url="http://babayeln@boruvka.felk.cvut.cz">
+        <fileTransfer host="babayeln@boruvka.felk.cvut.cz" port="21" rootFolder="~/Detectron/">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="21" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
