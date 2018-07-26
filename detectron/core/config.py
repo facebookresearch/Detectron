@@ -972,6 +972,9 @@ __C.EXPECTED_RESULTS = []
 # Absolute and relative tolerance to use when comparing to EXPECTED_RESULTS
 __C.EXPECTED_RESULTS_RTOL = 0.1
 __C.EXPECTED_RESULTS_ATOL = 0.005
+# When the expected value specifies a mean and standard deviation, we check
+# that the actual value is within mean +/- SIGMA_TOL * std
+__C.EXPECTED_RESULTS_SIGMA_TOL = 4
 # Set to send email in case of an EXPECTED_RESULTS failure
 __C.EXPECTED_RESULTS_EMAIL = b''
 

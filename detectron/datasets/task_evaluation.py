@@ -195,6 +195,11 @@ def check_expected_results(results, atol=0.005, rtol=0.1):
     Expected results should take the form of a list of expectations, each
     specified by four elements: [dataset, task, metric, expected value]. For
     example: [['coco_2014_minival', 'box_proposal', 'AR@1000', 0.387], ...].
+
+    The expected value may also be formatted as a list [mean, std] providing
+    an empirical mean and standard deviation from which a valid range is computed
+    using cfg.EXPECTED_RESULTS_SIGMA_TOL. For example:
+    [['coco_2014_minival', 'box_proposal', 'AR@1000', [0.387, 0.001]], ...]
     """
     # cfg contains a reference set of results that we want to check against
     if len(cfg.EXPECTED_RESULTS) == 0:
@@ -206,13 +211,28 @@ def check_expected_results(results, atol=0.005, rtol=0.1):
         assert metric in results[dataset][task], \
             'Metric {} not in results'.format(metric)
         actual_val = results[dataset][task][metric]
-        err = abs(actual_val - expected_val)
-        tol = atol + rtol * abs(expected_val)
-        msg = (
-            '{} > {} > {} sanity check (actual vs. expected): '
-            '{:.3f} vs. {:.3f}, err={:.3f}, tol={:.3f}'
-        ).format(dataset, task, metric, actual_val, expected_val, err, tol)
-        if err > tol:
+        ok = False
+        if isinstance(expected_val, list):
+            assert len(expected_val) == 2, (
+                'Expected result must be in (mean, std) format'
+            )
+            mean, std = expected_val
+            lo = mean - cfg.EXPECTED_RESULTS_SIGMA_TOL * std
+            hi = mean + cfg.EXPECTED_RESULTS_SIGMA_TOL * std
+            ok = (lo < actual_val) and (actual_val < hi)
+            msg = (
+                '{} > {} > {} sanity check (actual vs. expected): '
+                '{:.3f} vs. mean={:.4f}, std={:.4}, range=({:.4f}, {:.4f})'
+            ).format(dataset, task, metric, actual_val, mean, std, lo, hi)
+        else:
+            err = abs(actual_val - expected_val)
+            tol = atol + rtol * abs(expected_val)
+            ok = (err > tol)
+            msg = (
+                '{} > {} > {} sanity check (actual vs. expected): '
+                '{:.3f} vs. {:.3f}, err={:.3f}, tol={:.3f}'
+            ).format(dataset, task, metric, actual_val, expected_val, err, tol)
+        if not ok:
             msg = 'FAIL: ' + msg
             logger.error(msg)
             if cfg.EXPECTED_RESULTS_EMAIL != '':
