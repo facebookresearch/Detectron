@@ -124,6 +124,16 @@ def evaluate_masks(dataset, all_boxes, all_segms, output_dir):
             cleanup=not_comp
         )
         mask_results = _cs_eval_to_mask_results(cs_eval)
+    elif _use_voc_evaluator(dataset):
+        coco_eval = json_dataset_evaluator.evaluate_masks(
+            dataset,
+            all_boxes,
+            all_segms,
+            output_dir,
+            use_salt=not_comp,
+            cleanup=not_comp
+        )
+        mask_results = _coco_eval_to_mask_results(coco_eval)
     else:
         raise NotImplementedError(
             'No evaluator for dataset: {}'.format(dataset.name)

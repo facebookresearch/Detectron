@@ -102,6 +102,18 @@ _DATASETS = {
         _IM_DIR:
             _DATA_DIR + '/coco/coco_test2015',
         _ANN_FN:
+            _DATA_DIR + '/coco/annotations/instances_train2017.json'
+    },
+    'coco_2017_val': {  # 2017 val is minival
+        _IM_DIR:
+            _DATA_DIR + '/coco/val2017',
+        _ANN_FN:
+            _DATA_DIR + '/coco/annotations/instances_val2017.json'
+    },
+    'coco_2017_test': {  # 2017 test uses 2015 test images
+        _IM_DIR:
+            _DATA_DIR + '/coco/coco_test2015',
+        _ANN_FN:
             _DATA_DIR + '/coco/annotations/image_info_test2017.json',
         _IM_PREFIX:
             'COCO_test2015_'
