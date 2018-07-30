@@ -132,7 +132,7 @@ def convert_gen_proposals(
     op, blobs,
     rpn_pre_nms_topN,
     rpn_post_nms_topN,
-    rpn_nms_thres,
+    rpn_nms_thresh,
     rpn_min_size,
 ):
     print('Converting GenerateProposals Python -> C++:\n{}'.format(op))
@@ -154,7 +154,7 @@ def convert_gen_proposals(
         spatial_scale=spatial_scale,
         pre_nms_topN=rpn_pre_nms_topN,
         post_nms_topN=rpn_post_nms_topN,
-        nms_thres=rpn_nms_thres,
+        nms_thresh=rpn_nms_thresh,
         min_size=rpn_min_size,
         correct_transform_coords=True,
     )
@@ -195,7 +195,7 @@ def convert_net(args, net, blobs):
             rpn_min_size=float(cfg.TEST.RPN_MIN_SIZE),
             rpn_post_nms_topN=cfg.TEST.RPN_POST_NMS_TOP_N,
             rpn_pre_nms_topN=cfg.TEST.RPN_PRE_NMS_TOP_N,
-            rpn_nms_thres=cfg.TEST.RPN_NMS_THRESH,
+            rpn_nms_thresh=cfg.TEST.RPN_NMS_THRESH,
         )
         net.external_input.extend([ext_input])
         return [gen_proposals_op]
