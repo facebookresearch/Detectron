@@ -30,6 +30,8 @@ from caffe2.python import scope
 
 import detectron.utils.env as envu
 
+DEVICE_ID_CPU = -1
+DEVICE_ID_IDEEP = -2
 
 def import_contrib_ops():
     """Import contrib ops needed by Detectron."""
@@ -104,37 +106,70 @@ def UnscopeName(possibly_scoped_name):
 def NamedCudaScope(gpu_id):
     """Creates a GPU name scope and CUDA device scope. This function is provided
     to reduce `with ...` nesting levels."""
-    with GpuNameScope(gpu_id):
-        with CudaScope(gpu_id):
+    if gpu_id == DEVICE_ID_CPU:
+        with CpuScope():
             yield
+    elif gpu_id == DEVICE_ID_IDEEP:
+        with IdeepScope():
+            yield
+    else:
+        with GpuNameScope(gpu_id):
+            with CudaScope(gpu_id):
+                yield
 
 
 @contextlib.contextmanager
 def GpuNameScope(gpu_id):
-    """Create a name scope for GPU device `gpu_id`."""
-    with core.NameScope('gpu_{:d}'.format(gpu_id)):
+    if gpu_id < 0:
         yield
+    else:
+        """Create a name scope for GPU device `gpu_id`."""
+        with core.NameScope('gpu_{:d}'.format(gpu_id)):
+            yield
 
 
 @contextlib.contextmanager
 def CudaScope(gpu_id):
-    """Create a CUDA device scope for GPU device `gpu_id`."""
-    gpu_dev = CudaDevice(gpu_id)
-    with core.DeviceScope(gpu_dev):
-        yield
+    if gpu_id == DEVICE_ID_CPU:
+        with CpuScope():
+            yield
+    elif gpu_id == DEVICE_ID_IDEEP:
+        with IdeepScope():
+            yield
+    else:
+        """Create a CUDA device scope for GPU device `gpu_id`."""
+        gpu_dev = CudaDevice(gpu_id)
+        with core.DeviceScope(gpu_dev):
+            yield
 
 
 @contextlib.contextmanager
 def CpuScope():
     """Create a CPU device scope."""
-    cpu_dev = core.DeviceOption(caffe2_pb2.CPU)
+    cpu_dev = CpuDevice()
     with core.DeviceScope(cpu_dev):
         yield
 
+def CpuDevice():
+    return core.DeviceOption(caffe2_pb2.CPU)
+
+@contextlib.contextmanager
+def IdeepScope():
+    ideep_dev = IdeepDevice()
+    with core.DeviceScope(ideep_dev):
+        yield
+
+def IdeepDevice():
+    return core.DeviceOption(caffe2_pb2.IDEEP)
 
 def CudaDevice(gpu_id):
     """Create a Cuda device."""
-    return core.DeviceOption(caffe2_pb2.CUDA, gpu_id)
+    if gpu_id == DEVICE_ID_CPU:
+        return CpuDevice()
+    elif gpu_id == DEVICE_ID_IDEEP:
+        return IdeepDevice()
+    else:
+        return core.DeviceOption(caffe2_pb2.CUDA, gpu_id)
 
 
 def gauss_fill(std):

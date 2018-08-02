@@ -99,6 +99,12 @@ def parse_args():
         default='pdf',
         type=str
     )
+    parser.add_argument(
+        '--device_id',
+        dest='device_id',
+        default=0,
+        type=int
+    )
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
@@ -118,7 +124,7 @@ def main(args):
     assert not cfg.TEST.PRECOMPUTED_PROPOSALS, \
         'Models that require precomputed proposals are not supported'
 
-    model = infer_engine.initialize_model_from_cfg(args.weights)
+    model = infer_engine.initialize_model_from_cfg(args.weights, gpu_id = args.device_id)
     dummy_coco_dataset = dummy_datasets.get_coco_dataset()
 
     if os.path.isdir(args.im_or_folder):
@@ -134,7 +140,7 @@ def main(args):
         im = cv2.imread(im_name)
         timers = defaultdict(Timer)
         t = time.time()
-        with c2_utils.NamedCudaScope(0):
+        with c2_utils.NamedCudaScope(args.device_id):
             cls_boxes, cls_segms, cls_keyps = infer_engine.im_detect_all(
                 model, im, None, timers=timers
             )

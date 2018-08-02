@@ -80,6 +80,12 @@ def parse_args():
         nargs=2
     )
     parser.add_argument(
+        '--device_id',
+        dest='device_id',
+        default=0,
+        type=int
+    )
+    parser.add_argument(
         'opts',
         help='See detectron/core/config.py for all options',
         default=None,
@@ -113,5 +119,6 @@ if __name__ == '__main__':
         cfg.TEST.WEIGHTS,
         ind_range=args.range,
         multi_gpu_testing=args.multi_gpu_testing,
+        gpu_id=args.device_id,
         check_expected_results=True,
     )
