@@ -91,7 +91,7 @@ def initialize_gpu_from_weights_file(model, weights_file, gpu_id=0):
             dst_name = core.ScopedName(unscoped_param_name)
             has_momentum = src_name + '_momentum' in src_blobs
             has_momentum_str = ' [+ momentum]' if has_momentum else ''
-            logger.debug(
+            logger.info(
                 '{:s}{:} loaded from weights file into {:s}: {}'.format(
                     src_name, has_momentum_str, dst_name, src_blobs[src_name]
                     .shape
@@ -129,7 +129,7 @@ def initialize_gpu_from_weights_file(model, weights_file, gpu_id=0):
             with c2_utils.CpuScope():
                 workspace.FeedBlob(
                     '__preserve__/{:s}'.format(src_name), src_blobs[src_name])
-                logger.debug(
+                logger.info(
                     '{:s} preserved in workspace (unused)'.format(src_name))
 
 
