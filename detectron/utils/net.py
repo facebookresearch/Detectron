@@ -37,6 +37,7 @@ from detectron.utils.io import save_object
 import detectron.utils.c2 as c2_utils
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def initialize_from_weights_file(model, weights_file, broadcast=True):
