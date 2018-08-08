@@ -250,6 +250,24 @@ def convert_net(args, net, blobs):
             raise ValueError('Failed to convert Python op {}'.format(
                 op.name))
 
+    # Only convert UpsampleNearest to ResizeNearest when converting to pb so that the existing models is unchanged
+    # https://github.com/facebookresearch/Detectron/pull/372#issuecomment-410248561
+    @op_filter(type='UpsampleNearest')
+    def convert_upsample_nearest(op):
+        for arg in op.arg:
+            if arg.name == 'scale':
+                scale = arg.i
+                break
+        else:
+            raise KeyError('No attribute "scale" in UpsampleNearest op')
+        resize_nearest_op = core.CreateOperator('ResizeNearest',
+                                                list(op.input),
+                                                list(op.output),
+                                                name=op.name,
+                                                width_scale=float(scale),
+                                                height_scale=float(scale))
+        return resize_nearest_op
+
     @op_filter()
     def convert_rpn_rois(op):
         for j in range(len(op.input)):
@@ -272,6 +290,7 @@ def convert_net(args, net, blobs):
     # We want to apply to all operators, including converted
     # so run separately
     convert_op_in_proto(net, convert_remove_op)
+    convert_op_in_proto(net, convert_upsample_nearest)
     convert_op_in_proto(net, convert_python)
     convert_op_in_proto(net, convert_op_name)
     convert_op_in_proto(net, convert_rpn_rois)
