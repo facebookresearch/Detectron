@@ -31,9 +31,8 @@ import json
 import os
 import sys
 
-from datasets.dataset_catalog import ANN_FN
-from datasets.dataset_catalog import DATASETS
-from utils.timer import Timer
+from detectron.datasets.dataset_catalog import get_ann_fn
+from detectron.utils.timer import Timer
 
 
 def parse_args():
@@ -59,14 +58,14 @@ def convert(json_file, output_dir):
         dt = json.load(fid)
     print('done!')
 
-    test_image_info = DATASETS['coco_2017_test'][ANN_FN]
+    test_image_info = get_ann_fn('coco_2017_test')
     with open(test_image_info, 'r') as fid:
         info_test = json.load(fid)
     image_test = info_test['images']
     image_test_id = [i['id'] for i in image_test]
     print('{} has {} images'.format(test_image_info, len(image_test_id)))
 
-    test_dev_image_info = DATASETS['coco_2017_test-dev'][ANN_FN]
+    test_dev_image_info = get_ann_fn('coco_2017_test-dev')
     with open(test_dev_image_info, 'r') as fid:
         info_testdev = json.load(fid)
     image_testdev = info_testdev['images']
