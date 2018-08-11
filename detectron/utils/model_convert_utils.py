@@ -315,11 +315,11 @@ def gen_init_net_from_blobs(blobs, blobs_to_use=None, excluded_blobs=None):
         blobs_to_use = [x for x in blobs_to_use if x not in excluded_blobs]
     for name in blobs_to_use:
         blob = blobs[name]
-        if isinstance(blob, str):
+        if isinstance(blob, np.ndarray):
+            add_tensor(ret, name, blob)
+        else:
             print('Blob {} with type {} is not supported in generating init net,'
                   ' skipped.'.format(name, type(blob)))
-            continue
-        add_tensor(ret, name, blob)
 
     return ret
 
