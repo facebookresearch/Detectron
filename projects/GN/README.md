@@ -236,29 +236,69 @@ GN enables to train Mask R-CNN *from scratch* without ImageNet pre-training, des
 <td align="left"><sup><sub>Mask R-CNN</sub></sup></td>
 <td align="left"><sup><sub>3x</sub></sup></td>
 <td align="right"><sup><sub>2</sub></sup></td>
-<td align="right"><sup><sub>10.5</sub></sup></td>
-<td align="right"><sup><sub>0.990</sub></sup></td>
-<td align="right"><sup><sub>74.3</sub></sup></td>
-<td align="right"><sup><sub>0.146&nbsp;+&nbsp;0.020</sub></sup></td>
-<td align="right"><sup><sub>36.2</sub></sup></td>
-<td align="right"><sup><sub>32.5</sub></sup></td>
-<td align="right"><sup><sub>49025460</sub></sup></td>
+<td align="right"><sup><sub>10.8</sub></sup></td>
+<td align="right"><sup><sub>1.087</sub></sup></td>
+<td align="right"><sup><sub>81.5</sub></sup></td>
+<td align="right"><sup><sub>0.140&nbsp;+&nbsp;0.019</sub></sup></td>
+<td align="right"><sup><sub>39.5</sub></sup></td>
+<td align="right"><sup><sub>35.2</sub></sup></td>
+<td align="right"><sup><sub>56421872</sub></sup></td>
 </tr>
 <tr>
 <td align="left"><sup><sub>R-101-FPN, GN, scratch</sub></sup></td>
 <td align="left"><sup><sub>Mask R-CNN</sub></sup></td>
 <td align="left"><sup><sub>3x</sub></sup></td>
 <td align="right"><sup><sub>2</sub></sup></td>
-<td align="right"><sup><sub>12.4</sub></sup></td>
-<td align="right"><sup><sub>1.124</sub></sup></td>
-<td align="right"><sup><sub>84.3</sub></sup></td>
-<td align="right"><sup><sub>0.180&nbsp;+&nbsp;0.019</sub></sup></td>
-<td align="right"><sup><sub>37.5</sub></sup></td>
-<td align="right"><sup><sub>33.3</sub></sup></td>
-<td align="right"><sup><sub>49024951</sub></sup></td>
+<td align="right"><sup><sub>12.7</sub></sup></td>
+<td align="right"><sup><sub>1.243</sub></sup></td>
+<td align="right"><sup><sub>93.2</sub></sup></td>
+<td align="right"><sup><sub>0.177&nbsp;+&nbsp;0.019</sub></sup></td>
+<td align="right"><sup><sub>41.0</sub></sup></td>
+<td align="right"><sup><sub>36.4</sub></sup></td>
+<td align="right"><sup><sub>56421911</sub></sup></td>
 </tr>
 <!-- END E2E MASK RCNN GN SCRATCH TABLE -->
 </tbody></table>
 
 **Notes:**
 - To reproduce these results, see the config yaml files starting with ```scratch ```.
+- These are results using ```freeze_at=0```. See this [commit](https://github.com/facebookresearch/Detectron/commit/f8ffc87ca442d8f6bd2b9aad11029b5db56d7260) about the related issue.
+
+&nbsp;
+
+<table><tbody>
+<!-- START E2E MASK RCNN GN SCRATCH TABLE -->
+<!-- TABLE HEADER -->
+<!-- Info: we use wrap text in <sup><sub></sub><sup> to make is small -->
+<!-- TABLE BODY -->
+<tr>
+<td align="left"><sup><sub><s>R-50-FPN, GN, scratch</s></sub></sup></td>
+<td align="left"><sup><sub><s>Mask R-CNN</s></sub></sup></td>
+<td align="left"><sup><sub><s>3x</s></sub></sup></td>
+<td align="right"><sup><sub><s>2</s></sub></sup></td>
+<td align="right"><sup><sub><s>10.5</s></sub></sup></td>
+<td align="right"><sup><sub><s>0.990</s></sub></sup></td>
+<td align="right"><sup><sub><s>74.3</s></sub></sup></td>
+<td align="right"><sup><sub><s>0.146&nbsp;+&nbsp;0.020</s></sub></sup></td>
+<td align="right"><sup><sub><s>36.2</s></sub></sup></td>
+<td align="right"><sup><sub><s>32.5</s></sub></sup></td>
+<td align="right"><sup><sub><s>49025460</s></sub></sup></td>
+</tr>
+<tr>
+<td align="left"><sup><sub><s>R-101-FPN, GN, scratch</s></sub></sup></td>
+<td align="left"><sup><sub><s>Mask R-CNN</s></sub></sup></td>
+<td align="left"><sup><sub><s>3x</s></sub></sup></td>
+<td align="right"><sup><sub><s>2</s></sub></sup></td>
+<td align="right"><sup><sub><s>12.4</s></sub></sup></td>
+<td align="right"><sup><sub><s>1.124</s></sub></sup></td>
+<td align="right"><sup><sub><s>84.3</s></sub></sup></td>
+<td align="right"><sup><sub><s>0.180&nbsp;+&nbsp;0.019</s></sub></sup></td>
+<td align="right"><sup><sub><s>37.5</s></sub></sup></td>
+<td align="right"><sup><sub><s>33.3</s></sub></sup></td>
+<td align="right"><sup><sub><s>49024951</s></sub></sup></td>
+</tr>
+<!-- END E2E MASK RCNN GN SCRATCH TABLE -->
+</tbody></table>
+
+**Notes:**
+- These are early results that followed the default training using ```freeze_at=2```. This means the layers of conv1 and res2 were simply random weights in the case of training from-scratch. See this [commit](https://github.com/facebookresearch/Detectron/commit/f8ffc87ca442d8f6bd2b9aad11029b5db56d7260) about the related issue.

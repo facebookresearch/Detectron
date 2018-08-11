@@ -189,6 +189,12 @@ __C.TRAIN.FREEZE_CONV_BODY = False
 # output directory
 __C.TRAIN.AUTO_RESUME = True
 
+# Training will copy TRAIN.WEIGHTS and treat it as a candidate checkpoint
+__C.TRAIN.COPY_WEIGHTS = False
+
+# Add StopGrad at a specified stage so the bottom layers are frozen
+__C.TRAIN.FREEZE_AT = 2
+
 
 # ---------------------------------------------------------------------------- #
 # Data loader options (see detectron/roi_data/loader.py for more info)
@@ -776,7 +782,7 @@ __C.MRCNN.THRESH_BINARIZE = 0.5
 
 
 # ---------------------------------------------------------------------------- #
-# Keyoint Mask R-CNN options ("KRCNN" = Mask R-CNN with Keypoint support)
+# Keypoint Mask R-CNN options ("KRCNN" = Mask R-CNN with Keypoint support)
 # ---------------------------------------------------------------------------- #
 __C.KRCNN = AttrDict()
 
@@ -966,6 +972,9 @@ __C.EXPECTED_RESULTS = []
 # Absolute and relative tolerance to use when comparing to EXPECTED_RESULTS
 __C.EXPECTED_RESULTS_RTOL = 0.1
 __C.EXPECTED_RESULTS_ATOL = 0.005
+# When the expected value specifies a mean and standard deviation, we check
+# that the actual value is within mean +/- SIGMA_TOL * std
+__C.EXPECTED_RESULTS_SIGMA_TOL = 4
 # Set to send email in case of an EXPECTED_RESULTS failure
 __C.EXPECTED_RESULTS_EMAIL = b''
 
@@ -988,7 +997,7 @@ __C.CLUSTER.ON_CLUSTER = False
 # If an option is removed from the code and you don't want to break existing
 # yaml configs, you can add the full config key as a string to the set below.
 # ---------------------------------------------------------------------------- #
-_DEPCRECATED_KEYS = set(
+_DEPRECATED_KEYS = set(
     {
         'FINAL_MSG',
         'MODEL.DILATION',
@@ -1189,7 +1198,7 @@ def _merge_a_into_b(a, b, stack=None):
 
 
 def _key_is_deprecated(full_key):
-    if full_key in _DEPCRECATED_KEYS:
+    if full_key in _DEPRECATED_KEYS:
         logger.warn(
             'Deprecated config key (ignoring): {}'.format(full_key)
         )

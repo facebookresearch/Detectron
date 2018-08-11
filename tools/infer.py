@@ -56,9 +56,10 @@ c2_utils.import_detectron_ops()
 cv2.ocl.setUseOpenCL(False)
 
 # infer.py
-#   --im [path/to/image.jpg]
-#   --rpn-model [path/to/rpn/model.pkl]
-#   --rpn-config [path/to/rpn/config.yaml]
+#   --im [path/to/image.jpg] \
+#   --rpn-model [path/to/rpn/model.pkl] \
+#   --rpn-cfg [path/to/rpn/config.yaml] \
+#   --output-dir [path/to/output/dir] \
 #   [model1] [config1] [model2] [config2] ...
 
 
@@ -90,7 +91,7 @@ def parse_args():
     )
     parser.add_argument(
         'models_to_run',
-        help='list of pkl, yaml pairs',
+        help='pairs of models & configs, listed like so: [pkl1] [yaml1] [pkl2] [yaml2] ...',
         default=None,
         nargs=argparse.REMAINDER
     )

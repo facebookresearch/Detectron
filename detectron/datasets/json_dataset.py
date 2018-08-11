@@ -43,6 +43,7 @@ from detectron.core.config import cfg
 from detectron.utils.timer import Timer
 import detectron.datasets.dataset_catalog as dataset_catalog
 import detectron.utils.boxes as box_utils
+import detectron.utils.segms as segm_utils
 
 logger = logging.getLogger(__name__)
 
@@ -167,8 +168,8 @@ class JsonDataset(object):
         width = entry['width']
         height = entry['height']
         for obj in objs:
-            # crowd regions are RLE encoded and stored as dicts
-            if isinstance(obj['segmentation'], list):
+            # crowd regions are RLE encoded
+            if segm_utils.is_poly(obj['segmentation']):
                 # Valid polygons have >= 3 points, so require >= 6 coordinates
                 obj['segmentation'] = [
                     p for p in obj['segmentation'] if len(p) >= 6

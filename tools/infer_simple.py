@@ -84,7 +84,20 @@ def parse_args():
         type=str
     )
     parser.add_argument(
+        '--always-out',
+        dest='out_when_no_box',
+        help='output image even when no object is found',
+        action='store_true'
+    )
+    parser.add_argument(
         'im_or_folder', help='image or folder of images', default=None
+    )
+    parser.add_argument(
+        '--output-ext',
+        dest='output_ext',
+        help='output image file format (default: pdf)',
+        default='pdf',
+        type=str
     )
     if len(sys.argv) == 1:
         parser.print_help()
@@ -94,10 +107,17 @@ def parse_args():
 
 def main(args):
     logger = logging.getLogger(__name__)
+
     merge_cfg_from_file(args.cfg)
     cfg.NUM_GPUS = 1
     args.weights = cache_url(args.weights, cfg.DOWNLOAD_CACHE)
     assert_and_infer_cfg(cache_urls=False)
+
+    assert not cfg.MODEL.RPN_ONLY, \
+        'RPN models are not supported'
+    assert not cfg.TEST.PRECOMPUTED_PROPOSALS, \
+        'Models that require precomputed proposals are not supported'
+
     model = infer_engine.initialize_model_from_cfg(args.weights)
     dummy_coco_dataset = dummy_datasets.get_coco_dataset()
 
@@ -108,7 +128,7 @@ def main(args):
 
     for i, im_name in enumerate(im_list):
         out_name = os.path.join(
-            args.output_dir, '{}'.format(os.path.basename(im_name) + '.pdf')
+            args.output_dir, '{}'.format(os.path.basename(im_name) + '.' + args.output_ext)
         )
         logger.info('Processing {} -> {}'.format(im_name, out_name))
         im = cv2.imread(im_name)
@@ -138,7 +158,9 @@ def main(args):
             box_alpha=0.3,
             show_class=True,
             thresh=0.7,
-            kp_thresh=2
+            kp_thresh=2,
+            ext=args.output_ext,
+            out_when_no_box=args.out_when_no_box
         )
 
 

@@ -28,6 +28,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from shutil import copyfile
 import cv2  # NOQA (Must import before importing caffe2 due to bug in cv2)
 import logging
 import numpy as np
@@ -108,6 +109,12 @@ def create_model():
         if os.path.exists(final_path):
             logger.info('model_final.pkl exists; no need to train!')
             return None, None, None, {'final': final_path}, output_dir
+
+        if cfg.TRAIN.COPY_WEIGHTS:
+            copyfile(
+                weights_file,
+                os.path.join(output_dir, os.path.basename(weights_file)))
+            logger.info('Copy {} to {}'.format(weights_file, output_dir))
 
         # Find the most recent checkpoint (highest iteration number)
         files = os.listdir(output_dir)
