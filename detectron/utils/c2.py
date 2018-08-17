@@ -22,11 +22,13 @@ from __future__ import unicode_literals
 
 from six import string_types
 import contextlib
+import subprocess
 
 from caffe2.proto import caffe2_pb2
 from caffe2.python import core
 from caffe2.python import dyndep
 from caffe2.python import scope
+from caffe2.python import workspace
 
 import detectron.utils.env as envu
 
@@ -145,3 +147,19 @@ def gauss_fill(std):
 def const_fill(value):
     """Constant fill helper to reduce verbosity."""
     return ('ConstantFill', {'value': value})
+
+
+def get_nvidia_info():
+    return (
+        get_nvidia_smi_output(),
+        workspace.GetCUDAVersion(),
+        workspace.GetCuDNNVersion(),
+    )
+
+
+def get_nvidia_smi_output():
+    try:
+        info = subprocess.check_output(["nvidia-smi"], stderr=subprocess.STDOUT)
+    except Exception as e:
+        info = "Executing nvidia-smi failed: " + str(e)
+    return info.strip()
