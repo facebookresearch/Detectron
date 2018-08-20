@@ -171,13 +171,24 @@ class GenerateProposalsOp(object):
 def _filter_boxes(boxes, min_size, im_info):
     """Only keep boxes with both sides >= min_size and center within the image.
     """
-    # Scale min_size to match image scale
-    min_size *= im_info[2]
+    # Compute the width and height of the proposal boxes as measured in the original
+    # image coordinate system (this is required to avoid "Negative Areas Found"
+    # assertions in other parts of the code that measure).
+    im_scale = im_info[2]
+    ws_orig_scale = (boxes[:, 2] - boxes[:, 0]) / im_scale + 1
+    hs_orig_scale = (boxes[:, 3] - boxes[:, 1]) / im_scale + 1
+    # To avoid numerical issues we require the min_size to be at least 1 pixel in the
+    # original image
+    min_size = np.maximum(min_size, 1)
+    # Proposal center is computed relative to the scaled input image
     ws = boxes[:, 2] - boxes[:, 0] + 1
     hs = boxes[:, 3] - boxes[:, 1] + 1
     x_ctr = boxes[:, 0] + ws / 2.
     y_ctr = boxes[:, 1] + hs / 2.
     keep = np.where(
-        (ws >= min_size) & (hs >= min_size) &
-        (x_ctr < im_info[1]) & (y_ctr < im_info[0]))[0]
+        (ws_orig_scale >= min_size)
+        & (hs_orig_scale >= min_size)
+        & (x_ctr < im_info[1])
+        & (y_ctr < im_info[0])
+    )[0]
     return keep
