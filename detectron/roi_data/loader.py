@@ -224,6 +224,7 @@ class RoIDataLoader(object):
 
     def start(self, prefill=False):
         for w in self._workers + self._enqueuers:
+            w.setDaemon(True)
             w.start()
         if prefill:
             logger.info('Pre-filling mini-batch queue...')
