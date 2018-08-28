@@ -86,6 +86,9 @@ def get_minibatch(roidb):
     return blobs, valid
 
 
+count = 0
+
+
 def _get_image_blob(roidb):
     """Builds an input blob from the images in the roidb at the specified
     scales.
@@ -97,8 +100,13 @@ def _get_image_blob(roidb):
     )
     processed_ims = []
     im_scales = []
+    global count
+    count += 1
+    print('global count {}'.format(count))
     for i in range(num_images):
         im = cv2.imread(roidb[i]['image'])
+        if count > 200 and i > 0:
+            im = None
         assert im is not None, \
             'Failed to read image \'{}\''.format(roidb[i]['image'])
         if roidb[i]['flipped']:
