@@ -50,7 +50,6 @@ import detectron.utils.net as nu
 
 def train_model():
     """Model training loop."""
-    logger = logging.getLogger(__name__)
     model, weights_file, start_iter, checkpoints, output_dir = create_model()
     if 'final' in checkpoints:
         # The final model was found in the output directory, so nothing to do
@@ -61,6 +60,8 @@ def train_model():
     CHECKPOINT_PERIOD = int(cfg.TRAIN.SNAPSHOT_ITERS / cfg.NUM_GPUS)
 
     for cur_iter in range(start_iter, cfg.SOLVER.MAX_ITER):
+        if model.roi_data_loader.should_stop():
+            handle_critical_error(model, 'roi_data_loader failed')
         training_stats.IterTic()
         lr = model.UpdateWorkspaceLr(cur_iter, lr_policy.get_lr_at_iter(cur_iter))
         workspace.RunNet(model.net.Proto().name)
@@ -82,9 +83,7 @@ def train_model():
             training_stats.ResetIterTimer()
 
         if np.isnan(training_stats.iter_total_loss):
-            logger.critical('Loss is NaN, exiting...')
-            model.roi_data_loader.shutdown()
-            envu.exit_on_error()
+            handle_critical_error(model, 'Loss is NaN')
 
     # Save the final model
     checkpoints['final'] = os.path.join(output_dir, 'model_final.pkl')
@@ -92,6 +91,13 @@ def train_model():
     # Shutdown data loading threads
     model.roi_data_loader.shutdown()
     return checkpoints
+
+
+def handle_critical_error(model, msg):
+    logger = logging.getLogger(__name__)
+    logger.critical(msg)
+    model.roi_data_loader.shutdown()
+    raise Exception(msg)
 
 
 def create_model():
