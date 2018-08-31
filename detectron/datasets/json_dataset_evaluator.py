@@ -55,6 +55,10 @@ def evaluate_masks(
     if json_dataset.name.find('test') == -1:
         coco_eval = _do_segmentation_eval(json_dataset, res_file, output_dir)
     else:
+        logger.warning(
+            '{} eval ignored as annotations are undisclosed on test: {} ignored'
+            .format("Segmentation", json_dataset.name)
+        )
         coco_eval = None
     # Optionally cleanup results json file
     if cleanup:
@@ -137,6 +141,10 @@ def evaluate_boxes(
     if json_dataset.name.find('test') == -1:
         coco_eval = _do_detection_eval(json_dataset, res_file, output_dir)
     else:
+        logger.warning(
+            '{} eval ignored as annotations are undisclosed on test: {} ignored'
+            .format("Bbox", json_dataset.name)
+        )
         coco_eval = None
     # Optionally cleanup results json file
     if cleanup:
@@ -337,6 +345,10 @@ def evaluate_keypoints(
     if json_dataset.name.find('test') == -1:
         coco_eval = _do_keypoint_eval(json_dataset, res_file, output_dir)
     else:
+        logger.warning(
+            '{} eval ignored as annotations are undisclosed on test: {} ignored'
+            .format("Keypoints", json_dataset.name)
+        )
         coco_eval = None
     # Optionally cleanup results json file
     if cleanup:
