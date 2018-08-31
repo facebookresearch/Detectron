@@ -241,7 +241,7 @@ class RoIDataLoader(object):
                     self.shutdown()
                     break
 
-    def should_stop(self):
+    def has_stopped(self):
         return self.coordinator.should_stop()
 
     def shutdown(self):
