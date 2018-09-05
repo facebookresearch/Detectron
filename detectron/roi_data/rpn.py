@@ -202,7 +202,10 @@ def _get_rpn_blobs(im_height, im_width, foas, all_anchors, gt_boxes):
     bg_inds = np.where(anchor_to_gt_max < cfg.TRAIN.RPN_NEGATIVE_OVERLAP)[0]
     if len(bg_inds) > num_bg:
         enable_inds = bg_inds[npr.randint(len(bg_inds), size=num_bg)]
-        labels[enable_inds] = 0
+    else:
+        enable_inds = bg_inds
+
+    labels[enable_inds] = 0
     bg_inds = np.where(labels == 0)[0]
 
     bbox_targets = np.zeros((num_inside, 4), dtype=np.float32)
