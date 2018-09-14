@@ -13,7 +13,7 @@ This file documents a large collection of baselines trained with Detectron, prim
 - All models were trained on the union of `coco_2014_train` and `coco_2014_valminusminival`, which is exactly equivalent to the recently defined `coco_2017_train` dataset.
 - All models were tested on the `coco_2014_minival` dataset, which is exactly equivalent to the recently defined `coco_2017_val` dataset.
 - Inference times are often expressed as "*X* + *Y*", in which *X* is time taken in reasonably well-optimized GPU code and *Y* is time taken in unoptimized CPU code. (The CPU code time could be reduced substantially with additional engineering.)
-- Inference results for boxes, masks, and keypoints ("kps") are provided in the [COCO json format](http://cocodataset.org/#format).
+- Inference results for boxes, masks, and keypoints ("kps") are provided in the [COCO json format](http://cocodataset.org/#format-data).
 - The *model id* column is provided for ease of reference.
 - To check downloaded file integrity: for any download URL on this page, simply append `.md5sum` to the URL to download the file's md5 hash.
 - All models and results below are on the [COCO dataset](http://cocodataset.org).
