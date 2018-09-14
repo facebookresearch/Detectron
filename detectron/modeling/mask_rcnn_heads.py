@@ -51,10 +51,11 @@ def add_mask_rcnn_outputs(model, blob_in, dim):
     if cfg.MRCNN.USE_FC_OUTPUT:
         # Predict masks with a fully connected layer (ignore 'fcn' in the blob
         # name)
+        dim_fc = int(dim * (cfg.MRCNN.RESOLUTION / cfg.MRCNN.UPSAMPLE_RATIO)**2)
         blob_out = model.FC(
             blob_in,
             'mask_fcn_logits',
-            dim,
+            dim_fc,
             num_cls * cfg.MRCNN.RESOLUTION**2,
             weight_init=gauss_fill(0.001),
             bias_init=const_fill(0.0)
