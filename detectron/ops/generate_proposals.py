@@ -30,13 +30,17 @@ import detectron.utils.boxes as box_utils
 class GenerateProposalsOp(object):
     """Output object detection proposals by applying estimated bounding-box
     transformations to a set of regular boxes (called "anchors").
+
+    See comment in utils/boxes:bbox_transform_inv for details abouts the
+    optional `reg_weights` parameter.
     """
 
-    def __init__(self, anchors, spatial_scale, train):
+    def __init__(self, anchors, spatial_scale, train, reg_weights=(1.0, 1.0, 1.0, 1.0)):
         self._anchors = anchors
         self._num_anchors = self._anchors.shape[0]
         self._feat_stride = 1. / spatial_scale
         self._train = train
+        self._reg_weights = reg_weights
 
     def forward(self, inputs, outputs):
         """See modeling.detector.GenerateProposals for inputs/outputs
@@ -144,8 +148,7 @@ class GenerateProposalsOp(object):
         scores = scores[order]
 
         # Transform anchors into proposals via bbox transformations
-        proposals = box_utils.bbox_transform(
-            all_anchors, bbox_deltas, (1.0, 1.0, 1.0, 1.0))
+        proposals = box_utils.bbox_transform(all_anchors, bbox_deltas, self._reg_weights)
 
         # 2. clip proposals to image (may result in proposals with zero area
         # that will be removed in the next step)
