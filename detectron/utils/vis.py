@@ -113,6 +113,7 @@ def vis_mask(img, mask, col, alpha=0.4, show_border=True, border_thick=1):
 
 def vis_class(img, pos, class_str, font_scale=0.35):
     """Visualizes the class."""
+    
     img = img.astype(np.uint8)
     x0, y0 = int(pos[0]), int(pos[1])
     # Compute text size.
@@ -131,6 +132,7 @@ def vis_class(img, pos, class_str, font_scale=0.35):
 
 def vis_bbox(img, bbox, thick=1):
     """Visualizes a bounding box."""
+    
     img = img.astype(np.uint8)
     (x0, y0, w, h) = bbox
     x1, y1 = int(x0 + w), int(y0 + h)
