@@ -96,6 +96,7 @@ def get_class_string(class_index, score, dataset):
 
 def vis_mask(img, mask, col, alpha=0.4, show_border=True, border_thick=1):
     """Visualizes a single binary mask."""
+    
     img = img.astype(np.float32)
     idx = np.nonzero(mask)
 
@@ -129,7 +130,7 @@ def vis_class(img, pos, class_str, font_scale=0.35):
 
 
 def vis_bbox(img, bbox, thick=1):
-    """Visualizes a bounding box.""" 
+    """Visualizes a bounding box."""
     img = img.astype(np.uint8)
     (x0, y0, w, h) = bbox
     x1, y1 = int(x0 + w), int(y0 + h)
@@ -203,6 +204,7 @@ def vis_one_image_opencv(
         im, boxes, segms=None, keypoints=None, thresh=0.9, kp_thresh=2,
         show_box=False, dataset=None, show_class=False):
     """Constructs a numpy array with the detections visualized."""
+    
     if isinstance(boxes, list):
         boxes, segms, keypoints, classes = convert_from_cls_format(
             boxes, segms, keypoints)
