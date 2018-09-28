@@ -27,6 +27,7 @@ import os
 import re
 import sys
 import urllib2
+from detectron.utils.py3compat import bytes2string
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,9 @@ def cache_url(url_or_file, cache_dir):
     path to the cached file. If the argument is not a URL, simply return it as
     is.
     """
+    url_or_file = bytes2string(url_or_file)
+    cache_dir   = bytes2string(cache_dir)
+
     is_url = re.match(r'^(?:http)s?://', url_or_file, re.IGNORECASE) is not None
 
     if not is_url:
@@ -112,8 +116,11 @@ def download_url(
     https://stackoverflow.com/questions/2028517/python-urllib2-progress-hook
     """
     response = urllib2.urlopen(url)
-    total_size = response.info().getheader('Content-Length').strip()
-    total_size = int(total_size)
+    try:
+        total_size = response.info().getheader('Content-Length')  # python 2
+    except AttributeError:
+        total_size = response.info()['Content-Length']  # python 3
+    total_size = int(total_size.strip())
     bytes_so_far = 0
 
     with open(dst_file_path, 'wb') as f:
@@ -132,7 +139,7 @@ def download_url(
 def _get_file_md5sum(file_name):
     """Compute the md5 hash of a file."""
     hash_obj = hashlib.md5()
-    with open(file_name, 'r') as f:
+    with open(file_name, 'rb') as f:
         hash_obj.update(f.read())
     return hash_obj.hexdigest()
 

@@ -44,11 +44,11 @@ from __future__ import unicode_literals
 
 from ast import literal_eval
 from future.utils import iteritems
-from past.builtins import basestring
+#from past.builtins import basestring
 import copy
 import logging
 import numpy as np
-import os
+import os, sys, io
 import os.path as osp
 import yaml
 
@@ -1114,9 +1114,14 @@ def get_output_dir(datasets, training=True):
 
 def load_cfg(cfg_to_load):
     """Wrapper around yaml.load used for maintaining backward compatibility"""
-    assert isinstance(cfg_to_load, (file, basestring)), \
-        'Expected {} or {} got {}'.format(file, basestring, type(cfg_to_load))
-    if isinstance(cfg_to_load, file):
+    if sys.version_info.major == 2:
+        assert isinstance(cfg_to_load, (file, basestring)), \
+            'Expected {} or {} got {}'.format(file, basestring, type(cfg_to_load))
+    else:
+        assert isinstance(cfg_to_load, (io.TextIOWrapper, basestring)), \
+            'Expected {} or {} got {}'.format(io.TextIOWrapper, basestring, type(cfg_to_load))
+
+    if not isinstance(cfg_to_load, basestring):
         cfg_to_load = ''.join(cfg_to_load.readlines())
     if isinstance(cfg_to_load, basestring):
         for old_module, new_module in iteritems(_RENAMED_MODULES):
@@ -1196,6 +1201,16 @@ def _merge_a_into_b(a, b, stack=None):
         else:
             b[k] = v
 
+    # walk into b, look for bytes, decode as ascii strings
+    # assume bytes are encoded ascii strings (thats how they are in python 2)
+    for k, v_ in list(b.items()):
+        if isinstance(v_, bytes):
+            b[k] = v_.decode('ascii')
+        elif isinstance(v_, dict):
+            for vkey,vval in v_.items():
+                if isinstance(vval, bytes):
+                    v_[vkey] = vval.decode('ascii')
+
 
 def _key_is_deprecated(full_key):
     if full_key in _DEPRECATED_KEYS:
@@ -1232,7 +1247,9 @@ def _decode_cfg_value(v):
     if isinstance(v, dict):
         return AttrDict(v)
     # All remaining processing is only applied to strings
-    if not isinstance(v, basestring):
+    if isinstance(v, bytes): # assume bytes are encoded ascii strings (thats how they are in python 2)
+        v = v.decode('ascii')
+    if not isinstance(v, str) and not isinstance(v, unicode):
         return v
     # Try to interpret `v` as a:
     #   string, number, tuple, list, dict, boolean, or None
@@ -1261,6 +1278,12 @@ def _check_and_coerce_cfg_value_type(value_a, value_b, key, full_key):
     right type. The type is correct if it matches exactly or is one of a few
     cases in which the type can be easily coerced.
     """
+    if isinstance(value_a, bytes) and isinstance(value_b, bytes):
+        return value_a.decode('ascii') # assume bytes are encoded ascii strings (thats how they are in python 2)
+    if sys.version_info.major == 2 and isinstance(value_a, unicode):
+        assert isinstance(value_b, str) or isinstance(value_b, unicode), str(type(value_b))
+        return value_a.decode('latin1')  # https://github.com/tflearn/tflearn/issues/57
+
     # The types must match (with some exceptions)
     type_b = type(value_b)
     type_a = type(value_a)
@@ -1270,8 +1293,9 @@ def _check_and_coerce_cfg_value_type(value_a, value_b, key, full_key):
     # Exceptions: numpy arrays, strings, tuple<->list
     if isinstance(value_b, np.ndarray):
         value_a = np.array(value_a, dtype=value_b.dtype)
-    elif isinstance(value_b, basestring):
-        value_a = str(value_a)
+    elif isinstance(value_b, bytes) and isinstance(value_a, str):
+        pass   # encode to match other dict? or just leave alone?
+        #value_a = value_a.encode('ascii')
     elif isinstance(value_a, tuple) and isinstance(value_b, list):
         value_a = list(value_a)
     elif isinstance(value_a, list) and isinstance(value_b, tuple):

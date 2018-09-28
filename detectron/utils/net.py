@@ -59,8 +59,11 @@ def initialize_gpu_from_weights_file(model, weights_file, gpu_id=0):
     """
     logger.info('Loading weights from: {}'.format(weights_file))
     ws_blobs = workspace.Blobs()
-    with open(weights_file, 'r') as f:
-        src_blobs = pickle.load(f)
+    with open(weights_file, 'rb') as f:
+        try:
+            src_blobs = pickle.load(f, encoding='latin1')  # the pickles from the Model Zoo (as of January 2018) seem to be encoded with latin1; see also https://github.com/tflearn/tflearn/issues/57
+        except TypeError:
+            src_blobs = pickle.load(f)  # Python 2 has no "encoding" argument for pickle
     if 'cfg' in src_blobs:
         saved_cfg = load_cfg(src_blobs['cfg'])
         configure_bbox_reg_weights(model, saved_cfg)

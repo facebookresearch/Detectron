@@ -93,7 +93,7 @@ def pickle_weights(out_file_name, weights):
         normalize_resnet_name(blob.name): utils.Caffe2TensorToNumpyArray(blob)
         for blob in weights.protos
     }
-    with open(out_file_name, 'w') as f:
+    with open(out_file_name, 'wb') as f:
         pickle.dump(blobs, f, protocol=pickle.HIGHEST_PROTOCOL)
     print('Wrote blobs:')
     print(sorted(blobs.keys()))
