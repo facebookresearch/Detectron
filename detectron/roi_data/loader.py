@@ -182,8 +182,12 @@ class RoIDataLoader(object):
         assert len(blob_names) == len(blobs)
         t = time.time()
         dev = c2_utils.CudaDevice(gpu_id)
-        queue_name = 'gpu_{}/{}'.format(gpu_id, self._blobs_queue_name)
-        blob_names = ['gpu_{}/{}'.format(gpu_id, b) for b in blob_names]
+        if gpu_id < 0:
+            queue_name = self._blobs_queue_name
+            blob_names = blob_names
+        else:
+            queue_name = 'gpu_{}/{}'.format(gpu_id, self._blobs_queue_name)
+            blob_names = ['gpu_{}/{}'.format(gpu_id, b) for b in blob_names]
         for (blob_name, blob) in zip(blob_names, blobs):
             workspace.FeedBlob(blob_name, blob, device_option=dev)
         logger.debug(
@@ -262,6 +266,14 @@ class RoIDataLoader(object):
                         capacity=self._blobs_queue_capacity
                     )
                 )
+        if self._num_gpus == 0:
+            workspace.RunOperatorOnce(
+                core.CreateOperator(
+                    'CreateBlobsQueue', [], [self._blobs_queue_name],
+                    num_blobs=len(self.get_output_names()),
+                    capacity=self._blobs_queue_capacity
+                )
+            )
         return self.create_enqueue_blobs()
 
     def close_blobs_queues(self):
@@ -273,6 +285,12 @@ class RoIDataLoader(object):
                         'CloseBlobsQueue', [self._blobs_queue_name], []
                     )
                 )
+        if self._num_gpus == 0:
+            workspace.RunOperatorOnce(
+                core.CreateOperator(
+                    'CloseBlobsQueue', [self._blobs_queue_name], []
+                )
+            )
 
     def create_enqueue_blobs(self):
         blob_names = self.get_output_names()
@@ -283,6 +301,9 @@ class RoIDataLoader(object):
             with c2_utils.NamedCudaScope(gpu_id):
                 for blob in enqueue_blob_names:
                     workspace.CreateBlob(core.ScopedName(blob))
+        if self._num_gpus == 0:
+            for blob in enqueue_blob_names:
+                workspace.CreateBlob(core.ScopedName(blob))
         return enqueue_blob_names
 
     def register_sigint_handler(self):

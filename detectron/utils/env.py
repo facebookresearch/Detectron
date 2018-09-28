@@ -67,6 +67,11 @@ def get_detectron_ops_lib():
             # TODO(ilijar): Switch to using a logger
             print('Found Detectron ops lib: {}'.format(ops_path))
             break
+        ops_path = os.path.join(prefix, 'lib/libcaffe2_detectron_ops.so')
+        if os.path.exists(ops_path):
+            # TODO(ilijar): Switch to using a logger
+            print('Found Detectron ops lib: {}'.format(ops_path))
+            break
     assert os.path.exists(ops_path), \
         ('Detectron ops lib not found; make sure that your Caffe2 '
          'version includes Detectron module')

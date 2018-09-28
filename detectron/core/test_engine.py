@@ -105,7 +105,8 @@ def run_inference(
                     dataset_name,
                     proposal_file,
                     output_dir,
-                    multi_gpu=multi_gpu_testing
+                    multi_gpu=multi_gpu_testing,
+                    gpu_id=gpu_id
                 )
                 all_results.update(results)
 
