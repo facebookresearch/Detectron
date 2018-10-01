@@ -90,14 +90,28 @@ def parse_args():
         action='store_true'
     )
     parser.add_argument(
-        'im_or_folder', help='image or folder of images', default=None
-    )
-    parser.add_argument(
         '--output-ext',
         dest='output_ext',
         help='output image file format (default: pdf)',
         default='pdf',
         type=str
+    )
+    parser.add_argument(
+        '--thresh',
+        dest='thresh',
+        help='Threshold for visualizing detections',
+        default=0.7,
+        type=float
+    )
+    parser.add_argument(
+        '--kp-thresh',
+        dest='kp_thresh',
+        help='Threshold for visualizing keypoints',
+        default=2.0,
+        type=float
+    )
+    parser.add_argument(
+        'im_or_folder', help='image or folder of images', default=None
     )
     if len(sys.argv) == 1:
         parser.print_help()
@@ -157,8 +171,8 @@ def main(args):
             dataset=dummy_coco_dataset,
             box_alpha=0.3,
             show_class=True,
-            thresh=0.7,
-            kp_thresh=2,
+            thresh=args.thresh,
+            kp_thresh=args.kp_thresh,
             ext=args.output_ext,
             out_when_no_box=args.out_when_no_box
         )
