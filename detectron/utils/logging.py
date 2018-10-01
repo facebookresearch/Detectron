@@ -28,11 +28,13 @@ import numpy as np
 import smtplib
 import sys
 
-# Print lower precision floating point values than default FLOAT_REPR
-json.encoder.FLOAT_REPR = lambda o: format(o, '.6f')
-
 
 def log_json_stats(stats, sort_keys=True):
+    # hack to control precision of top-level floats
+    stats = {
+        k: '{:.6f}'.format(v) if isinstance(v, float) else v
+        for k, v in stats.items()
+    }
     print('json_stats: {:s}'.format(json.dumps(stats, sort_keys=sort_keys)))
 
 

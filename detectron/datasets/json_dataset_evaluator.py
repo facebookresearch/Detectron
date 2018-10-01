@@ -24,6 +24,7 @@ import json
 import logging
 import numpy as np
 import os
+import six
 import uuid
 
 from pycocotools.cocoeval import COCOeval
@@ -86,6 +87,16 @@ def _write_coco_segms_results_file(
         'Writing segmentation results json to: {}'.format(
             os.path.abspath(res_file)))
     with open(res_file, 'w') as fid:
+        # "counts" is an array encoded by mask_util as a byte-stream. Python3's
+        # json writer which /always produces strings/ cannot serialize a bytestream
+        # unless you decode it. Thankfully, utf-8 works out (which is also what
+        # the pycocotools/_mask.pyx does.
+        if six.PY3:
+            for r in results:
+                rle = r['segmentation']
+                if 'counts' in rle:
+                    rle['counts'] = rle['counts'].decode("utf8")
+
         json.dump(results, fid)
 
 
