@@ -23,10 +23,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
-import cPickle as pickle
 import cv2
 import os
 import sys
+from six.moves import cPickle as pickle
 
 from detectron.datasets.json_dataset import JsonDataset
 import detectron.utils.vis as vis_utils

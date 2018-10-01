@@ -26,11 +26,11 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import copy
-import cPickle as pickle
 import logging
 import numpy as np
 import os
 import scipy.sparse
+from six.moves import cPickle as pickle
 
 # Must happen before importing COCO API (which imports matplotlib)
 import detectron.utils.env as envu

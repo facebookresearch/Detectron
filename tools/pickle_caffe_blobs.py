@@ -26,10 +26,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
-import cPickle as pickle
 import numpy as np
 import os
 import sys
+from six.moves import cPickle as pickle
 
 from caffe.proto import caffe_pb2
 from caffe2.proto import caffe2_pb2

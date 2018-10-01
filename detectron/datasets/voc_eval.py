@@ -22,11 +22,11 @@
 
 """Python implementation of the PASCAL VOC devkit's AP evaluation code."""
 
-import cPickle
 import logging
 import numpy as np
 import os
 import xml.etree.ElementTree as ET
+from six.moves import cPickle
 
 logger = logging.getLogger(__name__)
 

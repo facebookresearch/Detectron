@@ -6,3 +6,4 @@ setuptools
 Cython
 mock
 scipy
+six

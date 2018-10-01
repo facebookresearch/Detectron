@@ -28,9 +28,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import cPickle as pickle
 import cv2
 import numpy as np
+from six.moves import cPickle as pickle
 
 from caffe2.proto import caffe2_pb2
 

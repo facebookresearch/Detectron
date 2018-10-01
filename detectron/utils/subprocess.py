@@ -27,7 +27,7 @@ import os
 import yaml
 import numpy as np
 import subprocess
-import cPickle as pickle
+from six.moves import cPickle as pickle
 from six.moves import shlex_quote
 
 from detectron.core.config import cfg

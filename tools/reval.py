@@ -31,10 +31,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
-import cPickle as pickle
 import os
 import sys
 import yaml
+from six.moves import cPickle as pickle
 
 from detectron.core.config import cfg
 from detectron.datasets import task_evaluation

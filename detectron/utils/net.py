@@ -21,12 +21,12 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from collections import OrderedDict
-import cPickle as pickle
 import logging
 import numpy as np
 import os
 import pprint
 import yaml
+from six.moves import cPickle as pickle
 
 from caffe2.python import core
 from caffe2.python import workspace
