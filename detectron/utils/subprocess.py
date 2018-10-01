@@ -27,10 +27,10 @@ import os
 import yaml
 import numpy as np
 import subprocess
-from six.moves import cPickle as pickle
 from six.moves import shlex_quote
 
 from detectron.core.config import cfg
+from detectron.utils.io import load_object
 
 import logging
 logger = logging.getLogger(__name__)
@@ -98,7 +98,7 @@ def process_in_parallel(
         range_file = os.path.join(
             output_dir, '%s_range_%s_%s.pkl' % (tag, start, end)
         )
-        range_data = pickle.load(open(range_file))
+        range_data = load_object(range_file)
         outputs.append(range_data)
     return outputs
 

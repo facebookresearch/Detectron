@@ -24,6 +24,7 @@ import hashlib
 import logging
 import os
 import re
+import six
 import sys
 from six.moves import cPickle as pickle
 from six.moves import urllib
@@ -33,11 +34,32 @@ logger = logging.getLogger(__name__)
 _DETECTRON_S3_BASE_URL = 'https://s3-us-west-2.amazonaws.com/detectron'
 
 
-def save_object(obj, file_name):
-    """Save a Python object by pickling it."""
+def save_object(obj, file_name, pickle_format=2):
+    """Save a Python object by pickling it.
+
+Unless specifically overridden, we want to save it in Pickle format=2 since this
+will allow other Python2 executables to load the resulting Pickle. When we want
+to completely remove Python2 backward-compatibility, we can bump it up to 3. We
+should never use pickle.HIGHEST_PROTOCOL as far as possible if the resulting
+file is manifested or used, external to the system.
+    """
     file_name = os.path.abspath(file_name)
     with open(file_name, 'wb') as f:
-        pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(obj, f, pickle_format)
+
+
+def load_object(file_name):
+    with open(file_name, 'rb') as f:
+        # The default encoding used while unpickling is 7-bit (ASCII.) However,
+        # the blobs are arbitrary 8-bit bytes which don't agree. The absolute
+        # correct way to do this is to use `encoding="bytes"` and then interpret
+        # the blob names either as ASCII, or better, as unicode utf-8. A
+        # reasonable fix, however, is to treat it the encoding as 8-bit latin1
+        # (which agrees with the first 256 characters of Unicode anyway.)
+        if six.PY2:
+            return pickle.load(f)
+        else:
+            return pickle.load(f, encoding='latin1')
 
 
 def cache_url(url_or_file, cache_dir):
