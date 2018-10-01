@@ -440,6 +440,11 @@ __C.MODEL = AttrDict()
 # (e.g., 'generalized_rcnn', 'mask_rcnn', ...)
 __C.MODEL.TYPE = b''
 
+# Detection model helper class to use
+#
+# Allows to apply custom DetectionModelHelper implementation
+__C.MODEL.MODEL_HELPER_CLASS = b'detectron.modeling.detector.DetectionModelHelper'
+
 # The backbone conv body to use
 # The string must match a function that is imported in modeling.model_builder
 # (e.g., 'FPN.add_fpn_ResNet101_conv5_body' to specify a ResNet-101-FPN

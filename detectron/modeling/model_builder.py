@@ -113,7 +113,16 @@ def create(model_type_func, train=False, gpu_id=0):
     targeted to a specific GPU by specifying gpu_id. This is used by
     optimizer.build_data_parallel_model() during test time.
     """
-    model = DetectionModelHelper(
+    parts = cfg.MODEL.MODEL_HELPER_CLASS.split('.')
+    try:
+        module_name = '.'join(parts[:-1])
+        module = importlib.import_module(module_name)
+        model_helper_class = getattr(module, parts[-1])
+    except (IndexError, ImportError, AttributeError):
+        logger.error('Failed to find model helper: %s', model_helper_class)
+        raise
+
+    model = model_helper_class(
         name=model_type_func,
         train=train,
         num_classes=cfg.MODEL.NUM_CLASSES,
