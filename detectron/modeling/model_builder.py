@@ -145,7 +145,13 @@ def get_func(func_name):
             return globals()[parts[0]]
         # Otherwise, assume we're referencing a module under modeling
         module_name = 'detectron.modeling.' + '.'.join(parts[:-1])
-        module = importlib.import_module(module_name)
+        try:
+            module = importlib.import_module(module_name)
+        except ImportError:
+            # Finally check if we're referencing a module from the environment
+            module_name = '.'.join(parts[:-1])
+            module = importlib.import_module(module_name)
+            logger.debug('Using function %s from the environment', func_name)
         return getattr(module, parts[-1])
     except Exception:
         logger.error('Failed to find function: {}'.format(func_name))
