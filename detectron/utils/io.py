@@ -159,9 +159,9 @@ def download_url(
 def _get_file_md5sum(file_name):
     """Compute the md5 hash of a file."""
     hash_obj = hashlib.md5()
-    with open(file_name, 'r') as f:
+    with open(file_name, 'rb') as f:
         hash_obj.update(f.read())
-    return hash_obj.hexdigest()
+    return hash_obj.hexdigest().encode('utf-8')
 
 
 def _get_reference_md5sum(url):
