@@ -7,3 +7,4 @@ Cython
 mock
 scipy
 six
+future
