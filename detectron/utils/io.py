@@ -136,7 +136,10 @@ def download_url(
     https://stackoverflow.com/questions/2028517/python-urllib2-progress-hook
     """
     response = urllib.request.urlopen(url)
-    total_size = response.info().getheader('Content-Length').strip()
+    if six.PY2:
+        total_size = response.info().getheader('Content-Length').strip()
+    else:
+        total_size = response.info().get('Content-Length').strip()
     total_size = int(total_size)
     bytes_so_far = 0
 
