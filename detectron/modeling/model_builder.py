@@ -115,7 +115,7 @@ def create(model_type_func, train=False, gpu_id=0):
     """
     parts = cfg.MODEL.MODEL_HELPER_CLASS.split('.')
     try:
-        module_name = '.'join(parts[:-1])
+        module_name = '.'.join(parts[:-1])
         module = importlib.import_module(module_name)
         model_helper_class = getattr(module, parts[-1])
     except (IndexError, ImportError, AttributeError):

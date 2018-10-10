@@ -444,7 +444,7 @@ __C.MODEL.TYPE = ''
 # Detection model helper class to use
 #
 # Allows to apply custom DetectionModelHelper implementation
-__C.MODEL.MODEL_HELPER_CLASS = b'detectron.modeling.detector.DetectionModelHelper'
+__C.MODEL.MODEL_HELPER_CLASS = 'detectron.modeling.detector.DetectionModelHelper'
 
 # The backbone conv body to use
 # The string must match a function that is imported in modeling.model_builder
