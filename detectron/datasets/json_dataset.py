@@ -26,7 +26,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import copy
-import cPickle as pickle
 import logging
 import numpy as np
 import os
@@ -43,6 +42,7 @@ from detectron.core.config import cfg
 from detectron.utils.timer import Timer
 import detectron.datasets.dataset_catalog as dataset_catalog
 import detectron.utils.boxes as box_utils
+from detectron.utils.io import load_object
 import detectron.utils.segms as segm_utils
 
 logger = logging.getLogger(__name__)
@@ -251,8 +251,8 @@ class JsonDataset(object):
     ):
         """Add proposals from a proposals file to an roidb."""
         logger.info('Loading proposals from: {}'.format(proposal_file))
-        with open(proposal_file, 'r') as f:
-            proposals = pickle.load(f)
+        proposals = load_object(proposal_file)
+
         id_field = 'indexes' if 'indexes' in proposals else 'ids'  # compat fix
         _sort_proposals(proposals, id_field)
         box_list = []

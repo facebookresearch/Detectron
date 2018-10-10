@@ -6,3 +6,5 @@ setuptools
 Cython
 mock
 scipy
+six
+future

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 # Copyright (c) 2017-present, Facebook, Inc.
 #
@@ -26,7 +26,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
-import cPickle as pickle
 import numpy as np
 import os
 import sys
@@ -37,6 +36,7 @@ from caffe2.python import caffe_translator
 from caffe2.python import utils
 from google.protobuf import text_format
 
+from detectron.utils.io import save_object
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -93,8 +93,7 @@ def pickle_weights(out_file_name, weights):
         normalize_resnet_name(blob.name): utils.Caffe2TensorToNumpyArray(blob)
         for blob in weights.protos
     }
-    with open(out_file_name, 'w') as f:
-        pickle.dump(blobs, f, protocol=pickle.HIGHEST_PROTOCOL)
+    save_object(blobs, out_file_name)
     print('Wrote blobs:')
     print(sorted(blobs.keys()))
 

@@ -160,6 +160,7 @@ def get_nvidia_info():
 def get_nvidia_smi_output():
     try:
         info = subprocess.check_output(["nvidia-smi"], stderr=subprocess.STDOUT)
+        info = info.decode("utf8")
     except Exception as e:
         info = "Executing nvidia-smi failed: " + str(e)
     return info.strip()

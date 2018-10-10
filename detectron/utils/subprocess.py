@@ -27,10 +27,10 @@ import os
 import yaml
 import numpy as np
 import subprocess
-import cPickle as pickle
 from six.moves import shlex_quote
 
 from detectron.core.config import cfg
+from detectron.utils.io import load_object
 
 import logging
 logger = logging.getLogger(__name__)
@@ -93,12 +93,12 @@ def process_in_parallel(
     outputs = []
     for i, p, start, end, subprocess_stdout in processes:
         log_subprocess_output(i, p, output_dir, tag, start, end)
-        if isinstance(subprocess_stdout, file):  # NOQA (Python 2 for now)
+        if i > 0:
             subprocess_stdout.close()
         range_file = os.path.join(
             output_dir, '%s_range_%s_%s.pkl' % (tag, start, end)
         )
-        range_data = pickle.load(open(range_file))
+        range_data = load_object(range_file)
         outputs.append(range_data)
     return outputs
 
@@ -119,10 +119,10 @@ def log_subprocess_output(i, p, output_dir, tag, start, end):
     logger.info('# ' + '-' * 76 + ' #')
     if i == 0:
         # Stream the piped stdout from the first subprocess in realtime
-        with open(outfile, 'w') as f:
+        with open(outfile, 'wb') as f:
             for line in iter(p.stdout.readline, b''):
-                print(line.rstrip())
-                f.write(str(line))
+                print(line.rstrip().decode("utf8"))
+                f.write(line)
         p.stdout.close()
         ret = p.wait()
     else:

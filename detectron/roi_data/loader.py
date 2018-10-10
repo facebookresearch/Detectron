@@ -44,11 +44,11 @@ from collections import deque
 from collections import OrderedDict
 import logging
 import numpy as np
-import Queue
 import signal
 import threading
 import time
 import uuid
+from six.moves import queue as Queue
 
 from caffe2.python import core, workspace
 

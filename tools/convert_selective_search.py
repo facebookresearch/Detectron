@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 # Copyright (c) 2017-present, Facebook, Inc.
 #
@@ -24,12 +24,13 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import cPickle as pickle
 import numpy as np
 import scipy.io as sio
 import sys
 
 from detectron.datasets.json_dataset import JsonDataset
+from detectron.utils.io import save_object
+
 
 if __name__ == '__main__':
     dataset_name = sys.argv[1]
@@ -53,8 +54,4 @@ if __name__ == '__main__':
         scores.append(np.zeros((i_boxes.shape[0]), dtype=np.float32))
         ids.append(roidb[i]['id'])
 
-    with open(file_out, 'wb') as f:
-        pickle.dump(
-            dict(boxes=boxes, scores=scores, indexes=ids), f,
-            pickle.HIGHEST_PROTOCOL
-        )
+    save_object(dict(boxes=boxes, scores=scores, indexes=ids), file_out)

@@ -21,7 +21,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from collections import OrderedDict
-import cPickle as pickle
 import logging
 import numpy as np
 import os
@@ -33,6 +32,7 @@ from caffe2.python import workspace
 
 from detectron.core.config import cfg
 from detectron.core.config import load_cfg
+from detectron.utils.io import load_object
 from detectron.utils.io import save_object
 import detectron.utils.c2 as c2_utils
 
@@ -59,8 +59,8 @@ def initialize_gpu_from_weights_file(model, weights_file, gpu_id=0):
     """
     logger.info('Loading weights from: {}'.format(weights_file))
     ws_blobs = workspace.Blobs()
-    with open(weights_file, 'r') as f:
-        src_blobs = pickle.load(f)
+    src_blobs = load_object(weights_file)
+
     if 'cfg' in src_blobs:
         saved_cfg = load_cfg(src_blobs['cfg'])
         configure_bbox_reg_weights(model, saved_cfg)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 # Copyright (c) 2017-present, Facebook, Inc.
 #
@@ -23,12 +23,12 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
-import cPickle as pickle
 import cv2
 import os
 import sys
 
 from detectron.datasets.json_dataset import JsonDataset
+from detectron.utils.io import load_object
 import detectron.utils.vis as vis_utils
 
 # OpenCL may be enabled by default in OpenCV3; disable it because it's not
@@ -84,8 +84,7 @@ def vis(dataset, detections_pkl, thresh, output_dir, limit=0):
     ds = JsonDataset(dataset)
     roidb = ds.get_roidb()
 
-    with open(detections_pkl, 'r') as f:
-        dets = pickle.load(f)
+    dets = load_object(detections_pkl)
 
     assert all(k in dets for k in ['all_boxes', 'all_segms', 'all_keyps']), \
         'Expected detections pkl file in the format used by test_engine.py'

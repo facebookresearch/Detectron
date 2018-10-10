@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 # Copyright (c) 2017-present, Facebook, Inc.
 #
@@ -31,14 +31,13 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import argparse
-import cPickle as pickle
 import os
 import sys
-import yaml
 
 from detectron.core.config import cfg
 from detectron.datasets import task_evaluation
 from detectron.datasets.json_dataset import JsonDataset
+from detectron.utils.io import load_object
 from detectron.utils.logging import setup_logging
 import detectron.core.config as core_config
 
@@ -85,8 +84,8 @@ def parse_args():
 
 def do_reval(dataset_name, output_dir, args):
     dataset = JsonDataset(dataset_name)
-    with open(os.path.join(output_dir, 'detections.pkl'), 'rb') as f:
-        dets = pickle.load(f)
+    dets = load_object(os.path.join(output_dir, 'detections.pkl'))
+
     # Override config with the one saved in the detections file
     if args.cfg_file is not None:
         core_config.merge_cfg_from_cfg(core_config.load_cfg(dets['cfg']))
