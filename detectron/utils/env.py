@@ -22,6 +22,7 @@ from __future__ import unicode_literals
 
 import os
 import sys
+import torch
 
 # Default value of the CMake install prefix
 _CMAKE_INSTALL_PREFIX = '/usr/local'
@@ -61,7 +62,7 @@ def import_nccl_ops():
 def get_detectron_ops_lib():
     """Retrieve Detectron ops library."""
     # Candidate prefixes for detectron ops lib path
-    prefixes = [_CMAKE_INSTALL_PREFIX, sys.prefix, sys.exec_prefix] + sys.path
+    prefixes = [_CMAKE_INSTALL_PREFIX, sys.prefix, sys.exec_prefix, os.path.dirname(torch.__file__)] + sys.path
     # Candidate subdirs for detectron ops lib
     subdirs = ['lib', 'torch/lib']
     # Try to find detectron ops lib
