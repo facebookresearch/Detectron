@@ -8,3 +8,4 @@ mock
 scipy
 six
 future
+protobuf
