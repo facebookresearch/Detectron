@@ -26,7 +26,6 @@ import datetime
 import logging
 import numpy as np
 import os
-import yaml
 
 from caffe2.python import workspace
 
@@ -201,7 +200,7 @@ def multi_gpu_test_net_on_dataset(
             all_segms[cls_idx] += all_segms_batch[cls_idx]
             all_keyps[cls_idx] += all_keyps_batch[cls_idx]
     det_file = os.path.join(output_dir, 'detections.pkl')
-    cfg_yaml = yaml.dump(cfg)
+    cfg_yaml = envu.yaml_dump(cfg)
     save_object(
         dict(
             all_boxes=all_boxes,
@@ -303,7 +302,7 @@ def test_net(
                 show_class=True
             )
 
-    cfg_yaml = yaml.dump(cfg)
+    cfg_yaml = envu.yaml_dump(cfg)
     if ind_range is not None:
         det_name = 'detection_range_%s_%s.pkl' % tuple(ind_range)
     else:

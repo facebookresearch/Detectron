@@ -32,7 +32,6 @@ import cv2  # NOQA (Must import before importing caffe2 due to bug in cv2)
 import logging
 import os
 import sys
-import yaml
 
 from caffe2.python import workspace
 
@@ -47,6 +46,7 @@ import detectron.core.rpn_generator as rpn_engine
 import detectron.core.test_engine as model_engine
 import detectron.datasets.dummy_datasets as dummy_datasets
 import detectron.utils.c2 as c2_utils
+import detectron.utils.env as envu
 import detectron.utils.vis as vis_utils
 
 c2_utils.import_detectron_ops()
@@ -119,7 +119,7 @@ def get_rpn_box_proposals(im, args):
 def main(args):
     logger = logging.getLogger(__name__)
     dummy_coco_dataset = dummy_datasets.get_coco_dataset()
-    cfg_orig = load_cfg(yaml.dump(cfg))
+    cfg_orig = load_cfg(envu.yaml_dump(cfg))
     im = cv2.imread(args.im_file)
 
     if args.rpn_pkl is not None:

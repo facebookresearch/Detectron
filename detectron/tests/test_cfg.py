@@ -21,11 +21,11 @@ from __future__ import unicode_literals
 import copy
 import tempfile
 import unittest
-import yaml
 
 from detectron.core.config import cfg
 from detectron.utils.collections import AttrDict
 import detectron.core.config as core_config
+import detectron.utils.env as envu
 import detectron.utils.logging as logging_utils
 
 
@@ -59,7 +59,7 @@ class TestAttrDict(unittest.TestCase):
 
         # Serialize immutability state
         a.immutable(True)
-        a2 = core_config.load_cfg(yaml.dump(a))
+        a2 = core_config.load_cfg(envu.yaml_dump(a))
         assert a.is_immutable()
         assert a2.is_immutable()
 
@@ -81,7 +81,7 @@ class TestCfg(unittest.TestCase):
 
         # Test: merge from yaml
         s = 'dummy1'
-        cfg2 = core_config.load_cfg(yaml.dump(cfg))
+        cfg2 = core_config.load_cfg(envu.yaml_dump(cfg))
         cfg2.MODEL.TYPE = s
         core_config.merge_cfg_from_cfg(cfg2)
         assert cfg.MODEL.TYPE == s
@@ -119,7 +119,7 @@ class TestCfg(unittest.TestCase):
 
     def test_merge_cfg_from_file(self):
         with tempfile.NamedTemporaryFile() as f:
-            yaml.dump(cfg, f)
+            envu.yaml_dump(cfg, f)
             s = cfg.MODEL.TYPE
             cfg.MODEL.TYPE = 'dummy'
             assert cfg.MODEL.TYPE != s
@@ -161,7 +161,7 @@ class TestCfg(unittest.TestCase):
         with tempfile.NamedTemporaryFile() as f:
             cfg2 = copy.deepcopy(cfg)
             cfg2.MODEL.DILATION = 2
-            yaml.dump(cfg2, f)
+            envu.yaml_dump(cfg2, f)
             with self.assertRaises(AttributeError):
                 _ = cfg.MODEL.DILATION  # noqa
             core_config.merge_cfg_from_file(f.name)
@@ -187,7 +187,7 @@ class TestCfg(unittest.TestCase):
             cfg2.EXAMPLE = AttrDict()
             cfg2.EXAMPLE.RENAMED = AttrDict()
             cfg2.EXAMPLE.RENAMED.KEY = 'foobar'
-            yaml.dump(cfg2, f)
+            envu.yaml_dump(cfg2, f)
             with self.assertRaises(AttributeError):
                 _ = cfg.EXAMPLE.RENAMED.KEY  # noqa
             with self.assertRaises(KeyError):

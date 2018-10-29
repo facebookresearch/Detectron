@@ -51,7 +51,6 @@ import numpy as np
 import os
 import os.path as osp
 import six
-import yaml
 
 from detectron.utils.collections import AttrDict
 from detectron.utils.io import cache_url
@@ -62,7 +61,6 @@ __C = AttrDict()
 # Consumers can get config by:
 #   from detectron.core.config import cfg
 cfg = __C
-
 
 # Random note: avoid using '.ON' as a config key since yaml converts it to True;
 # prefer 'ENABLED' instead
@@ -1125,7 +1123,9 @@ def load_cfg(cfg_to_load):
         # yaml object encoding: !!python/object/new:<module>.<object>
         old_module, new_module = 'new:' + old_module, 'new:' + new_module
         cfg_to_load = cfg_to_load.replace(old_module, new_module)
-    return yaml.load(cfg_to_load)
+    # Import inline due to a circular dependency between env.py and config.py
+    import detectron.utils.env as envu
+    return envu.yaml_load(cfg_to_load)
 
 
 def merge_cfg_from_file(cfg_filename):

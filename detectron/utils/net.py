@@ -25,7 +25,6 @@ import logging
 import numpy as np
 import os
 import pprint
-import yaml
 
 from caffe2.python import core
 from caffe2.python import workspace
@@ -35,6 +34,7 @@ from detectron.core.config import load_cfg
 from detectron.utils.io import load_object
 from detectron.utils.io import save_object
 import detectron.utils.c2 as c2_utils
+import detectron.utils.env as envu
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -165,7 +165,7 @@ def save_model_to_weights_file(weights_file, model):
                     ' {:s} -> {:s} (preserved)'.format(
                         scoped_name, unscoped_name))
                 blobs[unscoped_name] = workspace.FetchBlob(scoped_name)
-    cfg_yaml = yaml.dump(cfg)
+    cfg_yaml = envu.yaml_dump(cfg)
     save_object(dict(blobs=blobs, cfg=cfg_yaml), weights_file)
 
 

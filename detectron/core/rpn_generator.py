@@ -33,7 +33,6 @@ import datetime
 import logging
 import numpy as np
 import os
-import yaml
 
 from caffe2.python import core
 from caffe2.python import workspace
@@ -111,7 +110,7 @@ def multi_gpu_generate_rpn_on_dataset(
         scores += rpn_data['scores']
         ids += rpn_data['ids']
     rpn_file = os.path.join(output_dir, 'rpn_proposals.pkl')
-    cfg_yaml = yaml.dump(cfg)
+    cfg_yaml = envu.yaml_dump(cfg)
     save_object(
         dict(boxes=boxes, scores=scores, ids=ids, cfg=cfg_yaml), rpn_file
     )
@@ -155,7 +154,7 @@ def generate_rpn_on_range(
         gpu_id=gpu_id,
     )
 
-    cfg_yaml = yaml.dump(cfg)
+    cfg_yaml = envu.yaml_dump(cfg)
     if ind_range is not None:
         rpn_name = 'rpn_proposals_range_%s_%s.pkl' % tuple(ind_range)
     else:

@@ -22,6 +22,7 @@ from __future__ import unicode_literals
 
 import os
 import sys
+import yaml
 
 # Default value of the CMake install prefix
 _CMAKE_INSTALL_PREFIX = '/usr/local'
@@ -83,3 +84,8 @@ def get_custom_ops_lib():
     assert os.path.exists(custom_ops_lib), \
         'Custom ops lib not found at \'{}\''.format(custom_ops_lib)
     return custom_ops_lib
+
+
+# YAML load/dump function aliases
+yaml_load = yaml.load
+yaml_dump = yaml.dump

@@ -24,13 +24,13 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import yaml
 import numpy as np
 import subprocess
 from six.moves import shlex_quote
 
 from detectron.core.config import cfg
 from detectron.utils.io import load_object
+import detectron.utils.env as envu
 
 import logging
 logger = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ def process_in_parallel(
     # subprocesses
     cfg_file = os.path.join(output_dir, '{}_range_config.yaml'.format(tag))
     with open(cfg_file, 'w') as f:
-        yaml.dump(cfg, stream=f)
+        envu.yaml_dump(cfg, stream=f)
     subprocess_env = os.environ.copy()
     processes = []
     subinds = np.array_split(range(total_range_size), cfg.NUM_GPUS)
