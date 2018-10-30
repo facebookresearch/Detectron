@@ -30,7 +30,7 @@ bool ZeroEvenOp<float, CPUContext>::RunOnDevice() {
 
   // Set output elements at even indices to zero.
   auto* Y_data = Y->mutable_data<float>();
-  for (auto i = 0; i < Y->size(); i += 2) {
+  for (auto i = 0; i < Y->numel(); i += 2) {
     Y_data[i] = 0.0f;
   }
 
