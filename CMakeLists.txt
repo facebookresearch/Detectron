@@ -31,8 +31,12 @@ file(GLOB CUSTOM_OPS_GPU_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/detectron/ops/*.cu)
 
 # Install custom CPU ops lib.
 add_library(
-     caffe2_detectron_custom_ops SHARED
-     ${CUSTOM_OPS_CPU_SRCS})
+    caffe2_detectron_custom_ops SHARED
+    ${CUSTOM_OPS_CPU_SRCS})
+
+target_include_directories(
+    caffe2_detectron_custom_ops PRIVATE
+    ${CAFFE2_INCLUDE_DIRS})
 
 target_link_libraries(caffe2_detectron_custom_ops caffe2_library)
 install(TARGETS caffe2_detectron_custom_ops DESTINATION lib)
