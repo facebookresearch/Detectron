@@ -22,7 +22,7 @@ template <>
 bool ZeroEvenOp<float, CPUContext>::RunOnDevice() {
   // Retrieve the input tensor.
   const auto& X = Input(0);
-  CAFFE_ENFORCE(X.ndim() == 1);
+  CAFFE_ENFORCE(X.dim() == 1);
 
   // Initialize the output tensor to a copy of the input tensor.
   auto* Y = Output(0);
