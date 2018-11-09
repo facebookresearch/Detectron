@@ -111,6 +111,21 @@ def parse_args():
         type=float
     )
     parser.add_argument(
+        '--num_gpus',
+        default=8,
+        type=int
+    )
+
+    parser.add_argument(
+        '--video',
+        type=str,
+    )
+    parser.add_argument(
+        '--limit',
+        type=int,
+    )
+
+    parser.add_argument(
         'im_or_folder', help='image or folder of images', default=None
     )
     if len(sys.argv) == 1:
@@ -123,9 +138,12 @@ def main(args):
     logger = logging.getLogger(__name__)
 
     merge_cfg_from_file(args.cfg)
-    cfg.NUM_GPUS = 1
+    cfg.NUM_GPUS = args.num_gpus
     args.weights = cache_url(args.weights, cfg.DOWNLOAD_CACHE)
     assert_and_infer_cfg(cache_urls=False)
+
+    if args.video:
+        cap = cv2.VideoCapture(args.video)
 
     assert not cfg.MODEL.RPN_ONLY, \
         'RPN models are not supported'
@@ -140,12 +158,34 @@ def main(args):
     else:
         im_list = [args.im_or_folder]
 
+    if cap:
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        zfill_amount = len(str(frame_count))
+        if args.limit:
+            frame_count = min(args.limit, frame_count)
+        im_list = list(
+            map(
+                lambda i: str(i).zfill(zfill_amount),
+                list(
+                    range(frame_count)
+                )
+            )
+        )
+
+    output_names = []
+    grouped_res = []
     for i, im_name in enumerate(im_list):
         out_name = os.path.join(
             args.output_dir, '{}'.format(os.path.basename(im_name) + '.' + args.output_ext)
         )
+        output_names.append(out_name)
         logger.info('Processing {} -> {}'.format(im_name, out_name))
-        im = cv2.imread(im_name)
+        if cap:
+            retval, im = cap.read()
+            if retval is False or im is None:
+                break
+        else:
+            im = cv2.imread(im_name)
         timers = defaultdict(Timer)
         t = time.time()
         with c2_utils.NamedCudaScope(0):
@@ -161,6 +201,26 @@ def main(args):
                 'rest (caches and auto-tuning need to warm up)'
             )
 
+        grouped_res.append((
+            cls_boxes, cls_segms, cls_keyps, im, im_name
+        ))
+
+    # import numpy as np
+    # from pykalman import KalmanFilter, UnscentedKalmanFilter
+    # from numpy import ma
+    # kf = UnscentedKalmanFilter(
+    #     lambda x, w: x + np.sin(w), lambda x, v: x + v, observation_covariance=0.1)
+    # for k in range(len(grouped_res)):
+    #     cls_boxes, cls_segms, cls_keyps, im, im_name = grouped_res[k]
+
+    #     for j in range(len(cls_keyps)):
+    #         X = ma.array(cls_keyps[j])
+    #         X[1::2] = ma.masked  # hide measurement at time step 1
+    #         grouped_res[k][2] = kf.smooth(X)
+            # cls_keyps[j] = kf.em(X, n_iter=5).smooth(X)
+
+    for res in grouped_res:
+        cls_boxes, cls_segms, cls_keyps, im, im_name = res
         vis_utils.vis_one_image(
             im[:, :, ::-1],  # BGR -> RGB for visualization
             im_name,
@@ -176,6 +236,17 @@ def main(args):
             ext=args.output_ext,
             out_when_no_box=args.out_when_no_box
         )
+
+    if cap:
+        import subprocess
+
+        command = 'ffmpeg -y -framerate {fps} -i {images_dir}/%0{zf}d.jpg {d}/{vn}.mp4'.format(
+            d=args.output_dir,
+            fps=float(cap.get(cv2.CAP_PROP_FPS)),
+            images_dir=args.output_dir,
+            vn='video', zf=zfill_amount)
+        proc = subprocess.Popen(command, shell=True)
+        proc.wait()
 
 
 if __name__ == '__main__':
