@@ -340,26 +340,50 @@ def vis_one_image(
                 ax.add_patch(polygon)
 
         # show keypoints
+        all_collect_keypoints = []
+        from numpy import ma
         if keypoints is not None and len(keypoints) > i:
             kps = keypoints[i]
+            collect_keypoints = []
             plt.autoscale(False)
             for l in range(len(kp_lines)):
                 i1 = kp_lines[l][0]
                 i2 = kp_lines[l][1]
+                collect_keypoint = {
+                    'line_index': l,
+                    'x': ma.masked,
+                    'y': ma.masked
+                }
                 if kps[2, i1] > kp_thresh and kps[2, i2] > kp_thresh:
                     x = [kps[0, i1], kps[0, i2]]
                     y = [kps[1, i1], kps[1, i2]]
+                    collect_keypoint = {
+                        'line_index': l,
+                        'x': x,
+                        'y': y
+                    }
                     line = plt.plot(x, y)
                     plt.setp(line, color=colors[l], linewidth=1.0, alpha=0.7)
                 if kps[2, i1] > kp_thresh:
+                    collect_keypoint = {
+                        'line_index': l,
+                        'x': kps[0, i1],
+                        'y': kps[1, i1]
+                    }
                     plt.plot(
                         kps[0, i1], kps[1, i1], '.', color=colors[l],
                         markersize=3.0, alpha=0.7)
 
                 if kps[2, i2] > kp_thresh:
+                    collect_keypoint = {
+                        'line_index': l,
+                        'x': kps[0, i2],
+                        'y': kps[1, i2]
+                    }
                     plt.plot(
                         kps[0, i2], kps[1, i2], '.', color=colors[l],
                         markersize=3.0, alpha=0.7)
+            collect_keypoints.append(collect_keypoint)
 
             # add mid shoulder / mid hip for better visualization
             mid_shoulder = (
@@ -388,7 +412,8 @@ def vis_one_image(
                 plt.setp(
                     line, color=colors[len(kp_lines) + 1], linewidth=1.0,
                     alpha=0.7)
-
+        all_collect_keypoints.append(collect_keypoints)
     output_name = os.path.basename(im_name) + '.' + ext
     fig.savefig(os.path.join(output_dir, '{}'.format(output_name)), dpi=dpi)
     plt.close('all')
+    return all_collect_keypoints
