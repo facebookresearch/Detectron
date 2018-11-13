@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 # Copyright (c) 2017-present, Facebook, Inc.
@@ -134,6 +135,32 @@ def parse_args():
     return parser.parse_args()
 
 
+def smoother(measurements, n_iter=5, last_measurement=None):
+    from pykalman import KalmanFilter
+    transition_matrix = [[1, 1, 0, 0], [0, 1, 0, 0], [0, 0, 1, 1], [0, 0, 0, 1]]
+    observation_matrix = [[1, 0, 0, 0], [0, 0, 1, 0]]
+
+    if last_measurement is None:
+        initial_state_mean = [measurements[0, 0], 0, measurements[0, 1], 0]
+    else:
+        initial_state_mean = [last_measurement[0], 0, last_measurement[1], 0]
+
+    kf1 = KalmanFilter(
+        transition_matrices = transition_matrix,
+        observation_matrices = observation_matrix,
+        initial_state_mean = initial_state_mean
+    )
+
+    kf1 = kf1.em(measurements, n_iter=n_iter)
+    (smoothed_state_means, smoothed_state_covariances) = kf1.smooth(measurements)
+
+    output = []
+
+    for smoothed_state_mean in smoothed_state_means:
+        output.append((smoothed_state_mean[0], smoothed_state_mean[2]))
+
+    return np.asarray(output)
+
 def main(args):
     logger = logging.getLogger(__name__)
 
@@ -201,12 +228,49 @@ def main(args):
                 'rest (caches and auto-tuning need to warm up)'
             )
 
+        # boxes, segms, keypoints, classes = vis_utils.convert_from_cls_format(
+        #     cls_boxes, cls_segms, cls_keyps)
+        # print('boxes', boxes)
+        # print('segms', segms)
+        # print('keypoints', keypoints)
+        # keypoints_labels = [
+        #     'nose',
+        #     'left_eye',
+        #     'right_eye',
+        #     'left_ear',
+        #     'right_ear',
+        #     'left_shoulder',
+        #     'right_shoulder',
+        #     'left_elbow',
+        #     'right_elbow',
+        #     'left_wrist',
+        #     'right_wrist',
+        #     'left_hip',
+        #     'right_hip',
+        #     'left_knee',
+        #     'right_knee',
+        #     'left_ankle',
+        #     'right_ankle'
+        # ]
+        # keypoint_dict_list = []
+        # for keypoint in keypoints:
+        #     keypoint_dict = {}
+        #     for label_i in range(len(keypoints_labels)):
+        #         label = keypoints_labels[label_i]
+        #         keypoint_dict[label] = {
+        #             'x': int(keypoint[0, label_i]),
+        #             'y': int(keypoint[1, label_i]),
+        #             'logit': keypoint[2, label_i],
+        #             'prob': keypoint[3, label_i],
+        #         }
+        #     keypoint_dict_list.append(keypoint_dict)
+        # print('keypoint_dict_list: ', keypoint_dict_list)
         grouped_res.append((
             cls_boxes, cls_segms, cls_keyps, im, im_name
         ))
 
+
     # import numpy as np
-    # from pykalman import KalmanFilter, UnscentedKalmanFilter
     # from numpy import ma
     # kf = UnscentedKalmanFilter(
     #     lambda x, w: x + np.sin(w), lambda x, v: x + v, observation_covariance=0.1)
@@ -236,6 +300,46 @@ def main(args):
             ext=args.output_ext,
             out_when_no_box=args.out_when_no_box
         )
+        # opencv_image, keypoints_clean = vis_utils.vis_one_image_opencv(
+        #     im,
+        #     cls_boxes,
+        #     segms=cls_segms,
+        #     keypoints=cls_keyps,
+        #     thresh=args.thresh,
+        #     kp_thresh=args.kp_thresh,
+        #     show_box=True,
+        #     dataset=dummy_coco_dataset,
+        #     show_class=False,
+        # )
+        # opencv_image_filename = '{}/{}.{}'.format(args.output_dir, im_name, args.output_ext)
+        # cv2.imwrite(opencv_image_filename, opencv_image)
+        # print('keypoints_clean: ', keypoints_clean)
+        # keypoint_x = []
+        # keypoint_y = []
+        # grouped_keypoints = []
+        # for keypoint_index in range(16):
+        #     grouped_keypoints.append(
+        #         list(filter(lambda x: keypoint_index == x['index'], keypoints_clean))
+        #     )
+
+        # grouped_smoothed_measurements = []
+        # from numpy import ma
+        # print('grouped_keypoints: ', grouped_keypoints)
+        # for group_keypoint in grouped_keypoints:
+        #     measurements = ma.empty(
+        #         shape=(
+        #             len(group_keypoint),
+        #             2
+        #         )
+        #     )
+        #     for ki in range(len(group_keypoint)):
+        #         keypoint = group_keypoint[ki]
+        #         print('keypoint: ', keypoint)
+        #     #     measurements[ki][0] = float(keypoint['y'])
+        #     #     measurements[ki][1] = float(keypoint['x'])
+        #     # smoothed_measurements = smoother(measurements)
+        #     # grouped_smoothed_measurements.append(smoothed_measurements)
+        # print('grouped_smoothed_measurements: ', grouped_smoothed_measurements)
 
     if cap:
         import subprocess
@@ -245,6 +349,7 @@ def main(args):
             fps=float(cap.get(cv2.CAP_PROP_FPS)),
             images_dir=args.output_dir,
             vn='video', zf=zfill_amount)
+
         proc = subprocess.Popen(command, shell=True)
         proc.wait()
 
