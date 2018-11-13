@@ -131,7 +131,7 @@ def parse_args():
     )
 
     parser.add_argument(
-        'skip_frames',
+        '--skip_frames',
         type=int
     )
 
@@ -169,7 +169,6 @@ def smoother(measurements, n_iter=5, last_measurement=None):
 
 def main(args):
     logger = logging.getLogger(__name__)
-
     merge_cfg_from_file(args.cfg)
     cfg.NUM_GPUS = args.num_gpus
     args.weights = cache_url(args.weights, cfg.DOWNLOAD_CACHE)
@@ -207,7 +206,8 @@ def main(args):
 
     output_names = []
     grouped_res = []
-    for i, im_name in enumerate(im_list):
+    skip_frame_count = args.skip_frames + 1
+    for i, im_name in enumerate(im_list[::skip_frame_count]):
         out_name = os.path.join(
             args.output_dir, '{}'.format(os.path.basename(im_name) + '.' + args.output_ext)
         )
@@ -236,9 +236,6 @@ def main(args):
 
         boxes, segms, keypoints, classes = vis_utils.convert_from_cls_format(
             cls_boxes, cls_segms, cls_keyps)
-        print('boxes', boxes)
-        print('segms', segms)
-        print('keypoints', keypoints)
         keypoints_labels = [
             'nose',
             'left_eye',
@@ -270,7 +267,6 @@ def main(args):
                     'prob': keypoint[3, label_i],
                 }
             keypoint_dict_list.append(keypoint_dict)
-        print('keypoint_dict_list: ', keypoint_dict_list)
         grouped_res.append((
             cls_boxes, cls_segms, cls_keyps, im, im_name
         ))
@@ -320,7 +316,6 @@ def main(args):
 
         opencv_image_filename = '{}/{}.{}'.format(args.output_dir, im_name, args.output_ext)
         cv2.imwrite(opencv_image_filename, opencv_image)
-        print('keypoints_clean: ', keypoints_clean)
         keypoint_x = []
         keypoint_y = []
         grouped_keypoints = []
@@ -331,7 +326,6 @@ def main(args):
 
         grouped_smoothed_measurements = []
         from numpy import ma
-        print('grouped_keypoints: ', grouped_keypoints)
         for group_keypoint in grouped_keypoints:
             measurements = ma.empty(
                 shape=(
@@ -341,12 +335,10 @@ def main(args):
             )
             for ki in range(len(group_keypoint)):
                 keypoint = group_keypoint[ki]
-                print('keypoint: ', keypoint)
             #     measurements[ki][0] = float(keypoint['y'])
             #     measurements[ki][1] = float(keypoint['x'])
             # smoothed_measurements = smoother(measurements)
             # grouped_smoothed_measurements.append(smoothed_measurements)
-        print('grouped_smoothed_measurements: ', grouped_smoothed_measurements)
 
     if cap:
         import subprocess
@@ -360,6 +352,8 @@ def main(args):
         proc = subprocess.Popen(command, shell=True)
         proc.wait()
 
+def skip_frames(skip_count):
+    pass
 
 if __name__ == '__main__':
     workspace.GlobalInit(['caffe2', '--caffe2_log_level=0'])
