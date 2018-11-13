@@ -206,7 +206,12 @@ def main(args):
 
     output_names = []
     grouped_res = []
-    skip_frame_count = args.skip_frames + 1
+
+    if args.skip_frames is not None:
+        skip_frame_count = args.skip_frames + 1
+    else:
+        skip_frame_count = 1
+        
     for i, im_name in enumerate(im_list[::skip_frame_count]):
         out_name = os.path.join(
             args.output_dir, '{}'.format(os.path.basename(im_name) + '.' + args.output_ext)
