@@ -129,6 +129,12 @@ def parse_args():
     parser.add_argument(
         'im_or_folder', help='image or folder of images', default=None
     )
+
+    parser.add_argument(
+        'skip_frames',
+        type=int
+    )
+
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
@@ -228,7 +234,6 @@ def main(args):
                 'rest (caches and auto-tuning need to warm up)'
             )
 
-<<<<<<< HEAD
         boxes, segms, keypoints, classes = vis_utils.convert_from_cls_format(
             cls_boxes, cls_segms, cls_keyps)
         print('boxes', boxes)
@@ -266,45 +271,6 @@ def main(args):
                 }
             keypoint_dict_list.append(keypoint_dict)
         print('keypoint_dict_list: ', keypoint_dict_list)
-=======
-        # boxes, segms, keypoints, classes = vis_utils.convert_from_cls_format(
-        #     cls_boxes, cls_segms, cls_keyps)
-        # print('boxes', boxes)
-        # print('segms', segms)
-        # print('keypoints', keypoints)
-        # keypoints_labels = [
-        #     'nose',
-        #     'left_eye',
-        #     'right_eye',
-        #     'left_ear',
-        #     'right_ear',
-        #     'left_shoulder',
-        #     'right_shoulder',
-        #     'left_elbow',
-        #     'right_elbow',
-        #     'left_wrist',
-        #     'right_wrist',
-        #     'left_hip',
-        #     'right_hip',
-        #     'left_knee',
-        #     'right_knee',
-        #     'left_ankle',
-        #     'right_ankle'
-        # ]
-        # keypoint_dict_list = []
-        # for keypoint in keypoints:
-        #     keypoint_dict = {}
-        #     for label_i in range(len(keypoints_labels)):
-        #         label = keypoints_labels[label_i]
-        #         keypoint_dict[label] = {
-        #             'x': int(keypoint[0, label_i]),
-        #             'y': int(keypoint[1, label_i]),
-        #             'logit': keypoint[2, label_i],
-        #             'prob': keypoint[3, label_i],
-        #         }
-        #     keypoint_dict_list.append(keypoint_dict)
-        # print('keypoint_dict_list: ', keypoint_dict_list)
->>>>>>> d0f8bda51e5a8fccc1d70c0fe2853a6fb342578e
         grouped_res.append((
             cls_boxes, cls_segms, cls_keyps, im, im_name
         ))
@@ -351,7 +317,7 @@ def main(args):
             dataset=dummy_coco_dataset,
             show_class=False,
         )
-<<<<<<< HEAD
+
         opencv_image_filename = '{}/{}.{}'.format(args.output_dir, im_name, args.output_ext)
         cv2.imwrite(opencv_image_filename, opencv_image)
         print('keypoints_clean: ', keypoints_clean)
@@ -381,48 +347,6 @@ def main(args):
             # smoothed_measurements = smoother(measurements)
             # grouped_smoothed_measurements.append(smoothed_measurements)
         print('grouped_smoothed_measurements: ', grouped_smoothed_measurements)
-=======
-        # opencv_image, keypoints_clean = vis_utils.vis_one_image_opencv(
-        #     im,
-        #     cls_boxes,
-        #     segms=cls_segms,
-        #     keypoints=cls_keyps,
-        #     thresh=args.thresh,
-        #     kp_thresh=args.kp_thresh,
-        #     show_box=True,
-        #     dataset=dummy_coco_dataset,
-        #     show_class=False,
-        # )
-        # opencv_image_filename = '{}/{}.{}'.format(args.output_dir, im_name, args.output_ext)
-        # cv2.imwrite(opencv_image_filename, opencv_image)
-        # print('keypoints_clean: ', keypoints_clean)
-        # keypoint_x = []
-        # keypoint_y = []
-        # grouped_keypoints = []
-        # for keypoint_index in range(16):
-        #     grouped_keypoints.append(
-        #         list(filter(lambda x: keypoint_index == x['index'], keypoints_clean))
-        #     )
-
-        # grouped_smoothed_measurements = []
-        # from numpy import ma
-        # print('grouped_keypoints: ', grouped_keypoints)
-        # for group_keypoint in grouped_keypoints:
-        #     measurements = ma.empty(
-        #         shape=(
-        #             len(group_keypoint),
-        #             2
-        #         )
-        #     )
-        #     for ki in range(len(group_keypoint)):
-        #         keypoint = group_keypoint[ki]
-        #         print('keypoint: ', keypoint)
-        #     #     measurements[ki][0] = float(keypoint['y'])
-        #     #     measurements[ki][1] = float(keypoint['x'])
-        #     # smoothed_measurements = smoother(measurements)
-        #     # grouped_smoothed_measurements.append(smoothed_measurements)
-        # print('grouped_smoothed_measurements: ', grouped_smoothed_measurements)
->>>>>>> d0f8bda51e5a8fccc1d70c0fe2853a6fb342578e
 
     if cap:
         import subprocess
