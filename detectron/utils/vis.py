@@ -143,6 +143,7 @@ def vis_keypoints(img, kps, kp_thresh=2, alpha=0.7):
     """Visualizes keypoints (adapted from vis_one_image).
     kps has shape (4, #keypoints) where 4 rows are (x, y, logit, prob).
     """
+    keypoints_clean = []
     dataset_keypoints, _ = keypoint_utils.get_keypoints()
     kp_lines = kp_connections(dataset_keypoints)
 
@@ -178,6 +179,7 @@ def vis_keypoints(img, kps, kp_thresh=2, alpha=0.7):
             color=colors[len(kp_lines) + 1], thickness=2, lineType=cv2.LINE_AA)
 
     # Draw the keypoints.
+    from numpy import ma
     for l in range(len(kp_lines)):
         i1 = kp_lines[l][0]
         i2 = kp_lines[l][1]
@@ -188,16 +190,44 @@ def vis_keypoints(img, kps, kp_thresh=2, alpha=0.7):
                 kp_mask, p1, p2,
                 color=colors[l], thickness=2, lineType=cv2.LINE_AA)
         if kps[2, i1] > kp_thresh:
+            keypoints_clean.append({
+                'label': dataset_keypoints[i1],
+                'index': i1,
+                'x': p1[0],
+                'y': p1[1],
+            })
             cv2.circle(
                 kp_mask, p1,
                 radius=3, color=colors[l], thickness=-1, lineType=cv2.LINE_AA)
+        else:
+            keypoints_clean.append({
+                'label': dataset_keypoints[i1],
+                'index': i1,
+                'x': ma.masked,
+                'y': ma.masked,
+            })
+
         if kps[2, i2] > kp_thresh:
+            keypoints_clean.append({
+                'label': dataset_keypoints[i1],
+                'index': i2,
+                'x': p2[0],
+                'y': p2[1],
+            })
             cv2.circle(
                 kp_mask, p2,
                 radius=3, color=colors[l], thickness=-1, lineType=cv2.LINE_AA)
+        else:
+            keypoints_clean.append({
+                'label': dataset_keypoints[i1],
+                'index': i2,
+                'x': ma.masked,
+                'y': ma.masked,
+            })
+
 
     # Blend the keypoints.
-    return cv2.addWeighted(img, 1.0 - alpha, kp_mask, alpha, 0)
+    return cv2.addWeighted(img, 1.0 - alpha, kp_mask, alpha, 0), keypoints_clean
 
 
 def vis_one_image_opencv(
@@ -245,8 +275,10 @@ def vis_one_image_opencv(
 
         # show keypoints
         if keypoints is not None and len(keypoints) > i:
-            im = vis_keypoints(im, keypoints[i], kp_thresh)
+            im, keypoints_clean = vis_keypoints(im, keypoints[i], kp_thresh)
 
+    if keypoints_clean:
+        return im, keypoints_clean
     return im
 
 
@@ -346,6 +378,7 @@ def vis_one_image(
             kps = keypoints[i]
             collect_keypoints = []
             plt.autoscale(False)
+            # print('kps: ', kps)
             for l in range(len(kp_lines)):
                 i1 = kp_lines[l][0]
                 i2 = kp_lines[l][1]
@@ -383,7 +416,7 @@ def vis_one_image(
                     plt.plot(
                         kps[0, i2], kps[1, i2], '.', color=colors[l],
                         markersize=3.0, alpha=0.7)
-            collect_keypoints.append(collect_keypoint)
+                collect_keypoints.append(collect_keypoint)
 
             # add mid shoulder / mid hip for better visualization
             mid_shoulder = (
