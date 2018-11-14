@@ -83,7 +83,7 @@ def condense_json_files(
 
     for f in json_temp_filenames:
         with open(f, "r") as infile:
-            json_merged = json_merged + json.load(infile)
+            json_merged.append(json.load(infile))
 
     json_final_output = {
         "data": json_merged,
@@ -170,6 +170,12 @@ def parse_args():
     )
 
     parser.add_argument(
+        '--skip_frames',
+        type=int,
+        default=0
+    )
+
+    parser.add_argument(
         'im_or_folder', help='image or folder of images', default=None
     )
     if len(sys.argv) == 1:
@@ -179,6 +185,7 @@ def parse_args():
 
 def main(args):
     logger = logging.getLogger(__name__)
+    skip_frames_mod = args.skip_frames + 1
 
     merge_cfg_from_file(args.cfg)
     cfg.NUM_GPUS = 1
@@ -237,41 +244,53 @@ def main(args):
     if not os.path.isdir(frames_dir):
         os.mkdir(frames_dir)
 
+    prev_output = None
     for i, im_name in enumerate(im_list):
-        out_name = os.path.join(
-            args.output_dir, '/frames/{}'.format(os.path.basename(im_name) + '.' + args.output_ext)
-        )
+        should_skip_frame = i % skip_frames_mod != 0
 
-        out_name_json = '{}/json/{}.json'.format(args.output_dir, im_name)
+        out_name = '{}/{}.{}'.format(frames_dir, im_name, args.output_ext)
+
+        out_name_json = '{}/{}.json'.format(json_dir, im_name)
 
         json_file_names.append(out_name_json)
 
-        logger.info('Processing {} -> {}'.format(im_name, out_name))
+        if should_skip_frame and prev_output is not None:
+            logger.info('Skipping Processing {} -> {}'.format(im_name, out_name))
+        else:
+            logger.info('Processing {} -> {}'.format(im_name, out_name))
+
         if cap:
             retval, im = cap.read()
             if retval is False or im is None:
                 break
         else:
             im = cv2.imread(im_name)
-        timers = defaultdict(Timer)
-        t = time.time()
-        with c2_utils.NamedCudaScope(0):
-            cls_boxes, cls_segms, cls_keyps = infer_engine.im_detect_all(
-                model, im, None, timers=timers
-            )
-        logger.info('Inference time: {:.3f}s'.format(time.time() - t))
-        for k, v in timers.items():
-            logger.info(' | {}: {:.3f}s'.format(k, v.average_time))
-        if i == 0:
-            logger.info(
-                ' \ Note: inference on the first image will be slower than the '
-                'rest (caches and auto-tuning need to warm up)'
-            )
+
+        if should_skip_frame and prev_output is not None:
+            cls_boxes, cls_segms, cls_keyps = prev_output
+        else:
+            timers = defaultdict(Timer)
+            t = time.time()
+
+            with c2_utils.NamedCudaScope(0):
+                cls_boxes, cls_segms, cls_keyps = infer_engine.im_detect_all(
+                    model, im, None, timers=timers
+                )
+                prev_output = (cls_boxes, cls_segms, cls_keyps)
+
+            logger.info('Inference time: {:.3f}s'.format(time.time() - t))
+            for k, v in timers.items():
+                logger.info(' | {}: {:.3f}s'.format(k, v.average_time))
+            if i == 0:
+                logger.info(
+                    ' \ Note: inference on the first image will be slower than the '
+                    'rest (caches and auto-tuning need to warm up)'
+                )
 
         vis_utils.vis_one_image(
             im[:, :, ::-1],  # BGR -> RGB for visualization
             im_name,
-            args.output_dir,
+            frames_dir,
             cls_boxes,
             cls_segms,
             cls_keyps,
@@ -296,35 +315,39 @@ def main(args):
             # keypoints if something other then a human is detected.
             keypoint = keypoints[k]
             keypoints_dict = {}
-            for label_i in range(len(keypoints_labels)):
-                label = keypoints_labels[label_i]
-                keypoints_dict[label] = {
-                    'x': int(keypoint[0, label_i]),
-                    'y': int(keypoint[1, label_i]),
-                    'logit': keypoint[2, label_i],
-                    'prob': keypoint[3, label_i],
-                    'label': label,
-                    'label_index': label_i
+            box_score = boxes[k][4]
+
+            if box_score > args.thresh or k == 0:
+                for label_i in range(len(keypoints_labels)):
+                    label = keypoints_labels[label_i]
+                    keypoints_dict[label] = {
+                        'x': int(keypoint[0, label_i]),
+                        'y': int(keypoint[1, label_i]),
+                        'logit': keypoint[2, label_i],
+                        'prob': keypoint[3, label_i],
+                        'label': label,
+                        'label_index': label_i
+                    }
+
+                detection_dict = {
+                    'indices': { 'frame': i, 'detection': k },
+                    'box': {
+                        'xmin': int(boxes[k][0]),
+                        'ymin': int(boxes[k][1]),
+                        'xmax': int(boxes[k][2]),
+                        'ymax': int(boxes[k][3]),
+                        'score': boxes[k][4]
+                    },
+                    'class': dummy_coco_dataset.classes[int(classes[k])],
+                    'keypoints': keypoints_dict,
                 }
 
-            detection_dict = {
-                'indices': { 'frame': i, 'detection': k },
-                'box': {
-                    'xmin': int(boxes[k][0]),
-                    'ymin': int(boxes[k][1]),
-                    'xmax': int(boxes[k][2]),
-                    'ymax': int(boxes[k][3]),
-                    'score': boxes[k][4]
-                },
-                'class': dummy_coco_dataset.classes[int(classes[k])],
-                'keypoints': keypoints_dict,
-            }
-
-            detection_dict_list.append(detection_dict)
+                detection_dict_list.append(detection_dict)
 
         save_json(
             filename=out_name_json,
             data={
+                'skipped_frame': should_skip_frame,
                 'detections': detection_dict_list
             }
         )
@@ -338,16 +361,17 @@ def main(args):
         }
     )
 
-    # rmtree('{}/json'.format(args.output_dir))
-
     if cap:
         command = 'ffmpeg -y -framerate {fps} -i {images_dir}/%0{zf}d.jpg {d}/{vn}.mp4'.format(
             d=args.output_dir,
             fps=float(cap.get(cv2.CAP_PROP_FPS)),
-            images_dir=args.output_dir,
+            images_dir=frames_dir,
             vn='video', zf=zfill_amount)
         proc = subprocess.Popen(command, shell=True)
         proc.wait()
+
+    time.sleep(1)
+    rmtree(json_dir)
 
 if __name__ == '__main__':
     workspace.GlobalInit(['caffe2', '--caffe2_log_level=0'])
