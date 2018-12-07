@@ -69,7 +69,7 @@ After installation, please see [`GETTING_STARTED.md`](GETTING_STARTED.md) for br
 ## Quick Start: Google Colab
 
 1. Go to https://colab.research.google.com
-2. File > Upload notebook... > GitHub > Paste this link: https://github.com/Dene33/Detectron/blob/master/notebooks/detectron(google_colab).ipynb
+2. File > Upload notebook... > GitHub > Paste this link: https://github.com/facebookresearch/Detectron/blob/master/notebooks/detectron(google_colab).ipynb
 3. Run cells
 
 ## Getting Help
