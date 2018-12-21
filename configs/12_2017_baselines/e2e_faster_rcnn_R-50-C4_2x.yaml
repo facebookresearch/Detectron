@@ -18,7 +18,7 @@ FAST_RCNN:
   ROI_BOX_HEAD: ResNet.add_ResNet_roi_conv5_head
   ROI_XFORM_METHOD: RoIAlign
 TRAIN:
-  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/MSRA/R-50.pkl
+  WEIGHTS: https://dl.fbaipublicfiles.com/detectron/ImageNetPretrained/MSRA/R-50.pkl
   DATASETS: ('coco_2014_train', 'coco_2014_valminusminival')
   SCALES: (800,)
   MAX_SIZE: 1333

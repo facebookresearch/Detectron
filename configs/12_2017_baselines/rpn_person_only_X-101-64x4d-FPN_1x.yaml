@@ -24,7 +24,7 @@ RESNETS:
   NUM_GROUPS: 64
   WIDTH_PER_GROUP: 4
 TRAIN:
-  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/FBResNeXt/X-101-64x4d.pkl
+  WEIGHTS: https://dl.fbaipublicfiles.com/detectron/ImageNetPretrained/FBResNeXt/X-101-64x4d.pkl
   DATASETS: ('keypoints_coco_2014_train', 'keypoints_coco_2014_valminusminival')
   SCALES: (800,)
   MAX_SIZE: 1333

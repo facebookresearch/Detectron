@@ -36,16 +36,16 @@ MRCNN:
   CONV_INIT: MSRAFill  # default GaussianFill
 TRAIN:
   # md5sum of weights pkl file: aa14062280226e48f569ef1c7212e7c7
-  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/FBResNeXt/X-101-64x4d.pkl
+  WEIGHTS: https://dl.fbaipublicfiles.com/detectron/ImageNetPretrained/FBResNeXt/X-101-64x4d.pkl
   DATASETS: ('coco_2014_train', 'coco_2014_valminusminival')
-  PROPOSAL_FILES: ('https://s3-us-west-2.amazonaws.com/detectron/35998956/12_2017_baselines/rpn_X-101-64x4d-FPN_1x.yaml.08_08_41.Seh0psKz/output/test/coco_2014_train/generalized_rcnn/rpn_proposals.pkl', 'https://s3-us-west-2.amazonaws.com/detectron/35998956/12_2017_baselines/rpn_X-101-64x4d-FPN_1x.yaml.08_08_41.Seh0psKz/output/test/coco_2014_valminusminival/generalized_rcnn/rpn_proposals.pkl')
+  PROPOSAL_FILES: ('https://dl.fbaipublicfiles.com/detectron/35998956/12_2017_baselines/rpn_X-101-64x4d-FPN_1x.yaml.08_08_41.Seh0psKz/output/test/coco_2014_train/generalized_rcnn/rpn_proposals.pkl', 'https://dl.fbaipublicfiles.com/detectron/35998956/12_2017_baselines/rpn_X-101-64x4d-FPN_1x.yaml.08_08_41.Seh0psKz/output/test/coco_2014_valminusminival/generalized_rcnn/rpn_proposals.pkl')
   SCALES: (800,)
   MAX_SIZE: 1333
   IMS_PER_BATCH: 1
   BATCH_SIZE_PER_IM: 512
 TEST:
   DATASETS: ('coco_2014_minival',)
-  PROPOSAL_FILES: ('https://s3-us-west-2.amazonaws.com/detectron/35998956/12_2017_baselines/rpn_X-101-64x4d-FPN_1x.yaml.08_08_41.Seh0psKz/output/test/coco_2014_minival/generalized_rcnn/rpn_proposals.pkl',)
+  PROPOSAL_FILES: ('https://dl.fbaipublicfiles.com/detectron/35998956/12_2017_baselines/rpn_X-101-64x4d-FPN_1x.yaml.08_08_41.Seh0psKz/output/test/coco_2014_minival/generalized_rcnn/rpn_proposals.pkl',)
   PROPOSAL_LIMIT: 1000
   SCALE: 800
   MAX_SIZE: 1333

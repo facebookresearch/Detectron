@@ -19,7 +19,7 @@ FPN:
   RPN_ANCHOR_START_SIZE: 32
   RPN_ASPECT_RATIOS: (0.5, 1, 2)
 TRAIN:
-  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/MSRA/R-50.pkl
+  WEIGHTS: https://dl.fbaipublicfiles.com/detectron/ImageNetPretrained/MSRA/R-50.pkl
   DATASETS: ('keypoints_coco_2014_train', 'keypoints_coco_2014_valminusminival')
   SCALES: (800,)
   MAX_SIZE: 1333
