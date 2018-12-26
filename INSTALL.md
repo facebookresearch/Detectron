@@ -16,7 +16,7 @@ This document covers how to install Detectron, its dependencies (including Caffe
 
 ## Caffe2
 
-To install Caffe2 with CUDA support, follow the [installation instructions](https://caffe2.ai/docs/getting-started.html) from the [Caffe2 website](https://caffe2.ai/). **If you already have Caffe2 installed, make sure to update your Caffe2 to a version that includes the [Detectron module](https://github.com/caffe2/caffe2/tree/master/modules/detectron).**
+To install Caffe2 with CUDA support, follow the [installation instructions](https://caffe2.ai/docs/getting-started.html) from the [Caffe2 website](https://caffe2.ai/). **If you already have Caffe2 installed, make sure to update your Caffe2 to a version that includes the [Detectron module](https://github.com/pytorch/pytorch/tree/master/modules/detectron).**
 
 Please ensure that your Caffe2 installation was successful before proceeding by running the following commands and checking their output as directed in the comments.
 
@@ -106,7 +106,7 @@ python $DETECTRON/detectron/tests/test_zero_even_op.py
 
 ## Docker Image
 
-We provide a [`Dockerfile`](docker/Dockerfile) that you can use to build a Detectron image on top of a Caffe2 image that satisfies the requirements outlined at the top. If you would like to use a Caffe2 image different from the one we use by default, please make sure that it includes the [Detectron module](https://github.com/caffe2/caffe2/tree/master/modules/detectron).
+We provide a [`Dockerfile`](docker/Dockerfile) that you can use to build a Detectron image on top of a Caffe2 image that satisfies the requirements outlined at the top. If you would like to use a Caffe2 image different from the one we use by default, please make sure that it includes the [Detectron module](https://github.com/pytorch/pytorch/tree/master/modules/detectron).
 
 Build the image:
 
@@ -127,7 +127,7 @@ In case of Caffe2 installation problems, please read the troubleshooting section
 
 ### Caffe2 Operator Profiling
 
-Caffe2 comes with performance [`profiling`](https://github.com/caffe2/caffe2/tree/master/caffe2/contrib/prof)
+Caffe2 comes with performance [`profiling`](https://github.com/pytorch/pytorch/tree/master/caffe2/contrib/prof)
 support which you may find useful for benchmarking or debugging your operators
 (see [`BatchPermutationOp test`](detectron/tests/test_batch_permutation_op.py) for example usage).
 Profiling support is not built by default and you can enable it by setting

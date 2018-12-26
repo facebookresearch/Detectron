@@ -23,7 +23,7 @@ Also potentially relevant: inference with Mask R-CNN on high-resolution images m
 
 #### Q: How do I implement a custom Caffe2 CPU or GPU operator for use in Detectron?
 
-**A:** Detectron uses a number of specialized Caffe2 operators that are distributed via the [Caffe2 Detectron module](https://github.com/caffe2/caffe2/tree/master/modules/detectron) as part of the core Caffe2 GitHub repository. If you'd like to implement a custom Caffe2 operator for your project, we have written a toy example illustrating how to add an operator under the Detectron source tree; please see [`detectron/ops/zero_even_op.*`](detectron/ops/) and [`detectron/tests/test_zero_even_op.py`](detectron/tests/test_zero_even_op.py). For more background on writing Caffe2 operators please consult the [Caffe2 documentation](https://caffe2.ai/docs/custom-operators.html).
+**A:** Detectron uses a number of specialized Caffe2 operators that are distributed via the [Caffe2 Detectron module](https://github.com/pytorch/pytorch/tree/master/modules/detectron) as part of the core Caffe2 GitHub repository. If you'd like to implement a custom Caffe2 operator for your project, we have written a toy example illustrating how to add an operator under the Detectron source tree; please see [`detectron/ops/zero_even_op.*`](detectron/ops/) and [`detectron/tests/test_zero_even_op.py`](detectron/tests/test_zero_even_op.py). For more background on writing Caffe2 operators please consult the [Caffe2 documentation](https://caffe2.ai/docs/custom-operators.html).
 
 #### Q: How do I use Detectron to train a model on a custom dataset?
 
