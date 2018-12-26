@@ -41,7 +41,7 @@ KRCNN:
   KEYPOINT_CONFIDENCE: bbox
 TRAIN:
   # md5sum of weights pkl file: aa14062280226e48f569ef1c7212e7c7
-  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/FBResNeXt/X-101-64x4d.pkl
+  WEIGHTS: https://dl.fbaipublicfiles.com/detectron/ImageNetPretrained/FBResNeXt/X-101-64x4d.pkl
   DATASETS: ('keypoints_coco_2014_train', 'keypoints_coco_2014_valminusminival')
   SCALES: (640, 672, 704, 736, 768, 800)
   MAX_SIZE: 1333

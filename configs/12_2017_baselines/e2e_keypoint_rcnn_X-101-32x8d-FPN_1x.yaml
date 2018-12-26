@@ -40,7 +40,7 @@ KRCNN:
   ROI_XFORM_SAMPLING_RATIO: 2
   KEYPOINT_CONFIDENCE: bbox
 TRAIN:
-  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/20171220/X-101-32x8d.pkl
+  WEIGHTS: https://dl.fbaipublicfiles.com/detectron/ImageNetPretrained/20171220/X-101-32x8d.pkl
   DATASETS: ('keypoints_coco_2014_train', 'keypoints_coco_2014_valminusminival')
   SCALES: (640, 672, 704, 736, 768, 800)
   MAX_SIZE: 1333

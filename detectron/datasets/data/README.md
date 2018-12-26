@@ -36,7 +36,7 @@ ln -s /path/to/json/annotations $DETECTRON/detectron/datasets/data/coco/annotati
 
 ### COCO Minival Annotations
 
-Our custom `minival` and `valminusminival` annotations are available for download [here](https://s3-us-west-2.amazonaws.com/detectron/coco/coco_annotations_minival.tgz).
+Our custom `minival` and `valminusminival` annotations are available for download [here](https://dl.fbaipublicfiles.com/detectron/coco/coco_annotations_minival.tgz).
 Please note that `minival` is exactly equivalent to the recently defined 2017 `val` set.
 Similarly, the union of `valminusminival` and the 2014 `train` is exactly equivalent to the 2017 `train` set. To complete installation of the COCO dataset, you will need to copy the `minival` and `valminusminival` json annotation files to the `coco/annotations` directory referenced above.
 

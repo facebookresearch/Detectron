@@ -36,7 +36,7 @@ MRCNN:
   DILATION: 1  # default 2
   CONV_INIT: MSRAFill  # default GaussianFill
 TRAIN:
-  WEIGHTS: https://s3-us-west-2.amazonaws.com/detectron/ImageNetPretrained/25093814/X-152-32x8d-IN5k.pkl
+  WEIGHTS: https://dl.fbaipublicfiles.com/detectron/ImageNetPretrained/25093814/X-152-32x8d-IN5k.pkl
   DATASETS: ('coco_2014_train', 'coco_2014_valminusminival')
   SCALES: (640, 672, 704, 736, 768, 800)  # Scale jitter
   MAX_SIZE: 1333
