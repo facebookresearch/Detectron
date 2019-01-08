@@ -979,7 +979,8 @@ __C.EXPECTED_RESULTS_EMAIL = ''
 
 # Models and proposals referred to by URL are downloaded to a local cache
 # specified by DOWNLOAD_CACHE
-__C.DOWNLOAD_CACHE = '/tmp/detectron-download-cache'
+# __C.DOWNLOAD_CACHE = '/tmp/detectron-download-cache'
+__C.DOWNLOAD_CACHE = os.path.join(os.getenv("HOME"), 'code', 'maskrcnn', 'detectron-download-cache')
 
 
 # ---------------------------------------------------------------------------- #

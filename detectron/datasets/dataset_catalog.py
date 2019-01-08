@@ -24,7 +24,8 @@ import os
 
 
 # Path to data dir
-_DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+# _DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+_DATA_DIR = os.path.join(os.getenv("HOME"), 'code', 'maskrcnn', 'data')
 
 # Required dataset entry keys
 _IM_DIR = 'image_directory'
@@ -37,6 +38,18 @@ _RAW_DIR = 'raw_dir'
 
 # Available datasets
 _DATASETS = {
+    'multi_shoe_train_10000_images': {
+        _IM_DIR:
+            _DATA_DIR + '/custom/multi_shoe_train_10000_images',
+        _ANN_FN:
+            _DATA_DIR + '/custom/annotations/multi_shoe_train_10000_images.json'
+    },
+    'multi_shoe_validation_2000_images': {
+        _IM_DIR:
+            _DATA_DIR + '/custom/multi_shoe_validation_2000_images',
+        _ANN_FN:
+            _DATA_DIR + '/custom/annotations/multi_shoe_validation_2000_images.json'
+    },
     'cityscapes_fine_instanceonly_seg_train': {
         _IM_DIR:
             _DATA_DIR + '/cityscapes/images',
