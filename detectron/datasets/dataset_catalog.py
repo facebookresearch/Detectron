@@ -38,6 +38,18 @@ _RAW_DIR = 'raw_dir'
 
 # Available datasets
 _DATASETS = {
+    'multi_shoe_train': {
+        _IM_DIR:
+            _DATA_DIR + '/custom/multi_shoe_train',
+        _ANN_FN:
+            _DATA_DIR + '/custom/annotations/multi_shoe_train.json'
+    },
+    'multi_shoe_val': {
+        _IM_DIR:
+            _DATA_DIR + '/custom/multi_shoe_val',
+        _ANN_FN:
+            _DATA_DIR + '/custom/annotations/multi_shoe_val.json'
+    },
     'multi_shoe_train_10000_images': {
         _IM_DIR:
             _DATA_DIR + '/custom/multi_shoe_train_10000_images',
