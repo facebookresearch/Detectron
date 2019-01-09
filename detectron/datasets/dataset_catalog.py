@@ -24,8 +24,10 @@ import os
 
 
 # Path to data dir
-# _DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
-_DATA_DIR = os.path.join(os.getenv("HOME"), 'code', 'maskrcnn', 'data')
+_DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+
+# path to custom data location
+_CUSTOM_DATA_DIR = os.path.join(os.getenv("COCO_CUSTOM_DATA_DIR"))
 
 # Required dataset entry keys
 _IM_DIR = 'image_directory'
@@ -40,27 +42,27 @@ _RAW_DIR = 'raw_dir'
 _DATASETS = {
     'multi_shoe_train': {
         _IM_DIR:
-            _DATA_DIR + '/custom/multi_shoe_train',
+            _CUSTOM_DATA_DIR + '/custom/multi_shoe_train',
         _ANN_FN:
-            _DATA_DIR + '/custom/annotations/multi_shoe_train.json'
+            _CUSTOM_DATA_DIR + '/custom/annotations/multi_shoe_train.json'
     },
     'multi_shoe_val': {
         _IM_DIR:
-            _DATA_DIR + '/custom/multi_shoe_val',
+            _CUSTOM_DATA_DIR + '/custom/multi_shoe_val',
         _ANN_FN:
-            _DATA_DIR + '/custom/annotations/multi_shoe_val.json'
+            _CUSTOM_DATA_DIR + '/custom/annotations/multi_shoe_val.json'
     },
     'multi_shoe_train_10000_images': {
         _IM_DIR:
-            _DATA_DIR + '/custom/multi_shoe_train_10000_images',
+            _CUSTOM_DATA_DIR + '/custom/multi_shoe_train_10000_images',
         _ANN_FN:
-            _DATA_DIR + '/custom/annotations/multi_shoe_train_10000_images.json'
+            _CUSTOM_DATA_DIR + '/custom/annotations/multi_shoe_train_10000_images.json'
     },
     'multi_shoe_validation_2000_images': {
         _IM_DIR:
-            _DATA_DIR + '/custom/multi_shoe_validation_2000_images',
+            _CUSTOM_DATA_DIR + '/custom/multi_shoe_validation_2000_images',
         _ANN_FN:
-            _DATA_DIR + '/custom/annotations/multi_shoe_validation_2000_images.json'
+            _CUSTOM_DATA_DIR + '/custom/annotations/multi_shoe_validation_2000_images.json'
     },
     'cityscapes_fine_instanceonly_seg_train': {
         _IM_DIR:
