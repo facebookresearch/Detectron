@@ -336,7 +336,7 @@ def vis_one_image(
             if ((cv2.__version__).startswith('4.0')):
                 contour, hier = cv2.findContours(
                     e.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
-            else
+            else:
                 _, contour, hier = cv2.findContours(
                     e.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
 
