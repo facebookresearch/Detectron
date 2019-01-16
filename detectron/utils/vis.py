@@ -333,7 +333,7 @@ def vis_one_image(
                 img[:, :, c] = color_mask[c]
             e = masks[:, :, i]
 
-            if ((cv2.__version__).startswith('4.0')):
+            if ((cv2.__version__).startswith('4.')):
                 contour, hier = cv2.findContours(
                     e.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
             else:
