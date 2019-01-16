@@ -104,7 +104,7 @@ def vis_mask(img, mask, col, alpha=0.4, show_border=True, border_thick=1):
     img[idx[0], idx[1], :] += alpha * col
 
     if show_border:
-        if ((cv2.__version__).startswith('4.0')):
+        if ((cv2.__version__).startswith('4.')):
             contours, _ = cv2.findContours(
                 mask.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
         else:
