@@ -20,6 +20,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import errno
 import hashlib
 import logging
 import os
@@ -28,6 +29,7 @@ import six
 import sys
 from six.moves import cPickle as pickle
 from six.moves import urllib
+from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +46,27 @@ should never use pickle.HIGHEST_PROTOCOL as far as possible if the resulting
 file is manifested or used, external to the system.
     """
     file_name = os.path.abspath(file_name)
-    with open(file_name, 'wb') as f:
-        pickle.dump(obj, f, pickle_format)
+    # Avoid filesystem race conditions (particularly on network filesystems)
+    # by saving to a random tmp file on the same filesystem, and then
+    # atomically rename to the target filename.
+    tmp_file_name = file_name + ".tmp." + uuid4().hex
+    try:
+        with open(tmp_file_name, 'wb') as f:
+            pickle.dump(obj, f, pickle_format)
+            f.flush()  # make sure it's written to disk
+            os.fsync(f.fileno())
+        os.rename(tmp_file_name, file_name)
+    finally:
+        # Clean up the temp file on failure. Rather than using os.path.exists(),
+        # which can be unreliable on network filesystems, attempt to delete and
+        # ignore os errors.
+        try:
+            os.remove(tmp_file_name)
+        except EnvironmentError as e:  # parent class of IOError, OSError
+            if getattr(e, 'errno', None) != errno.ENOENT:  # We expect ENOENT
+                logger.info("Could not delete temp file %r",
+                    tmp_file_name, exc_info=True)
+                # pass through since we don't want the job to crash
 
 
 def load_object(file_name):
