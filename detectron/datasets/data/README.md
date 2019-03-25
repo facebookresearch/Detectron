@@ -29,8 +29,8 @@ If that is not the case, you may need to do something similar to:
 
 ```
 mkdir -p $DETECTRON/detectron/datasets/data/coco
-ln -s /path/to/coco_train2014 $DETECTRON/detectron/datasets/data/coco/
-ln -s /path/to/coco_val2014 $DETECTRON/detectron/datasets/data/coco/
+ln -s /path/to/coco_train2014 $DETECTRON/detectron/datasets/data/coco/coco_train2014
+ln -s /path/to/coco_val2014 $DETECTRON/detectron/datasets/data/coco/coco_val2014
 ln -s /path/to/json/annotations $DETECTRON/detectron/datasets/data/coco/annotations
 ```
 
