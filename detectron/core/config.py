@@ -583,9 +583,13 @@ __C.SOLVER.LR_POLICY = 'step'
 #   lr = LRS[current_step]
 # 'cosine_decay'
 #   lr = SOLVER.BASE_LR * (cos(PI * cur_iter / SOLVER.MAX_ITER) * 0.5 + 0.5)
+# 'exp_decay'
+#   lr smoothly decays from SOLVER.BASE_LR to SOLVER.GAMMA * SOLVER.BASE_LR
+#   lr = SOLVER.BASE_LR * exp(np.log(SOLVER.GAMMA) * cur_iter / SOLVER.MAX_ITER)
 
 # Hyperparameter used by the specified policy
 # For 'step', the current LR is multiplied by SOLVER.GAMMA at each step
+# For 'exp_decay', SOLVER.GAMMA is the ratio between the final and initial LR.
 __C.SOLVER.GAMMA = 0.1
 
 # Uniform step size for 'steps' policy
