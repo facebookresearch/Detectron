@@ -581,6 +581,8 @@ __C.SOLVER.LR_POLICY = 'step'
 #   SOLVER.STEPS = [0, 60000, 80000]
 #   SOLVER.LRS = [0.02, 0.002, 0.0002]
 #   lr = LRS[current_step]
+# 'cosine_decay'
+#   lr = SOLVER.BASE_LR * (cos(PI * cur_iter / SOLVER.MAX_ITER) * 0.5 + 0.5)
 
 # Hyperparameter used by the specified policy
 # For 'step', the current LR is multiplied by SOLVER.GAMMA at each step

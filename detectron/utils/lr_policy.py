@@ -91,6 +91,14 @@ def lr_func_step(cur_iter):
         cfg.SOLVER.GAMMA ** (cur_iter // cfg.SOLVER.STEP_SIZE))
 
 
+def lr_func_cosine_decay(cur_iter):
+    """For cfg.SOLVER.LR_POLICY = 'cosine_decay'
+    """
+    iter_frac = float(cur_iter) / cfg.SOLVER.MAX_ITER
+    cos_frac = 0.5 * (np.cos(np.pi * iter_frac) + 1)
+    return cfg.SOLVER.BASE_LR * cos_frac
+
+
 # ---------------------------------------------------------------------------- #
 # Helpers
 # ---------------------------------------------------------------------------- #
