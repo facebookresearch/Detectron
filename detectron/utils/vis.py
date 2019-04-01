@@ -104,8 +104,8 @@ def vis_mask(img, mask, col, alpha=0.4, show_border=True, border_thick=1):
     img[idx[0], idx[1], :] += alpha * col
 
     if show_border:
-        _, contours, _ = cv2.findContours(
-            mask.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
+        contours = cv2.findContours(
+            mask.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)[-2]
         cv2.drawContours(img, contours, -1, _WHITE, border_thick, cv2.LINE_AA)
 
     return img.astype(np.uint8)
@@ -328,8 +328,8 @@ def vis_one_image(
                 img[:, :, c] = color_mask[c]
             e = masks[:, :, i]
 
-            _, contour, hier = cv2.findContours(
-                e.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
+            contour = cv2.findContours(
+                e.copy(), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)[-2]
 
             for c in contour:
                 polygon = Polygon(
