@@ -137,6 +137,9 @@ __C.TRAIN.ASPECT_GROUPING = True
 # RPN training options
 # ---------------------------------------------------------------------------- #
 
+# Run GenerateProposals on GPU if set to True
+__C.TRAIN.GENERATE_PROPOSALS_ON_GPU = False
+
 # Minimum overlap required between an anchor and ground-truth box for the
 # (anchor, gt box) pair to be a positive example (IOU >= thresh ==> positive RPN
 # example)
@@ -240,6 +243,9 @@ __C.TEST.BBOX_REG = True
 
 # Test using these proposal files (must correspond with TEST.DATASETS)
 __C.TEST.PROPOSAL_FILES = ()
+
+# Run GenerateProposals on GPU if set to True
+__C.TEST.GENERATE_PROPOSALS_ON_GPU = False
 
 # Limit on the number of proposals per image used during inference
 __C.TEST.PROPOSAL_LIMIT = 2000

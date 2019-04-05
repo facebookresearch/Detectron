@@ -130,11 +130,41 @@ class DetectionModelHelper(cnn.CNNModelHelper):
           - 'rpn_roi_probs': 1D tensor of objectness probability scores
             (extracted from rpn_cls_probs; see above).
         """
-        name = 'GenerateProposalsOp:' + ','.join([str(b) for b in blobs_in])
-        # spatial_scale passed to the Python op is only used in convert_pkl_to_pb
-        self.net.Python(
-            GenerateProposalsOp(anchors, spatial_scale, self.train).forward
-        )(blobs_in, blobs_out, name=name, spatial_scale=spatial_scale)
+        cfg_key = 'TRAIN' if self.train else 'TEST'
+
+        if cfg[cfg_key].GENERATE_PROPOSALS_ON_GPU:
+            rpn_pre_nms_topN = cfg[cfg_key].RPN_PRE_NMS_TOP_N
+            rpn_post_nms_topN = cfg[cfg_key].RPN_POST_NMS_TOP_N
+            rpn_nms_thresh = cfg[cfg_key].RPN_NMS_THRESH
+            rpn_min_size = float(cfg[cfg_key].RPN_MIN_SIZE)
+
+            input_name = str(blobs_in[0])
+            lvl = int(input_name[-1]) if input_name[-1].isdigit() else None
+            anchors_name = 'anchors{}'.format(lvl) if lvl else 'anchors'
+
+            for i in range(cfg.NUM_GPUS):
+                with c2_utils.CudaScope(i):
+                    workspace.FeedBlob(
+                        'gpu_{}/{}'.format(i, anchors_name),
+                        anchors.astype(np.float32))
+
+            self.net.GenerateProposals(
+                blobs_in + [anchors_name],
+                blobs_out,
+                spatial_scale=spatial_scale,
+                pre_nms_topN=rpn_pre_nms_topN,
+                post_nms_topN=rpn_post_nms_topN,
+                nms_thresh=rpn_nms_thresh,
+                min_size=rpn_min_size,
+            )
+        else:
+            name = 'GenerateProposalsOp:' + ','.join([str(b) for b in blobs_in])
+            # spatial_scale passed to the Python op is only used in
+            # convert_pkl_to_pb
+            self.net.Python(
+                GenerateProposalsOp(anchors, spatial_scale, self.train).forward
+            )(blobs_in, blobs_out, name=name, spatial_scale=spatial_scale)
+
         return blobs_out
 
     def GenerateProposalLabels(self, blobs_in):
