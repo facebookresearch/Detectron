@@ -47,7 +47,6 @@ def get_fast_rcnn_blob_names(is_training=True):
         # labels_int32 blob: R categorical labels in [0, ..., K] for K
         # foreground classes plus background
         blob_names += ['labels_int32']
-    if is_training:
         # bbox_targets blob: R bounding-box regression targets with 4
         # targets per class
         blob_names += ['bbox_targets']
@@ -157,7 +156,7 @@ def _sample_rois(roidb, im_scale, batch_idx):
     # against there being fewer than desired)
     bg_rois_per_this_image = rois_per_image - fg_rois_per_this_image
     bg_rois_per_this_image = np.minimum(bg_rois_per_this_image, bg_inds.size)
-    # Sample foreground regions without replacement
+    # Sample background regions without replacement
     if bg_inds.size > 0:
         bg_inds = npr.choice(
             bg_inds, size=bg_rois_per_this_image, replace=False
