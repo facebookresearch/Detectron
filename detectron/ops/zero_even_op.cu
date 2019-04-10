@@ -35,14 +35,14 @@ template <>
 bool ZeroEvenOp<float, CUDAContext>::RunOnDevice() {
   // Retrieve the input tensor.
   const auto& X = Input(0);
-  CAFFE_ENFORCE(X.ndim() == 1);
+  CAFFE_ENFORCE(X.dim() == 1);
 
   // Initialize the output tensor to a copy of the input tensor.
   auto* Y = Output(0);
   Y->CopyFrom(X);
 
   // Set output elements at even indices to zero.
-  auto output_size = Y->size();
+  auto output_size = Y->numel();
 
   if (output_size > 0) {
     size_t num_even_inds = output_size / 2 + output_size % 2;
