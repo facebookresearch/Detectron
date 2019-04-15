@@ -115,6 +115,9 @@ def filter_for_training(roidb):
         # Valid images have:
         #   (1) At least one foreground RoI OR
         #   (2) At least one background RoI
+        if cfg.TRAIN.INCLUDE_BKG_IMAGES and len(entry['boxes']) == 0:
+            return True  # this is a bkg image
+
         overlaps = entry['max_overlaps']
         # find boxes with sufficient overlap
         fg_inds = np.where(overlaps >= cfg.TRAIN.FG_THRESH)[0]

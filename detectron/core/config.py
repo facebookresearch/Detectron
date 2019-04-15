@@ -133,6 +133,9 @@ __C.TRAIN.PROPOSAL_FILES = ()
 # faster)
 __C.TRAIN.ASPECT_GROUPING = True
 
+# Include background images (images with no annotation) in the training
+__C.TRAIN.INCLUDE_BKG_IMAGES = False
+
 # ---------------------------------------------------------------------------- #
 # RPN training options
 # ---------------------------------------------------------------------------- #
