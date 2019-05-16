@@ -116,9 +116,9 @@ __C.TRAIN.USE_FLIPPED = True
 __C.TRAIN.BBOX_THRESH = 0.5
 
 # Snapshot (model checkpoint) period
-# Divide by NUM_GPUS to determine actual period (e.g., 20000/8 => 2500 iters)
+# Divide by NUM_GPUS to determine actual period (e.g., 80000/8 => 10000 iters)
 # to allow for linear training schedule scaling
-__C.TRAIN.SNAPSHOT_ITERS = 20000
+__C.TRAIN.SNAPSHOT_ITERS = 80000
 
 # Train using these proposals
 # During training, all proposals specified in the file are used (no limit is
