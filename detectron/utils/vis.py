@@ -36,6 +36,9 @@ envu.set_up_matplotlib()
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+import Image
+
 plt.rcParams['pdf.fonttype'] = 42  # For editing in Adobe Illustrator
 
 
@@ -253,7 +256,7 @@ def vis_one_image_opencv(
 def vis_one_image(
         im, im_name, output_dir, boxes, segms=None, keypoints=None, thresh=0.9,
         kp_thresh=2, dpi=200, box_alpha=0.0, dataset=None, show_class=False,
-        ext='pdf', out_when_no_box=False):
+        ext='jpg', out_when_no_box=False):
     """Visual debugging of detections."""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -282,6 +285,7 @@ def vis_one_image(
     ax.axis('off')
     fig.add_axes(ax)
     ax.imshow(im)
+
 
     if boxes is None:
         sorted_inds = [] # avoid crash when 'boxes' is None
@@ -389,6 +393,28 @@ def vis_one_image(
                     line, color=colors[len(kp_lines) + 1], linewidth=1.0,
                     alpha=0.7)
 
+
     output_name = os.path.basename(im_name) + '.' + ext
     fig.savefig(os.path.join(output_dir, '{}'.format(output_name)), dpi=dpi)
+
+    #image manipulation stuff
+    # fig.canvas.draw()
+    #
+    # w,h = fig.canvas.get_width_height()
+    # buf = np.fromstring(fig.canvas.tostring_argb(), dtype=np.uint8)
+    # buf.shape = (w,h,4)
+    #
+    # buf = np.roll(buf,3,axis=2)
+    #
+    # im = Image.frombytes("RGBA",(w,h),buf.tostring())
+    # # im.show()
+    #
+    # open_cv_image = np.array(im)
+    #
+    # cv2.imshow("pls work final", open_cv_image)
+    #
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
     plt.close('all')
+
+    return fig

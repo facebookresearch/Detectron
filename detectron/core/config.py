@@ -1077,7 +1077,7 @@ _RENAMED_MODULES = {
 }
 
 
-def assert_and_infer_cfg(cache_urls=True, make_immutable=True):
+def assert_and_infer_cfg(cache_urls=True, make_immutable=False):
     """Call this function in your script after you have finished setting all cfg
     values that are necessary (e.g., merging a config from a file, merging
     command line config options, etc.). By default, this function will also

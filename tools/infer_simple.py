@@ -46,6 +46,13 @@ import detectron.datasets.dummy_datasets as dummy_datasets
 import detectron.utils.c2 as c2_utils
 import detectron.utils.vis as vis_utils
 
+#ROS imports
+import rospy
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+import numpy as np
+from PIL import Image as PL
+
 c2_utils.import_detectron_ops()
 
 # OpenCL may be enabled by default in OpenCV3; disable it because it's not
@@ -59,14 +66,14 @@ def parse_args():
         '--cfg',
         dest='cfg',
         help='cfg model file (/path/to/model_config.yaml)',
-        default=None,
+        default='configs/12_2017_baselines/e2e_mask_rcnn_R-101-FPN_2x.yaml',
         type=str
     )
     parser.add_argument(
         '--wts',
         dest='weights',
         help='weights model file (/path/to/model_weights.pkl)',
-        default=None,
+        default='https://dl.fbaipublicfiles.com/detectron/35861858/12_2017_baselines/e2e_mask_rcnn_R-101-FPN_2x.yaml.02_32_51.SgT4y1cO/output/train/coco_2014_train:coco_2014_valminusminival/generalized_rcnn/model_final.pkl',
         type=str
     )
     parser.add_argument(
@@ -93,7 +100,7 @@ def parse_args():
         '--output-ext',
         dest='output_ext',
         help='output image file format (default: pdf)',
-        default='pdf',
+        default='jpg',
         type=str
     )
     parser.add_argument(
@@ -110,6 +117,7 @@ def parse_args():
         default=2.0,
         type=float
     )
+    #here, i have to edit this to read images directly from the published ros topic
     parser.add_argument(
         'im_or_folder', help='image or folder of images', default=None
     )
@@ -118,64 +126,158 @@ def parse_args():
         sys.exit(1)
     return parser.parse_args()
 
+class get_image:
+    def __init__(self):
+
+        self.bridge = CvBridge()
+        self.image_subscriber = rospy.Subscriber('/usb_cam/image_raw', Image, self.callback)
+
+    def callback(self,data):
+        cv_image = None
+        try:
+            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+        except CvBridgeError as e:
+            print(e)
+
+        (rows, cols, channels) = cv_image.shape
+        args.im_or_folder = cv_image
+
+
+
+
+        # args.im_or_folder = data
+
+def talker(i):
+    image_publisher = rospy.Publisher('detectron_output', Image, queue_size=10)
+    brdg = CvBridge()
+    image_publisher.publish(brdg.cv2_to_imgmsg(i, "bgr8"))
+
+
 
 def main(args):
-    logger = logging.getLogger(__name__)
+    #ros stuff
+    rospy.init_node('get_image', anonymous=True)
+    # rospy.init_node('talker', anonymous=True)
 
-    merge_cfg_from_file(args.cfg)
-    cfg.NUM_GPUS = 1
-    args.weights = cache_url(args.weights, cfg.DOWNLOAD_CACHE)
-    assert_and_infer_cfg(cache_urls=False)
 
-    assert not cfg.MODEL.RPN_ONLY, \
-        'RPN models are not supported'
-    assert not cfg.TEST.PRECOMPUTED_PROPOSALS, \
-        'Models that require precomputed proposals are not supported'
+    args.im_or_folder = get_image()
 
-    model = infer_engine.initialize_model_from_cfg(args.weights)
-    dummy_coco_dataset = dummy_datasets.get_coco_dataset()
 
-    if os.path.isdir(args.im_or_folder):
-        im_list = glob.iglob(args.im_or_folder + '/*.' + args.image_ext)
-    else:
+    while not rospy.is_shutdown():
+
+        logger = logging.getLogger(__name__)
+
+        merge_cfg_from_file(args.cfg)
+        cfg.NUM_GPUS = 1
+        args.weights = cache_url(args.weights, cfg.DOWNLOAD_CACHE)
+        assert_and_infer_cfg(cache_urls=False)
+
+        assert not cfg.MODEL.RPN_ONLY, \
+            'RPN models are not supported'
+        assert not cfg.TEST.PRECOMPUTED_PROPOSALS, \
+            'Models that require precomputed proposals are not supported'
+
+        model = infer_engine.initialize_model_from_cfg(args.weights)
+        dummy_coco_dataset = dummy_datasets.get_coco_dataset()
+        #
+        # if os.path.isdir(args.im_or_folder):
+        #     im_list = glob.iglob(args.im_or_folder + '/*.' + args.image_ext)
+        # else
         im_list = [args.im_or_folder]
 
-    for i, im_name in enumerate(im_list):
-        out_name = os.path.join(
-            args.output_dir, '{}'.format(os.path.basename(im_name) + '.' + args.output_ext)
-        )
-        logger.info('Processing {} -> {}'.format(im_name, out_name))
-        im = cv2.imread(im_name)
-        timers = defaultdict(Timer)
-        t = time.time()
-        with c2_utils.NamedCudaScope(0):
-            cls_boxes, cls_segms, cls_keyps = infer_engine.im_detect_all(
-                model, im, None, timers=timers
+        im_name = "test"
+        for i in enumerate(im_list):
+            out_name = os.path.join(
+                args.output_dir, '{}'.format(os.path.basename(im_name) + '.' + args.output_ext)
             )
-        logger.info('Inference time: {:.3f}s'.format(time.time() - t))
-        for k, v in timers.items():
-            logger.info(' | {}: {:.3f}s'.format(k, v.average_time))
-        if i == 0:
-            logger.info(
-                ' \ Note: inference on the first image will be slower than the '
-                'rest (caches and auto-tuning need to warm up)'
+            logger.info('Processing {} -> {}'.format(im_name, out_name))
+            im = args.im_or_folder
+
+            #so im == image from webcam, but the problem is that it only takes a single picture...ignore this for now
+            # im = cv2.imread(im_name)
+            timers = defaultdict(Timer)
+            t = time.time()
+            with c2_utils.NamedCudaScope(0):
+                cls_boxes, cls_segms, cls_keyps = infer_engine.im_detect_all(
+                    model, im, None, timers=timers
+                )
+            #last point the engine runs for
+            logger.info('Inference time: {:.3f}s'.format(time.time() - t))
+            for k, v in timers.items():
+                logger.info(' | {}: {:.3f}s'.format(k, v.average_time))
+            if i == 0:
+                logger.info(
+                    ' \ Note: inference on the first image will be slower than the '
+                    'rest (caches and auto-tuning need to warm up)'
+                )
+            cv2.imshow("Raw Image", im)
+            fig = vis_utils.vis_one_image(
+                im[:, :, ::-1],  # BGR -> RGB for visualization
+                im_name,
+                args.output_dir,
+                cls_boxes,
+                cls_segms,
+                cls_keyps,
+                dataset=dummy_coco_dataset,
+                box_alpha=0.3,
+                show_class=True,
+                thresh=args.thresh,
+                kp_thresh=args.kp_thresh,
+                ext=args.output_ext,
+                out_when_no_box=args.out_when_no_box
             )
 
-        vis_utils.vis_one_image(
-            im[:, :, ::-1],  # BGR -> RGB for visualization
-            im_name,
-            args.output_dir,
-            cls_boxes,
-            cls_segms,
-            cls_keyps,
-            dataset=dummy_coco_dataset,
-            box_alpha=0.3,
-            show_class=True,
-            thresh=args.thresh,
-            kp_thresh=args.kp_thresh,
-            ext=args.output_ext,
-            out_when_no_box=args.out_when_no_box
-        )
+
+            for i in range(1000):
+                # update data
+                # redraw the canvas
+                fig.canvas.draw()
+
+                # convert canvas to image
+                img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
+                img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+
+                # img is rgb, convert to opencv's default bgr
+                img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
+                # display image with opencv or any operation you like
+                # cv2.imshow("plot", img)
+                # k = cv2.waitKey(33) & 0xFF
+                # if k == 27:
+                #     break
+        #     fig.canvas.draw()
+        #
+        #     w, h = fig.canvas.get_width_height()
+        #     buf = np.fromstring(fig.canvas.tostring_argb(), dtype=np.uint8)
+        #     buf.shape = (w, h, 4)
+        #
+        #     buf = np.roll(buf, 3, axis=2)
+        #
+        #     im = PL.frombytes("RGBA", (w, h), buf.tostring())
+        # # im.show()
+        #
+        #     open_cv_image = np.array(im)
+        #     cv2.namedWindow('detected',cv2.WINDOW_NORMAL)
+        #     # cv2.resizeWindow('detected', (600,600))
+            cv2.imshow("Detected Image..Press any key to repeat the process and publish image", img)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+            # talker(open_cv_image)
+            image_publisher = rospy.Publisher('detectron_output', Image, queue_size=10)
+            brdg = CvBridge()
+            image_publisher.publish(brdg.cv2_to_imgmsg(img, "bgr8"))
+
+            try:
+
+                # while(1):
+                print('Finished..Hold Ctrl+C to end')
+                    # args = parse_args()
+                main(args)
+            except KeyboardInterrupt:
+                print("shutting down")
+                cv2.destroyAllWindows()
+
+
 
 
 if __name__ == '__main__':
