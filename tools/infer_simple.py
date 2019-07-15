@@ -202,14 +202,15 @@ def main(args):
                     model, im, None, timers=timers
                 )
             #last point the engine runs for
-            logger.info('Inference time: {:.3f}s'.format(time.time() - t))
-            for k, v in timers.items():
-                logger.info(' | {}: {:.3f}s'.format(k, v.average_time))
-            if i == 0:
-                logger.info(
-                    ' \ Note: inference on the first image will be slower than the '
-                    'rest (caches and auto-tuning need to warm up)'
-                )
+            # logger.info('Inference time: {:.3f}s'.format(time.time() - t))
+            # for k, v in timers.items():
+            #     logger.info(' | {}: {:.3f}s'.format(k, v.average_time))
+            # if i == 0:
+            #     logger.info(
+            #         ' \ Note: inference on the first image will be slower than the '
+            #         'rest (caches and auto-tuning need to warm up)'
+            # )
+            # print("this is the initial time stamp right before it enters vis utils")
             cv2.imshow("Raw Image", im)
             fig = vis_utils.vis_one_image(
                 im[:, :, ::-1],  # BGR -> RGB for visualization
@@ -228,37 +229,17 @@ def main(args):
             )
 
 
-            for i in range(1000):
+            
                 # update data
                 # redraw the canvas
-                fig.canvas.draw()
-
+            fig.canvas.draw()
                 # convert canvas to image
-                img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
-                img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+            img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
+            img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
 
-                # img is rgb, convert to opencv's default bgr
-                img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            # img is rgb, convert to opencv's default bgr
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-                # display image with opencv or any operation you like
-                # cv2.imshow("plot", img)
-                # k = cv2.waitKey(33) & 0xFF
-                # if k == 27:
-                #     break
-        #     fig.canvas.draw()
-        #
-        #     w, h = fig.canvas.get_width_height()
-        #     buf = np.fromstring(fig.canvas.tostring_argb(), dtype=np.uint8)
-        #     buf.shape = (w, h, 4)
-        #
-        #     buf = np.roll(buf, 3, axis=2)
-        #
-        #     im = PL.frombytes("RGBA", (w, h), buf.tostring())
-        # # im.show()
-        #
-        #     open_cv_image = np.array(im)
-        #     cv2.namedWindow('detected',cv2.WINDOW_NORMAL)
-        #     # cv2.resizeWindow('detected', (600,600))
             cv2.imshow("Detected Image..Press any key to repeat the process and publish image", img)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
