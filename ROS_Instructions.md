@@ -1,4 +1,5 @@
 #ROS instructions
+
 Clone this fork into your ROS workspace in the /src folder (with your other packages). Additionally, to receive images from your webcam, use the the ROS usb_cam package. Clone this into your /src folder, run ```catkin_make``` in the root directory of your ROS workspace. 
 
 1. Run ```roscore``` to initialize ROS
