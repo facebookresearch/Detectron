@@ -73,6 +73,7 @@ def parse_args():
         '--wts',
         dest='weights',
         help='weights model file (/path/to/model_weights.pkl)',
+        # default='/tmp/detectron-output/train/coco_2014_train:coco_2014_valminusminival/retinanet/model_final.pkl',
         default='https://dl.fbaipublicfiles.com/detectron/35861858/12_2017_baselines/e2e_mask_rcnn_R-101-FPN_2x.yaml.02_32_51.SgT4y1cO/output/train/coco_2014_train:coco_2014_valminusminival/generalized_rcnn/model_final.pkl',
         type=str
     )
@@ -117,7 +118,6 @@ def parse_args():
         default=2.0,
         type=float
     )
-    #here, i have to edit this to read images directly from the published ros topic
     parser.add_argument(
         'im_or_folder', help='image or folder of images', default=None
     )
@@ -142,11 +142,6 @@ class get_image:
         (rows, cols, channels) = cv_image.shape
         args.im_or_folder = cv_image
 
-
-
-
-        # args.im_or_folder = data
-
 def talker(i):
     image_publisher = rospy.Publisher('detectron_output', Image, queue_size=10)
     brdg = CvBridge()
@@ -157,7 +152,6 @@ def talker(i):
 def main(args):
     #ros stuff
     rospy.init_node('get_image', anonymous=True)
-    # rospy.init_node('talker', anonymous=True)
 
 
     args.im_or_folder = get_image()
@@ -180,9 +174,6 @@ def main(args):
         model = infer_engine.initialize_model_from_cfg(args.weights)
         dummy_coco_dataset = dummy_datasets.get_coco_dataset()
         #
-        # if os.path.isdir(args.im_or_folder):
-        #     im_list = glob.iglob(args.im_or_folder + '/*.' + args.image_ext)
-        # else
         im_list = [args.im_or_folder]
 
         im_name = "test"
@@ -193,57 +184,33 @@ def main(args):
             logger.info('Processing {} -> {}'.format(im_name, out_name))
             im = args.im_or_folder
 
-            #so im == image from webcam, but the problem is that it only takes a single picture...ignore this for now
-            # im = cv2.imread(im_name)
             timers = defaultdict(Timer)
             t = time.time()
             with c2_utils.NamedCudaScope(0):
                 cls_boxes, cls_segms, cls_keyps = infer_engine.im_detect_all(
                     model, im, None, timers=timers
                 )
-            #last point the engine runs for
-            # logger.info('Inference time: {:.3f}s'.format(time.time() - t))
-            # for k, v in timers.items():
-            #     logger.info(' | {}: {:.3f}s'.format(k, v.average_time))
-            # if i == 0:
-            #     logger.info(
-            #         ' \ Note: inference on the first image will be slower than the '
-            #         'rest (caches and auto-tuning need to warm up)'
-            # )
-            # print("this is the initial time stamp right before it enters vis utils")
-            cv2.imshow("Raw Image", im)
-            fig = vis_utils.vis_one_image(
+
+            fig = vis_utils.vis_one_image_opencv(
                 im[:, :, ::-1],  # BGR -> RGB for visualization
-                im_name,
-                args.output_dir,
+                # im_name,
+                # args.output_dir,
                 cls_boxes,
                 cls_segms,
                 cls_keyps,
                 dataset=dummy_coco_dataset,
-                box_alpha=0.3,
+                # box_alpha=0.3,
                 show_class=True,
                 thresh=args.thresh,
                 kp_thresh=args.kp_thresh,
-                ext=args.output_ext,
-                out_when_no_box=args.out_when_no_box
+                # ext=args.output_ext,
+                # out_when_no_box=args.out_when_no_box
             )
 
-
-            
-                # update data
-                # redraw the canvas
-            fig.canvas.draw()
-                # convert canvas to image
-            img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
-            img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-
             # img is rgb, convert to opencv's default bgr
-            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            img = cv2.cvtColor(fig, cv2.COLOR_RGB2BGR)
 
-            cv2.imshow("Detected Image..Press any key to repeat the process and publish image", img)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-            # talker(open_cv_image)
+
             image_publisher = rospy.Publisher('detectron_output', Image, queue_size=10)
             brdg = CvBridge()
             image_publisher.publish(brdg.cv2_to_imgmsg(img, "bgr8"))
@@ -252,7 +219,6 @@ def main(args):
 
                 # while(1):
                 print('Finished..Hold Ctrl+C to end')
-                    # args = parse_args()
                 main(args)
             except KeyboardInterrupt:
                 print("shutting down")
