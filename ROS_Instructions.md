@@ -12,9 +12,9 @@ todo: insert custom dataset instructions here
 
 
 # Troubleshooting
-* "AttributeError: get_image instance has no attribute 'astype'
+* Error message = "AttributeError: get_image instance has no attribute 'astype'"
 Possible fix: ensure that the usb_cam package has been launched
 
-* usage: infer_simple.py....
+* Error message "usage: infer_simple.py...."
 Possible fix: ensure that there is a period ``` . ``` at the end of the ``` rosrun ``` command.
 
