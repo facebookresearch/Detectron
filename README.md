@@ -2,7 +2,7 @@
 
 Detectron is Facebook AI Research's software system that implements state-of-the-art object detection algorithms, including [Mask R-CNN](https://arxiv.org/abs/1703.06870). It is written in Python and powered by the [Caffe2](https://github.com/caffe2/caffe2) deep learning framework.
 
-This update to the original Detectron code aims to communicate object detection information over a ROS node, aiding in computer vision projects in the field of Robotics. See [`INSTALL.md`](INSTALL.md) for installation instructions for Caffe2 and Detectron. Note that this project has been tested on ROS Kinetic with python 2. See [`ROS_Instructions.md`](ROS_Instructions.md) for ROS-specific instructions.
+This update to the original Detectron code aims to communicate images with segmentation and object identification over a ROS node, aiding in computer vision projects in the field of Robotics. See [`INSTALL.md`](INSTALL.md) for installation instructions for Caffe2 and Detectron. Note that this project has been tested on ROS Kinetic with python 2. See [`ROS_Instructions.md`](ROS_Instructions.md) for ROS-specific instructions.
 
 Currently, I am working on finetuning the ROS detectron with custom datasets. 
 
@@ -94,7 +94,7 @@ If bugs are found, **we appreciate pull requests** (including adding Q&A's to `F
   Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, and Piotr Dollár.
   IEEE International Conference on Computer Vision (ICCV), 2017.
 - [Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour](https://arxiv.org/abs/1706.02677).
-  Priya Goyal, Piotr Dollár, Ross Girshick, Pieter Noordhuis, Lukasz Wesolowski, Aapo Kyrola, Andrew Tulloch, Yangqing Jia, and Kaiming He.
+  Priya Goyal, Piotr Dollár, Ross Girshick, Pieter Noordhuis, Lukasz Wesolowski, Aapo Kyrola, Andrew Tulloch, Yangqing Jia, and Kaiming He.esearch platform for object detection research. The object detection implements popular algorithms like Mask R-CNN and RetinaNet.
   Tech report, arXiv, June 2017.
 - [Detecting and Recognizing Human-Object Interactions](https://arxiv.org/abs/1704.07333).
   Georgia Gkioxari, Ross Girshick, Piotr Dollár, and Kaiming He.
