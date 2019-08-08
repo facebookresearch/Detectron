@@ -8,6 +8,15 @@ Additionally,
 3. Next, to run object inference, navigate to the Detectron package and run the command```rosrun detectron infer_simple.py .```  This will cause images with object segmentation and labeling to be published on a /detectron_output topic through an Image ROS message type. 
 4. To view published images, run ```rosrun image_view image_view image:=/detectron_output``` in a seperate terminal. 
 
+# Some Image Examples 
+<div align="center">
+  <img src="demo/ros_images/ros_example1.png" width="700px" />
+  <p>Inference on an iPhone</p>
+  <img src="demo/ros_images/ros_example2.png" width="700px" />
+  <p>Inference on a spoon/p>
+  <img src="demo/ros_images/ros_example3.png" width="700px" />
+  <p>Inference on a frisbee</p>
+</div>
 
 
 todo: insert finetuning instructions here
