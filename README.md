@@ -4,6 +4,8 @@ Detectron is Facebook AI Research's software system that implements state-of-the
 
 This update to the original Detectron code aims to communicate images with segmentation and object identification over a ROS node, aiding in computer vision projects in the field of Robotics. See [`INSTALL.md`](INSTALL.md) for installation instructions for Caffe2 and Detectron. Note that this project has been tested on ROS Kinetic with python 2. See [`ROS_Instructions.md`](ROS_Instructions.md) for ROS-specific instructions.
 
+To see a video demo this ROS package, watch the youtube [video](https://youtu.be/iqWTFGoJn9I).
+
 Currently, I am working on finetuning the ROS detectron with custom datasets. 
 
 At FAIR, Detectron has enabled numerous research projects, including: [Feature Pyramid Networks for Object Detection](https://arxiv.org/abs/1612.03144), [Mask R-CNN](https://arxiv.org/abs/1703.06870), [Detecting and Recognizing Human-Object Interactions](https://arxiv.org/abs/1704.07333), [Focal Loss for Dense Object Detection](https://arxiv.org/abs/1708.02002), [Non-local Neural Networks](https://arxiv.org/abs/1711.07971), [Learning to Segment Every Thing](https://arxiv.org/abs/1711.10370), [Data Distillation: Towards Omni-Supervised Learning](https://arxiv.org/abs/1712.04440), [DensePose: Dense Human Pose Estimation In The Wild](https://arxiv.org/abs/1802.00434), and [Group Normalization](https://arxiv.org/abs/1803.08494).
