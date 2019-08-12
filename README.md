@@ -4,7 +4,7 @@ Detectron is Facebook AI Research's software system that implements state-of-the
 
 This update to the original Detectron code aims to communicate images with segmentation and object identification over a ROS node, aiding in computer vision projects in the field of Robotics. See [`INSTALL.md`](INSTALL.md) for installation instructions for Caffe2 and Detectron. Note that this project has been tested on ROS Kinetic with python 2. See [`ROS_Instructions.md`](ROS_Instructions.md) for ROS-specific instructions.
 
-To see a video demo this ROS package, watch the youtube [video](https://youtu.be/iqWTFGoJn9I).
+To see a video demo of this ROS package, watch the youtube [video](https://youtu.be/iqWTFGoJn9I).
 
 Currently, I am working on finetuning the ROS detectron with custom datasets. 
 
