@@ -59,7 +59,7 @@ c2_utils.import_detectron_ops()
 # thread safe and causes unwanted GPU memory allocations.
 cv2.ocl.setUseOpenCL(False)
 
-
+p
 def parse_args():
     parser = argparse.ArgumentParser(description='End-to-end inference')
     parser.add_argument(
@@ -119,7 +119,7 @@ def parse_args():
         type=float
     )
     parser.add_argument(
-        'im_or_folder', help='image or folder of images', default=None
+        'im_or_folder', help='image or folder of images', default="."
     )
     if len(sys.argv) == 1:
         parser.print_help()
