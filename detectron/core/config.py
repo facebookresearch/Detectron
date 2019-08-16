@@ -290,6 +290,11 @@ __C.TEST.FORCE_JSON_DATASET_EVAL = False
 # Not set for 1-stage models and 2-stage models with RPN subnetwork enabled
 __C.TEST.PRECOMPUTED_PROPOSALS = True
 
+# Evaluate proposals in class-specific Average Recall (AR).
+# It means that one first computes AR within each category and then averages
+# over the categories. It is not biased towards the AR of frequent categories
+# compared with class-agnostic AR.
+__C.TEST.CLASS_SPECIFIC_AR = False
 
 # ---------------------------------------------------------------------------- #
 # Test-time augmentations for bounding box detection

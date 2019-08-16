@@ -253,7 +253,7 @@ def _log_detection_eval_metrics(json_dataset, coco_eval):
 
 
 def evaluate_box_proposals(
-    json_dataset, roidb, thresholds=None, area='all', limit=None
+    json_dataset, roidb, thresholds=None, area='all', limit=None, class_specific=False
 ):
     """Evaluate detection proposal recall metrics. This function is a much
     faster alternative to the official COCO API recall evaluation code. However,
@@ -282,6 +282,7 @@ def evaluate_box_proposals(
     assert area in areas, 'Unknown area range: {}'.format(area)
     area_range = area_ranges[areas[area]]
     gt_overlaps = np.zeros(0)
+    gt_classes = np.zeros(0)
     num_pos = 0
     for entry in roidb:
         gt_inds = np.where(
@@ -291,6 +292,9 @@ def evaluate_box_proposals(
         valid_gt_inds = np.where(
             (gt_areas >= area_range[0]) & (gt_areas <= area_range[1]))[0]
         gt_boxes = gt_boxes[valid_gt_inds, :]
+        _gt_classes = entry["gt_classes"][valid_gt_inds]
+        assert gt_boxes.shape[0] == _gt_classes.shape[0]
+        gt_classes = np.hstack((gt_classes, _gt_classes))
         num_pos += len(valid_gt_inds)
         non_gt_inds = np.where(entry['gt_classes'] == 0)[0]
         boxes = entry['boxes'][non_gt_inds, :]
@@ -322,19 +326,33 @@ def evaluate_box_proposals(
         # append recorded iou coverage level
         gt_overlaps = np.hstack((gt_overlaps, _gt_overlaps))
 
-    gt_overlaps = np.sort(gt_overlaps)
     if thresholds is None:
         step = 0.05
         thresholds = np.arange(0.5, 0.95 + 1e-5, step)
-    recalls = np.zeros_like(thresholds)
-    # compute recall for each iou threshold
-    for i, t in enumerate(thresholds):
-        recalls[i] = (gt_overlaps >= t).sum() / float(num_pos)
-    # ar = 2 * np.trapz(recalls, thresholds)
-    ar = recalls.mean()
-    return {'ar': ar, 'recalls': recalls, 'thresholds': thresholds,
-            'gt_overlaps': gt_overlaps, 'num_pos': num_pos}
 
+    if not class_specific:
+        gt_overlaps = np.sort(gt_overlaps)
+        recalls = np.zeros_like(thresholds)
+        # compute recall for each iou threshold
+        for i, t in enumerate(thresholds):
+            recalls[i] = (gt_overlaps >= t).sum() / float(num_pos)
+        ar = recalls.mean()
+        return {'ar': ar, 'recalls': recalls, 'thresholds': thresholds,
+                'gt_overlaps': gt_overlaps, 'num_pos': num_pos}
+    else:
+        gt_classes_unique = np.unique(gt_classes)
+        recalls = np.zeros((gt_classes_unique.shape[0], thresholds.shape[0]))
+        # compute recall for each category and each iou threshold
+        for i, category_id in enumerate(gt_classes_unique):
+            inds = (gt_classes == category_id)
+            num_pos_per_category = float(inds.sum())
+            for j, thresh in enumerate(thresholds):
+                recalls[i][j] = (
+                    gt_overlaps[inds] >= thresh
+                ).sum() / num_pos_per_category
+        ar = recalls.mean(axis=1).mean()
+        return {'ar': ar, 'recalls': recalls, 'thresholds': thresholds,
+                'gt_overlaps': gt_overlaps, 'num_pos': num_pos}
 
 def evaluate_keypoints(
     json_dataset,
