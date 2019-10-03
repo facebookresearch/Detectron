@@ -135,7 +135,7 @@ def main(args):
                 'rest (caches and auto-tuning need to warm up)'
             )
 
-        image_ret = vis_utils.vis_one_image_opencv_copy(
+        image_ret = vis_utils.vis_one_image_opencv(
             im,
             cls_boxes,
             cls_segms,
