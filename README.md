@@ -1,3 +1,5 @@
+**Detectron is deprecated. Please see [detectron2](https://github.com/facebookresearch/detectron2), a ground-up rewrite of Detectron in PyTorch.**
+
 # Detectron
 
 Detectron is Facebook AI Research's software system that implements state-of-the-art object detection algorithms, including [Mask R-CNN](https://arxiv.org/abs/1703.06870). It is written in Python and powered by the [Caffe2](https://github.com/caffe2/caffe2) deep learning framework.
