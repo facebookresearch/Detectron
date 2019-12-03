@@ -220,7 +220,7 @@ endforeach()
 # Set C++11 support
 set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 if (NOT MSVC)
-  list(APPEND CUDA_NVCC_FLAGS "-std=c++11")
+  list(APPEND CUDA_NVCC_FLAGS "-std=c++14")
   list(APPEND CUDA_NVCC_FLAGS "-Xcompiler -fPIC")
 endif()
 
