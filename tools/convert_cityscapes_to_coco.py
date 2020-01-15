@@ -24,7 +24,7 @@ import argparse
 import h5py
 import json
 import os
-import scipy.misc
+import imageio
 import sys
 
 import cityscapesscripts.evaluation.instances2dict_with_polygons as cs
@@ -74,7 +74,7 @@ def convert_coco_stuff_mat(data_dir, out_dir):
                             {"id": idx, "name": ''.join(chr(i) for i in data[
                                 n[0]])})
                     ann_dict['categories'] = categories
-                scipy.misc.imsave(
+                imageio.imsave(
                     os.path.join(data_dir, img_name + '.png'), labelMap)
                 image['width'] = labelMap.shape[0]
                 image['height'] = labelMap.shape[1]
