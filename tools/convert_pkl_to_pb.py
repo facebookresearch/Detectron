@@ -41,7 +41,7 @@ import detectron.utils.c2 as c2_utils
 import detectron.utils.model_convert_utils as mutils
 import detectron.utils.vis as vis_utils
 import numpy as np
-from caffe2.caffe2.fb.predictor import predictor_exporter, predictor_py_utils
+from caffe2.python.predictor import predictor_exporter, predictor_py_utils
 from caffe2.proto import caffe2_pb2
 from caffe2.python import core, workspace
 from caffe2.python.predictor_constants import predictor_constants as predictor_constants
