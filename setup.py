@@ -56,6 +56,12 @@ ext_modules = [
 
 setup(
     name='Detectron',
-    packages=['detectron'],
+    packages=['detectron',
+        'detectron.core',
+        'detectron.utils',
+        'detectron.datasets',
+        'detectron.modeling',
+        'detectron.ops',
+        'detectron.roi_data'],
     ext_modules=cythonize(ext_modules)
 )
