@@ -1,5 +1,5 @@
 numpy>=1.13
-pyyaml==3.12
+pyyaml==5.4
 matplotlib
 opencv-python>=3.2
 setuptools
