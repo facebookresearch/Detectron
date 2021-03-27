@@ -44,7 +44,7 @@ import numpy as np
 from caffe2.caffe2.fb.predictor import predictor_exporter, predictor_py_utils
 from caffe2.proto import caffe2_pb2
 from caffe2.python import core, workspace
-from caffe2.python.predictor_constants import predictor_constants as predictor_constants
+from caffe2.python.predictor_constants import predictor_constants
 from detectron.core.config import (
     assert_and_infer_cfg,
     cfg,
