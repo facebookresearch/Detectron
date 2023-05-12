@@ -21,7 +21,7 @@ from __future__ import unicode_literals
 import numpy as np
 import logging
 import unittest
-import mock
+import unittest.mock as mock
 
 from caffe2.proto import caffe2_pb2
 from caffe2.python import core
