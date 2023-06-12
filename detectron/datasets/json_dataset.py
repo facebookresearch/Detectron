@@ -229,7 +229,7 @@ class JsonDataset(object):
         entry['segms'].extend(valid_segms)
         # To match the original implementation:
         # entry['boxes'] = np.append(
-        #     entry['boxes'], boxes.astype(np.int).astype(np.float), axis=0)
+        #     entry['boxes'], boxes.astype(int).astype(np.float), axis=0)
         entry['gt_classes'] = np.append(entry['gt_classes'], gt_classes)
         entry['seg_areas'] = np.append(entry['seg_areas'], seg_areas)
         entry['gt_overlaps'] = np.append(

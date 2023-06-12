@@ -182,7 +182,7 @@ def _compute_and_log_stats(roidb):
     hist_bins = np.arange(len(classes) + 1)
 
     # Histogram of ground-truth objects
-    gt_hist = np.zeros((len(classes)), dtype=np.int)
+    gt_hist = np.zeros((len(classes)), dtype=int)
     for entry in roidb:
         gt_inds = np.where(
             (entry['gt_classes'] > 0) & (entry['is_crowd'] == 0))[0]

@@ -914,7 +914,7 @@ def _project_im_rois(im_rois, scales):
         levels (ndarray): image pyramid levels used by each projected RoI
     """
     rois = im_rois.astype(np.float, copy=False) * scales
-    levels = np.zeros((im_rois.shape[0], 1), dtype=np.int)
+    levels = np.zeros((im_rois.shape[0], 1), dtype=int)
     return rois, levels
 
 
