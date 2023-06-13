@@ -113,7 +113,7 @@ def _coco_segms_results_one_category(json_dataset, boxes, segms, cat_id):
         if isinstance(dets, list) and len(dets) == 0:
             continue
 
-        dets = dets.astype(np.float)
+        dets = dets.astype(float)
         scores = dets[:, -1]
 
         results.extend(
@@ -192,7 +192,7 @@ def _coco_bbox_results_one_category(json_dataset, boxes, cat_id):
         dets = boxes[i]
         if isinstance(dets, list) and len(dets) == 0:
             continue
-        dets = dets.astype(np.float)
+        dets = dets.astype(float)
         scores = dets[:, -1]
         xywh_dets = box_utils.xyxy_to_xywh(dets[:, 0:4])
         xs = xywh_dets[:, 0]
@@ -429,7 +429,7 @@ def _coco_kp_results_one_category(json_dataset, boxes, kps, cat_id):
         if len(boxes[i]) == 0:
             continue
         kps_dets = kps[i]
-        scores = boxes[i][:, -1].astype(np.float)
+        scores = boxes[i][:, -1].astype(float)
         if len(kps_dets) == 0:
             continue
         for j in range(len(kps_dets)):
