@@ -28,7 +28,7 @@ import detectron.roi_data.fast_rcnn as fast_rcnn_roi_data
 logger = logging.getLogger(__name__)
 
 
-class GenerateProposalLabelsOp(object):
+class GenerateProposalLabelsOp:
 
     def forward(self, inputs, outputs):
         """See modeling.detector.GenerateProposalLabels for inputs/outputs

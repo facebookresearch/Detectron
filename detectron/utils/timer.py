@@ -31,7 +31,7 @@ from __future__ import unicode_literals
 import time
 
 
-class Timer(object):
+class Timer:
     """A simple timer."""
 
     def __init__(self):

@@ -29,7 +29,7 @@ from six.moves import queue as Queue
 log = logging.getLogger(__name__)
 
 
-class Coordinator(object):
+class Coordinator:
 
     def __init__(self):
         self._event = threading.Event()

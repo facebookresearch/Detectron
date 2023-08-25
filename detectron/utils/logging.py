@@ -38,7 +38,7 @@ def log_json_stats(stats, sort_keys=True):
     print('json_stats: {:s}'.format(json.dumps(stats, sort_keys=sort_keys)))
 
 
-class SmoothedValue(object):
+class SmoothedValue:
     """Track a series of values and provide access to smoothed values over a
     window or the global series average.
     """

@@ -63,7 +63,7 @@ import detectron.utils.c2 as c2_utils
 logger = logging.getLogger(__name__)
 
 
-class RoIDataLoader(object):
+class RoIDataLoader:
     def __init__(
         self,
         roidb,

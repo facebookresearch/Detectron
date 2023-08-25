@@ -28,7 +28,7 @@ from caffe2.python import core, workspace
 from caffe2.proto import caffe2_pb2
 
 
-class OpFilter(object):
+class OpFilter:
     def __init__(self, **kwargs):
         self.type = None
         self.type_in = None

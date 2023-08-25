@@ -34,7 +34,7 @@ from detectron.utils.timer import Timer
 import detectron.utils.net as nu
 
 
-class TrainingStats(object):
+class TrainingStats:
     """Track vital training statistics."""
 
     def __init__(self, model):
