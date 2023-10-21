@@ -93,7 +93,10 @@ def add_ResNet_convX_body(model, block_counts):
     The final res5/conv5 stage may be optionally excluded (hence convX, where
     X = 4 or 5)."""
     freeze_at = cfg.TRAIN.FREEZE_AT
-    assert freeze_at in [0, 2, 3, 4, 5]
+    if len(block_counts) == 4:
+        assert freeze_at in [0, 2, 3, 4, 5]
+    else:
+        assert freeze_at in [0, 2, 3, 4] # if the body does not have res5, freeze_at cannot be 5
 
     # add the stem (by default, conv1 and pool1 with bn; can support gn)
     p, dim_in = globals()[cfg.RESNETS.STEM_FUNC](model, 'data')
