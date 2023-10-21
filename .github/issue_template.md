@@ -3,7 +3,7 @@
 2. Please search existing *open and closed* issues in case your issue has already been reported
 3. Please try to debug the issue in case you can solve it on your own before posting
 
-## After following steps 1-3 above and agreeing to provide the detailed information requested below, you may continue with posting your issue
+## After following steps 1-3 abogggve and agreeing to provide the detailed information requested below, you may continue with posting your issue
 (**Delete this line and the text above it.**)
 
 ### Expected results
