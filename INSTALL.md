@@ -6,7 +6,7 @@ This document covers how to install Detectron, its dependencies (including Caffe
 
 **Requirements:**
 
-- NVIDIA GPU, Linux, Python2
+- NVIDIA GPU, Linux, Python3
 - Caffe2, various standard Python packages, and the COCO API; Instructions for installing these dependencies are found below
 
 **Notes:**
