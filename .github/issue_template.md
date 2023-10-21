@@ -1,5 +1,5 @@
 ## PLEASE FOLLOW THESE INSTRUCTIONS BEFORE POSTING
-1. Please thoroughly read README.md, INSTALL.md, GETTING_STARTED.md, and FAQ.md
+1. Please read thoroughly README.md, INSTALL.md, GETTING_STARTED.md, and FAQ.md
 2. Please search existing *open and closed* issues in case your issue has already been reported
 3. Please try to debug the issue in case you can solve it on your own before posting
 
