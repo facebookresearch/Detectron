@@ -68,6 +68,12 @@ Please find installation instructions for Caffe2 and Detectron in [`INSTALL.md`]
 
 After installation, please see [`GETTING_STARTED.md`](GETTING_STARTED.md) for brief tutorials covering inference and training with Detectron.
 
+## Quick Start: Google Colab
+
+1. Go to https://colab.research.google.com
+2. File > Upload notebook... > GitHub > Paste this link: https://github.com/facebookresearch/Detectron/blob/master/notebooks/detectron(google_colab).ipynb
+3. Run cells
+
 ## Getting Help
 
 To start, please check the [troubleshooting](INSTALL.md#troubleshooting) section of our installation instructions as well as our [FAQ](FAQ.md). If you couldn't find help there, try searching our GitHub issues. We intend the issues page to be a forum in which the community collectively troubleshoots problems.
