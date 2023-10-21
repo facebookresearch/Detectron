@@ -296,6 +296,14 @@ def convert_net(args, net, blobs):
         )
         return resize_nearest_op
 
+    @op_filter(type='BatchPermutation')
+    def convert_batch_permutation(op):
+        gather_op = core.CreateOperator('Gather',
+                                        list(op.input),
+                                        list(op.output),
+                                        name=op.name)
+        return gather_op
+
     @op_filter()
     def convert_rpn_rois(op):
         for j in range(len(op.input)):
@@ -325,6 +333,7 @@ def convert_net(args, net, blobs):
     # so run separately
     convert_op_in_proto(net, convert_remove_op)
     convert_op_in_proto(net, convert_upsample_nearest)
+    convert_op_in_proto(net, convert_batch_permutation)
     convert_op_in_proto(net, convert_python)
     convert_op_in_proto(net, convert_op_name)
     convert_op_in_proto(net, convert_rpn_rois)

@@ -370,9 +370,9 @@ def compare_model(model1_func, model2_func, test_image, check_blobs):
         n1, n2 = cb1[idx], cb2[idx]
         r1 = res1[n1] if n1 in res1 else None
         r2 = res2[n2] if n2 in res2 else None
-        assert r1 is not None or r2 is None, \
+        assert r1 is not None, \
             "Blob {} in model1 is None".format(n1)
-        assert r2 is not None or r1 is None, \
+        assert r2 is not None, \
             "Blob {} in model2 is None".format(n2)
         assert r1.shape == r2.shape, \
             "Blob {} and {} shape mismatched: {} vs {}".format(
