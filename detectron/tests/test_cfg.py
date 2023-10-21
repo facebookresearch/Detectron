@@ -118,7 +118,7 @@ class TestCfg(unittest.TestCase):
             core_config.merge_cfg_from_cfg(cfg2)
 
     def test_merge_cfg_from_file(self):
-        with tempfile.NamedTemporaryFile() as f:
+        with tempfile.NamedTemporaryFile(mode='w') as f:
             envu.yaml_dump(cfg, f)
             s = cfg.MODEL.TYPE
             cfg.MODEL.TYPE = 'dummy'
@@ -158,7 +158,7 @@ class TestCfg(unittest.TestCase):
     def test_deprecated_key_from_file(self):
         # You should see logger messages like:
         #   "Deprecated config key (ignoring): MODEL.DILATION"
-        with tempfile.NamedTemporaryFile() as f:
+        with tempfile.NamedTemporaryFile(mode='w') as f:
             cfg2 = copy.deepcopy(cfg)
             cfg2.MODEL.DILATION = 2
             envu.yaml_dump(cfg2, f)
@@ -182,7 +182,7 @@ class TestCfg(unittest.TestCase):
         # You should see logger messages like:
         #  "Key EXAMPLE.RENAMED.KEY was renamed to EXAMPLE.KEY;
         #  please update your config"
-        with tempfile.NamedTemporaryFile() as f:
+        with tempfile.NamedTemporaryFile(mode='w') as f:
             cfg2 = copy.deepcopy(cfg)
             cfg2.EXAMPLE = AttrDict()
             cfg2.EXAMPLE.RENAMED = AttrDict()
