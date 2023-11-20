@@ -65,8 +65,13 @@ class SmoothedValue:
         return self.total / self.count
 
 
-def send_email(subject, body, to):
-    s = smtplib.SMTP('localhost')
+def send_email(subject, body, to, host='', port=smtplib.SMTP_PORT, username='',
+               password='', secure=False):
+    if secure:
+        s = smtplib.SMTP_SSL(host, smtplib.SMTP_SSL_PORT)
+        s.login(username, password)
+    else:
+        s = smtplib.SMTP('localhost')
     mime = MIMEText(body)
     mime['Subject'] = subject
     mime['To'] = to
